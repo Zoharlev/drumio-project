@@ -16,9 +16,16 @@ export default function DrumLogo({
     xl: "w-48 h-48"
   };
   const sizeClass = sizeConfig[size];
-  return <div className={`relative ${className}`}>
-      {showGlow}
-      
-      
-    </div>;
+  return (
+    <div className={`relative ${className}`}>
+      {showGlow && (
+        <div className="absolute inset-0 bg-gradient-to-r from-drumio-purple/30 to-drumio-yellow/20 rounded-full blur-2xl scale-125"></div>
+      )}
+      <img 
+        src={drumLogo} 
+        alt="Drumio Logo" 
+        className={`${sizeClass} object-contain relative z-10`}
+      />
+    </div>
+  );
 }
