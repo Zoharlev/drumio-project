@@ -1,5 +1,4 @@
 import { useNavigate } from "react-router-dom";
-import { drumLogo } from "@/assets";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -12,7 +11,7 @@ const Index = () => {
         <div className="flex flex-col items-center gap-4">
           <div 
             className="relative w-64 h-64 bg-cover bg-center bg-no-repeat rounded-full"
-            style={{ backgroundImage: `url(${drumLogo})` }}
+            style={{ backgroundImage: `url(/lovable-uploads/ced3ac1d-0317-4c8a-9be2-23b8f68dac90.png)` }}
           ></div>
 
           {/* Logo text */}
