@@ -19,6 +19,6 @@ export default function DrumLogo({
   return <div className={`relative ${className}`}>
       {showGlow}
       
-      <img src={drumLogo} alt="Drumio Logo" className={`${sizeClass} object-contain`} />
+      
     </div>;
 }
