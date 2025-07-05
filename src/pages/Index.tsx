@@ -60,6 +60,14 @@ const Index = () => {
           className="w-6 h-6 opacity-70"
         />
       </div>
+
+      <div className="absolute top-[25%] left-[15%] transform rotate-12 opacity-75">
+        <img 
+          src="/lovable-uploads/2db9f6bc-65d3-4c42-9404-0ac30f33bf91.png" 
+          alt="Drum with sticks" 
+          className="w-16 h-12 opacity-75"
+        />
+      </div>
     </div>
   );
 };
