@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Chrome, Facebook } from "lucide-react";
 import DrumLogo from "@/components/DrumLogo";
 
 export default function Login() {
@@ -112,11 +112,11 @@ export default function Login() {
 
         <div className="mt-6 grid grid-cols-2 gap-4">
           <button className="flex items-center justify-center gap-3 py-3 px-4 rounded-lg border-2 border-secondary hover:border-drumio-purple/50 transition-colors">
-            <div className="w-5 h-5 bg-white rounded"></div>
+            <Chrome className="w-5 h-5 text-white" />
             <span className="text-white font-poppins">Google</span>
           </button>
           <button className="flex items-center justify-center gap-3 py-3 px-4 rounded-lg border-2 border-secondary hover:border-drumio-purple/50 transition-colors">
-            <div className="w-5 h-5 bg-blue-600 rounded"></div>
+            <Facebook className="w-5 h-5 text-blue-500" />
             <span className="text-white font-poppins">Facebook</span>
           </button>
         </div>
