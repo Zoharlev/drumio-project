@@ -42,8 +42,8 @@ const Index = () => {
         <img src="/lovable-uploads/a4b900d1-3ed6-4288-8e65-aff93c1984a0.png" alt="Musical symbol" className="w-6 h-6 opacity-70" />
       </div>
 
-      <div className="absolute top-[25%] left-[15%] transform rotate-12 opacity-75">
-        <img src="/lovable-uploads/2db9f6bc-65d3-4c42-9404-0ac30f33bf91.png" alt="Drum with sticks" className="max-w-16 max-h-12 opacity-75 bottom-0" />
+      <div className="absolute bottom-[15%] left-[10%] transform rotate-12 opacity-75">
+        <img src="/lovable-uploads/2db9f6bc-65d3-4c42-9404-0ac30f33bf91.png" alt="Drum with sticks" className="max-w-16 max-h-12 opacity-75" />
       </div>
     </div>;
 };
