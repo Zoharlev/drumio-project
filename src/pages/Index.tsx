@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import DrumLogo from "@/components/DrumLogo";
+import { drumLogo } from "@/assets";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -10,15 +10,10 @@ const Index = () => {
       <div className="flex flex-col items-center gap-12 max-w-sm w-full relative z-10">
         {/* Logo with glowing effect */}
         <div className="flex flex-col items-center gap-4">
-          <div className="relative">
-            {/* Glowing background effect */}
-            <div className="absolute inset-0 bg-gradient-to-r from-drumio-purple/30 to-drumio-yellow/20 rounded-full blur-3xl scale-150"></div>
-
-            {/* Main drum logo - scaled up */}
-            <div className="relative w-64 h-64 flex items-center justify-center">
-              <DrumLogo size="xl" showGlow={true} />
-            </div>
-          </div>
+          <div 
+            className="relative w-64 h-64 bg-cover bg-center bg-no-repeat rounded-full"
+            style={{ backgroundImage: `url(${drumLogo})` }}
+          ></div>
 
           {/* Logo text */}
           <h1 className="text-5xl font-bold text-drumio-yellow font-poppins">
