@@ -38,7 +38,11 @@ const Index = () => {
 
       {/* Decorative musical elements */}
       <div className="absolute top-[62%] right-8 transform rotate-8 opacity-80">
-        <div className="w-12 h-16 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-lg"></div>
+        <img 
+          src="/lovable-uploads/4cf55a02-424e-4546-ba5d-1dc675dfe9d5.png" 
+          alt="Musical note" 
+          className="w-12 h-16 opacity-80"
+        />
       </div>
       
       <div className="absolute top-[45%] left-8 transform -rotate-12 opacity-60">
