@@ -1,8 +1,7 @@
 // Export all image assets from this index file
 // This makes imports cleaner: import { logoImage } from '@/assets'
 
-// Example: export { default as logoImage } from './images/logo.png';
-// Example: export { default as heroImage } from './images/hero.jpg';
+export { default as drumLogo } from './drum-logo.png';
 
 // For now, we can export the placeholder if needed
 export const placeholderImage = '/placeholder.svg';
