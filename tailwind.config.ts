@@ -61,7 +61,21 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
-				}
+				},
+				// Drumio-specific colors
+				'drumio-purple': 'hsl(var(--drumio-purple))',
+				'drumio-yellow': 'hsl(var(--drumio-yellow))',
+				'drumio-intro-bg': 'hsl(var(--drumio-intro-bg))',
+				'text-secondary': 'hsl(var(--text-secondary))',
+				'text-tertiary': 'hsl(var(--text-tertiary))',
+				'text-muted': 'hsl(var(--text-muted))'
+			},
+			fontFamily: {
+				'poppins': ['Poppins', 'sans-serif'],
+				'outfit': ['Outfit', 'sans-serif'],
+			},
+			backgroundImage: {
+				'drumio-gradient': 'linear-gradient(135deg, hsl(var(--gradient-from)), hsl(var(--gradient-to)))',
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
