@@ -107,6 +107,68 @@ export type Database = {
         }
         Relationships: []
       }
+      practice_type: {
+        Row: {
+          created_at: string
+          id: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          title: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          title?: string
+        }
+        Relationships: []
+      }
+      practices: {
+        Row: {
+          chords_file_url: string | null
+          created_at: string
+          description: string | null
+          id: string
+          sound_file_url: string | null
+          title: string
+          type_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          chords_file_url?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          sound_file_url?: string | null
+          title: string
+          type_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          chords_file_url?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          sound_file_url?: string | null
+          title?: string
+          type_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "practices_type_id_fkey"
+            columns: ["type_id"]
+            isOneToOne: false
+            referencedRelation: "practice_type"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       recordings: {
         Row: {
           analysis: Json | null
