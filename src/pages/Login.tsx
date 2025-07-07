@@ -91,7 +91,7 @@ export default function Login() {
         {/* Login button */}
         <button
           type="submit"
-          className="w-full py-4 px-6 rounded-xl bg-drumio-gradient text-white text-lg font-semibold font-poppins hover:opacity-90 transition-opacity"
+          className="w-full py-4 px-12 rounded-xl border-2 border-drumio-purple bg-gradient-to-r from-transparent via-white/10 to-transparent text-drumio-purple text-2xl font-semibold font-poppins hover:bg-white/5 transition-all duration-200"
         >
           Log In
         </button>
