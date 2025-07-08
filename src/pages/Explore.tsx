@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-
 const Explore = () => {
   const [activeCategory, setActiveCategory] = useState("lessons");
 
@@ -17,29 +16,30 @@ const Explore = () => {
     level: 3,
     tags: ["Tag", "Tag"]
   };
-
-  const categories = [
-    { id: "lessons", label: "Lessons" },
-    { id: "songs", label: "Songs" },
-    { id: "skills", label: "Skills" },
-    { id: "techniques", label: "Techniques" }
-  ];
-
+  const categories = [{
+    id: "lessons",
+    label: "Lessons"
+  }, {
+    id: "songs",
+    label: "Songs"
+  }, {
+    id: "skills",
+    label: "Skills"
+  }, {
+    id: "techniques",
+    label: "Techniques"
+  }];
   const renderStars = (level: number) => {
-    return Array.from({ length: 5 }, (_, i) => (
-      <span key={i} className={`text-lg ${i < level ? 'text-drumio-yellow' : 'text-muted-foreground'}`}>
+    return Array.from({
+      length: 5
+    }, (_, i) => <span key={i} className={`text-lg ${i < level ? 'text-drumio-yellow' : 'text-muted-foreground'}`}>
         ★
-      </span>
-    ));
+      </span>);
   };
-
-  return (
-    <div className="min-h-screen bg-background px-6 py-8">
+  return <div className="min-h-screen bg-background px-6 py-8">
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
-        <h1 className="text-2xl font-bold text-foreground font-poppins">
-          Look for your best practice
-        </h1>
+        <h1 className="text-2xl font-bold text-foreground font-poppins"></h1>
         <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
           <Search className="h-5 w-5" />
         </Button>
@@ -48,29 +48,19 @@ const Explore = () => {
       {/* Category Tabs */}
       <Tabs value={activeCategory} onValueChange={setActiveCategory} className="mb-8">
         <TabsList className="bg-muted/50 p-1 h-auto rounded-full">
-          {categories.map((category) => (
-            <TabsTrigger
-              key={category.id}
-              value={category.id}
-              className="rounded-full px-6 py-2 text-sm font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-            >
+          {categories.map(category => <TabsTrigger key={category.id} value={category.id} className="rounded-full px-6 py-2 text-sm font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               {category.label}
-            </TabsTrigger>
-          ))}
+            </TabsTrigger>)}
         </TabsList>
 
         {/* Content for each tab */}
-        {categories.map((category) => (
-          <TabsContent key={category.id} value={category.id} className="mt-6">
+        {categories.map(category => <TabsContent key={category.id} value={category.id} className="mt-6">
             <div className="space-y-4">
               {/* Lesson Card */}
               <Card className="relative overflow-hidden border-none bg-card">
-                <div
-                  className="relative h-80 bg-cover bg-center bg-no-repeat"
-                  style={{
-                    backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6)), url(${mockLesson.backgroundImage})`
-                  }}
-                >
+                <div className="relative h-80 bg-cover bg-center bg-no-repeat" style={{
+              backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6)), url(${mockLesson.backgroundImage})`
+            }}>
                   <CardContent className="absolute inset-0 p-6 flex flex-col justify-between">
                     {/* Content */}
                     <div className="flex-1 flex flex-col justify-center">
@@ -96,22 +86,14 @@ const Explore = () => {
 
                         {/* Tags */}
                         <div className="flex gap-2">
-                          {mockLesson.tags.map((tag, index) => (
-                            <Badge
-                              key={index}
-                              variant="secondary"
-                              className="bg-black/40 text-white border-none hover:bg-black/50"
-                            >
+                          {mockLesson.tags.map((tag, index) => <Badge key={index} variant="secondary" className="bg-black/40 text-white border-none hover:bg-black/50">
                               {tag}
-                            </Badge>
-                          ))}
+                            </Badge>)}
                         </div>
                       </div>
 
                       {/* Start Practice Button */}
-                      <Button 
-                        className="w-fit bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-8 py-3 rounded-full"
-                      >
+                      <Button className="w-fit bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-8 py-3 rounded-full">
                         Start Practice
                       </Button>
                     </div>
@@ -119,11 +101,8 @@ const Explore = () => {
                 </div>
               </Card>
             </div>
-          </TabsContent>
-        ))}
+          </TabsContent>)}
       </Tabs>
-    </div>
-  );
+    </div>;
 };
-
 export default Explore;
