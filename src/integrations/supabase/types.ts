@@ -14,6 +14,102 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_profiles: {
+        Row: {
+          created_at: string
+          id: string
+          last_login: string | null
+          name: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          last_login?: string | null
+          name: string
+          role?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          last_login?: string | null
+          name?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      admin_users: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          last_login: string | null
+          name: string
+          password_hash: string
+          role: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          last_login?: string | null
+          name: string
+          password_hash: string
+          role?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          last_login?: string | null
+          name?: string
+          password_hash?: string
+          role?: string
+        }
+        Relationships: []
+      }
+      lesson_practices: {
+        Row: {
+          created_at: string
+          display_order: number
+          id: string
+          lesson_id: string
+          practice_id: string
+        }
+        Insert: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          lesson_id: string
+          practice_id: string
+        }
+        Update: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          lesson_id?: string
+          practice_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lesson_practices_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lesson_practices_practice_id_fkey"
+            columns: ["practice_id"]
+            isOneToOne: false
+            referencedRelation: "practices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lesson_tags: {
         Row: {
           lesson_id: string
@@ -46,6 +142,7 @@ export type Database = {
       }
       lessons: {
         Row: {
+          background_image_url: string | null
           category: string | null
           created_at: string
           description: string | null
@@ -57,6 +154,7 @@ export type Database = {
           video_url: string | null
         }
         Insert: {
+          background_image_url?: string | null
           category?: string | null
           created_at?: string
           description?: string | null
@@ -68,6 +166,7 @@ export type Database = {
           video_url?: string | null
         }
         Update: {
+          background_image_url?: string | null
           category?: string | null
           created_at?: string
           description?: string | null
@@ -249,6 +348,7 @@ export type Database = {
           description: string | null
           id: string
           name: string
+          tag_color: string | null
           type: string
         }
         Insert: {
@@ -256,6 +356,7 @@ export type Database = {
           description?: string | null
           id?: string
           name: string
+          tag_color?: string | null
           type: string
         }
         Update: {
@@ -263,7 +364,41 @@ export type Database = {
           description?: string | null
           id?: string
           name?: string
+          tag_color?: string | null
           type?: string
+        }
+        Relationships: []
+      }
+      translations: {
+        Row: {
+          created_at: string | null
+          entity_id: string
+          entity_type: string
+          field_name: string
+          id: string
+          language_code: string
+          translation: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          entity_id: string
+          entity_type: string
+          field_name: string
+          id?: string
+          language_code: string
+          translation: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          entity_id?: string
+          entity_type?: string
+          field_name?: string
+          id?: string
+          language_code?: string
+          translation?: string
+          updated_at?: string | null
         }
         Relationships: []
       }
@@ -356,6 +491,10 @@ export type Database = {
           preferred_language: string | null
           profile_image_url: string | null
           theme_preference: string | null
+          user_drum_setup: string | null
+          user_experience: string | null
+          user_goal: string | null
+          user_how_diduhear: string | null
         }
         Insert: {
           created_at?: string
@@ -368,6 +507,10 @@ export type Database = {
           preferred_language?: string | null
           profile_image_url?: string | null
           theme_preference?: string | null
+          user_drum_setup?: string | null
+          user_experience?: string | null
+          user_goal?: string | null
+          user_how_diduhear?: string | null
         }
         Update: {
           created_at?: string
@@ -380,6 +523,10 @@ export type Database = {
           preferred_language?: string | null
           profile_image_url?: string | null
           theme_preference?: string | null
+          user_drum_setup?: string | null
+          user_experience?: string | null
+          user_goal?: string | null
+          user_how_diduhear?: string | null
         }
         Relationships: []
       }
@@ -388,7 +535,23 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_entity_translations: {
+        Args: {
+          p_entity_type: string
+          p_entity_id: string
+          p_language_code?: string
+        }
+        Returns: Json
+      }
+      get_translation: {
+        Args: {
+          p_entity_type: string
+          p_entity_id: string
+          p_field_name: string
+          p_language_code?: string
+        }
+        Returns: string
+      }
     }
     Enums: {
       [_ in never]: never
