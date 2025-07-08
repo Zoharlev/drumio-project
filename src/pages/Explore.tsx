@@ -101,7 +101,7 @@ const Explore = () => {
                               <div className="flex items-center">
                                 {renderStars(getLevelStars(lesson.level))}
                               </div>
-                              <span className="text-white text-sm font-medium">Level</span>
+                              <span className="text-white text-sm font-medium capitalize">{lesson.level}</span>
                             </div>
 
                             {/* Tags */}
