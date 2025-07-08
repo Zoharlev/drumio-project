@@ -4,18 +4,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { useLessons } from "@/hooks/useLessons";
+import { useNavigate } from "react-router-dom";
 const Explore = () => {
   const [activeCategory, setActiveCategory] = useState("lessons");
-
-  // Mock data - replace with real data from Supabase
-  const mockLesson = {
-    id: "1",
-    title: "Lesson Title",
-    description: "Lesson description",
-    backgroundImage: "/lovable-uploads/ced3ac1d-0317-4c8a-9be2-23b8f68dac90.png",
-    level: 3,
-    tags: ["Tag", "Tag"]
-  };
+  const navigate = useNavigate();
+  
+  const { data: lessons = [], isLoading } = useLessons(activeCategory === "lessons" ? undefined : activeCategory);
   const categories = [{
     id: "lessons",
     label: "Lessons"
@@ -29,12 +24,25 @@ const Explore = () => {
     id: "techniques",
     label: "Techniques"
   }];
+  const getLevelStars = (level: string) => {
+    const levelMap: { [key: string]: number } = {
+      'beginner': 1,
+      'intermediate': 3,
+      'advanced': 5
+    };
+    return levelMap[level.toLowerCase()] || 1;
+  };
+
   const renderStars = (level: number) => {
     return Array.from({
       length: 5
     }, (_, i) => <span key={i} className={`text-lg ${i < level ? 'text-drumio-yellow' : 'text-muted-foreground'}`}>
         ★
       </span>);
+  };
+
+  const handleStartPractice = (lessonId: string) => {
+    navigate(`/lesson/${lessonId}/practices`);
   };
   return <div className="min-h-screen bg-background px-6 py-8">
       {/* Header */}
@@ -56,50 +64,74 @@ const Explore = () => {
         {/* Content for each tab */}
         {categories.map(category => <TabsContent key={category.id} value={category.id} className="mt-6">
             <div className="space-y-4">
-              {/* Lesson Card */}
-              <Card className="relative overflow-hidden border-none bg-card">
-                <div className="relative h-80 bg-cover bg-center bg-no-repeat" style={{
-              backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6)), url(${mockLesson.backgroundImage})`
-            }}>
-                  <CardContent className="absolute inset-0 p-6 flex flex-col justify-between">
-                    {/* Content */}
-                    <div className="flex-1 flex flex-col justify-center">
-                      <h2 className="text-3xl font-bold text-white mb-2 font-poppins">
-                        {mockLesson.title}
-                      </h2>
-                      <p className="text-white/80 text-lg mb-6">
-                        {mockLesson.description}
-                      </p>
-                    </div>
-
-                    {/* Bottom section with level, tags and button */}
-                    <div className="space-y-4">
-                      {/* Level and Tags row */}
-                      <div className="flex items-center gap-4">
-                        {/* Level indicator */}
-                        <div className="flex items-center gap-2 bg-black/40 rounded-lg px-3 py-2">
-                          <div className="flex items-center">
-                            {renderStars(mockLesson.level)}
-                          </div>
-                          <span className="text-white text-sm font-medium">Level</span>
-                        </div>
-
-                        {/* Tags */}
-                        <div className="flex gap-2">
-                          {mockLesson.tags.map((tag, index) => <Badge key={index} variant="secondary" className="bg-black/40 text-white border-none hover:bg-black/50">
-                              {tag}
-                            </Badge>)}
-                        </div>
-                      </div>
-
-                      {/* Start Practice Button */}
-                      <Button className="w-fit bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-8 py-3 rounded-full">
-                        Start Practice
-                      </Button>
-                    </div>
-                  </CardContent>
+              {isLoading ? (
+                <div className="text-center py-8">
+                  <p className="text-muted-foreground">Loading lessons...</p>
                 </div>
-              </Card>
+              ) : lessons.length === 0 ? (
+                <div className="text-center py-8">
+                  <p className="text-muted-foreground">No lessons found for this category.</p>
+                </div>
+              ) : (
+                lessons.map((lesson) => (
+                  <Card key={lesson.id} className="relative overflow-hidden border-none bg-card">
+                    <div 
+                      className="relative h-80 bg-cover bg-center bg-no-repeat" 
+                      style={{
+                        backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6)), url(${lesson.background_image_url || '/lovable-uploads/ced3ac1d-0317-4c8a-9be2-23b8f68dac90.png'})`
+                      }}
+                    >
+                      <CardContent className="absolute inset-0 p-6 flex flex-col justify-between">
+                        {/* Content */}
+                        <div className="flex-1 flex flex-col justify-center">
+                          <h2 className="text-3xl font-bold text-white mb-2 font-poppins">
+                            {lesson.title}
+                          </h2>
+                          <p className="text-white/80 text-lg mb-6">
+                            {lesson.description || "No description available"}
+                          </p>
+                        </div>
+
+                        {/* Bottom section with level, tags and button */}
+                        <div className="space-y-4">
+                          {/* Level and Tags row */}
+                          <div className="flex items-center gap-4">
+                            {/* Level indicator */}
+                            <div className="flex items-center gap-2 bg-black/40 rounded-lg px-3 py-2">
+                              <div className="flex items-center">
+                                {renderStars(getLevelStars(lesson.level))}
+                              </div>
+                              <span className="text-white text-sm font-medium">Level</span>
+                            </div>
+
+                            {/* Tags */}
+                            <div className="flex gap-2">
+                              {lesson.tags.map((tag) => (
+                                <Badge 
+                                  key={tag.id} 
+                                  variant="secondary" 
+                                  className="bg-black/40 text-white border-none hover:bg-black/50"
+                                  style={{ backgroundColor: tag.tag_color ? `${tag.tag_color}40` : undefined }}
+                                >
+                                  {tag.name}
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* Start Practice Button */}
+                          <Button 
+                            onClick={() => handleStartPractice(lesson.id)}
+                            className="w-fit bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-8 py-3 rounded-full"
+                          >
+                            Start Practice
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </div>
+                  </Card>
+                ))
+              )}
             </div>
           </TabsContent>)}
       </Tabs>
