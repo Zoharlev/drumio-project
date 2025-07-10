@@ -76,11 +76,7 @@ const LessonPractices = () => {
                   <CardContent className="absolute inset-0 p-6 flex flex-col">
                     {/* Thumbnail images row */}
                     <div className="flex gap-2 mb-4">
-                      {[1, 2, 3, 4, 5].map(i => <div key={i} className="w-16 h-12 bg-black/30 rounded-md border border-white/20" style={{
-                  backgroundImage: `url(${data.lesson.background_image_url || '/lovable-uploads/ced3ac1d-0317-4c8a-9be2-23b8f68dac90.png'})`,
-                  backgroundSize: 'cover',
-                  backgroundPosition: 'center'
-                }} />)}
+                      {[1, 2, 3, 4, 5].map(i => {})}
                     </div>
 
                     {/* Center content */}
