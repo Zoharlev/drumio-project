@@ -116,9 +116,16 @@ const PracticeDetails = () => {
           {/* Main Description */}
           <div>
             
-            <p className="text-white/70 text-base leading-relaxed">
-              {practice.description || 'Simple 4/4 beat with ghost notes on the "e" and "a"'}
-            </p>
+            <div className="space-y-3">
+              <p className="text-white/70 text-base leading-relaxed">
+                {practice.description?.split('\n')[0] || 'Simple 4/4 beat with ghost notes on the "e" and "a"'}
+              </p>
+              {practice.description?.split('\n')[1] && (
+                <p className="text-white/70 text-base leading-relaxed">
+                  {practice.description.split('\n')[1]}
+                </p>
+              )}
+            </div>
           </div>
 
           {/* Tempo and Focus */}
