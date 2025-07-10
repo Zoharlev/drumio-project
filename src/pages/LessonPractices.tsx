@@ -64,7 +64,11 @@ const LessonPractices = () => {
         <div className="space-y-4">
           {data.practices.length === 0 ? <div className="text-center py-8">
               <p className="text-muted-foreground">No practice sessions available for this lesson.</p>
-            </div> : data.practices.map(practice => <Card key={practice.id} className="relative overflow-hidden border-none bg-card">
+            </div> : data.practices.map(practice => <Card 
+                key={practice.id} 
+                className="relative overflow-hidden border-none bg-card cursor-pointer hover:scale-105 transition-transform duration-200"
+                onClick={() => navigate(`/lesson/${lessonId}/practice/${practice.id}`)}
+              >
                 <div className="relative h-80 rounded-lg" style={{
             background: `linear-gradient(to bottom, 
               rgba(0, 0, 0, 0.6) 0%, 
