@@ -68,16 +68,12 @@ const LessonPractices = () => {
                 <div className="relative h-80 rounded-lg" style={{
             background: `linear-gradient(to bottom, 
               rgba(0, 0, 0, 0.6) 0%, 
-              rgba(0, 0, 0, 0.8) 40%, 
-              #1F2937 40%), 
+              rgba(0, 0, 0, 0.8) 35%, 
+              #1F2937 35%), 
               url(${data.lesson.background_image_url || '/lovable-uploads/ced3ac1d-0317-4c8a-9be2-23b8f68dac90.png'}) top/cover no-repeat`,
             backgroundColor: '#1F2937'
           }}>
                   <CardContent className="absolute inset-0 p-6 flex flex-col">
-                    {/* Thumbnail images row */}
-                    <div className="flex gap-2 mb-4">
-                      {[1, 2, 3, 4, 5].map(i => {})}
-                    </div>
 
                     {/* Center content */}
                     <div className="flex-1 flex flex-col items-center justify-center text-center">
