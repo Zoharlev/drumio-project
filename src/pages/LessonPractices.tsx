@@ -91,9 +91,6 @@ const LessonPractices = () => {
                       <h3 className="text-2xl font-bold text-white mb-2 font-poppins">
                         {practice.title}
                       </h3>
-                      <p className="text-white/80 text-base mb-4">
-                        {practice.description || practice.practice_type?.title || "Practice session"}
-                      </p>
                     </div>
 
                     {/* Bottom section with level and tags */}
