@@ -65,8 +65,13 @@ const LessonPractices = () => {
           {data.practices.length === 0 ? <div className="text-center py-8">
               <p className="text-muted-foreground">No practice sessions available for this lesson.</p>
             </div> : data.practices.map(practice => <Card key={practice.id} className="relative overflow-hidden border-none bg-card">
-                <div className="relative h-80 bg-cover bg-center bg-no-repeat rounded-lg" style={{
-            backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.8)), url(${data.lesson.background_image_url || '/lovable-uploads/ced3ac1d-0317-4c8a-9be2-23b8f68dac90.png'})`
+                <div className="relative h-80 rounded-lg" style={{
+            background: `linear-gradient(to bottom, 
+              rgba(0, 0, 0, 0.6) 0%, 
+              rgba(0, 0, 0, 0.8) 30%, 
+              #1F2937 30%), 
+              url(${data.lesson.background_image_url || '/lovable-uploads/ced3ac1d-0317-4c8a-9be2-23b8f68dac90.png'}) top/cover no-repeat`,
+            backgroundColor: '#1F2937'
           }}>
                   <CardContent className="absolute inset-0 p-6 flex flex-col">
                     {/* Thumbnail images row */}
