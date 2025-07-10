@@ -87,7 +87,7 @@ const LessonPractices = () => {
                     <div className="flex-1 flex flex-col items-center justify-center text-center">
                       {/* Logo/Icon */}
                       <div className="w-20 h-20 from-orange-500 to-red-600 rounded-full flex items-center justify-center mb-4 bg-[#1F2937] border-2 border-[#6764DB]">
-                        <div className="text-white text-2xl font-bold">🥁</div>
+                        <img src="/lovable-uploads/671d91a3-58e4-4109-be60-2975d8fa10f7.png" alt="Drum icon" className="w-12 h-12 object-contain" />
                       </div>
 
                       {/* Title */}
