@@ -19,7 +19,7 @@ export default function Login() {
     <div className="min-h-screen bg-background flex flex-col px-6 py-8 max-w-md mx-auto">
       {/* Logo */}
       <div className="flex flex-col items-center gap-4 mb-8">
-        <div className="w-48 h-48 flex items-center justify-center">
+        <div className="w-48 h-48 flex items-center justify-center bg-cover bg-center bg-no-repeat" style={{backgroundImage: 'url(/lovable-uploads/510fe5e0-9da9-4a4f-b14b-1da58f985a07.png)'}}>
           <DrumLogo size="xl" showGlow={true} />
         </div>
 
