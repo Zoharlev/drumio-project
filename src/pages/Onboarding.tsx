@@ -129,7 +129,7 @@ export default function Onboarding() {
                       <img 
                         src={option.icon} 
                         alt="Drumsticks icon" 
-                        className="w-6 h-6 object-contain" 
+                        className="w-9 h-9 object-contain" 
                       />
                     )}
                     <div className="flex-1">
