@@ -58,6 +58,23 @@ const PracticeDetails = () => {
       </div>;
   }
 
+  const getLevelStars = (level: string) => {
+    const levelMap: { [key: string]: number } = {
+      'beginner': 1,
+      'intermediate': 3,
+      'advanced': 5
+    };
+    return levelMap[level.toLowerCase()] || 1;
+  };
+
+  const renderStars = (level: number) => {
+    return Array.from({
+      length: level
+    }, (_, i) => <span key={i} className="text-lg text-amber-300">
+      ★
+    </span>);
+  };
+
   // Mock practice skills for demonstration
   const practiceSkills = ["Ghost Notes", "Accents", "Swells", "Level Matching"];
   return <div className="min-h-screen relative overflow-hidden" style={{
@@ -94,9 +111,12 @@ const PracticeDetails = () => {
           
           {/* Level and Tags */}
           <div className="flex items-center justify-center gap-3 mt-4">
-            {lesson && <Badge className="bg-amber-500/20 text-amber-300 border-amber-500/30 font-medium">
-                ★ {lesson.level}
-              </Badge>}
+            {lesson && <div className="flex items-center gap-2 bg-black/40 rounded-lg px-3 py-2">
+                <div className="flex items-center">
+                  {renderStars(getLevelStars(lesson.level))}
+                </div>
+                <span className="text-white text-sm font-medium capitalize">{lesson.level}</span>
+              </div>}
             <Badge variant="outline" className="border-white/30 text-white/80 bg-white/10">
               Tag name
             </Badge>

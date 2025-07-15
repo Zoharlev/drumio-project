@@ -229,8 +229,11 @@ export type Database = {
           chords_file_url: string | null
           created_at: string
           description: string | null
+          focus: string | null
           id: string
+          pattern: string | null
           sound_file_url: string | null
+          tempo: string | null
           title: string
           type_id: string
           updated_at: string
@@ -240,8 +243,11 @@ export type Database = {
           chords_file_url?: string | null
           created_at?: string
           description?: string | null
+          focus?: string | null
           id?: string
+          pattern?: string | null
           sound_file_url?: string | null
+          tempo?: string | null
           title: string
           type_id: string
           updated_at?: string
@@ -251,8 +257,11 @@ export type Database = {
           chords_file_url?: string | null
           created_at?: string
           description?: string | null
+          focus?: string | null
           id?: string
+          pattern?: string | null
           sound_file_url?: string | null
+          tempo?: string | null
           title?: string
           type_id?: string
           updated_at?: string
