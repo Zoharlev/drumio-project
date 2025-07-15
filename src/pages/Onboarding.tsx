@@ -161,7 +161,7 @@ export default function Onboarding() {
             <div className="space-y-4">
               {[
                 { id: "acoustic", label: "Acoustic drum kit", desc: "Full traditional drum set", icon: "/lovable-uploads/da44e5a4-12a3-46d2-b4d9-5818c68062e5.png" },
-                { id: "electronic", label: "Electronic drums", desc: "Digital/electric drum kit" },
+                { id: "electronic", label: "Electronic drums", desc: "Digital/electric drum kit", icon: "/lovable-uploads/afd53a4f-533b-4344-873d-e3dd42113d04.png" },
                 { id: "practice", label: "Practice pad", desc: "Drum pad or practice setup" },
                 { id: "none", label: "No drums yet", desc: "Planning to get equipment" },
                ].map((option) => (
