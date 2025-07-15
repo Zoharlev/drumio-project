@@ -111,7 +111,7 @@ export default function Onboarding() {
             <div className="space-y-4">
               {[
                 { id: "beginner", label: "Complete beginner", desc: "Never played drums before", icon: "/lovable-uploads/16ca57ab-639e-4c77-839e-781d337260b3.png" },
-                { id: "some", label: "Some experience", desc: "Played a bit, know basics" },
+                { id: "some", label: "Some experience", desc: "Played a bit, know basics", icon: "/lovable-uploads/b1bd418f-dca1-4f04-8bf7-1a3370c6d3f5.png" },
                 { id: "intermediate", label: "Intermediate", desc: "Can play songs, want to improve" },
                 { id: "advanced", label: "Advanced", desc: "Looking for challenges and refinement" },
               ].map((option) => (
