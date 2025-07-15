@@ -11,6 +11,7 @@ import Onboarding from "./pages/Onboarding";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import NotFound from "./pages/NotFound";
+import { AuthCallback } from "@/components/AuthCallback";
 
 const queryClient = new QueryClient();
 
@@ -19,6 +20,7 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
+      <AuthCallback />
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />

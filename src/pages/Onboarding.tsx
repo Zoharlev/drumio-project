@@ -45,7 +45,12 @@ export default function Onboarding() {
   };
 
   const selectOption = (field: keyof OnboardingData, value: string) => {
-    setData({ ...data, [field]: value });
+    const updatedData = { ...data, [field]: value };
+    setData(updatedData);
+    
+    // Save to localStorage for use during signup
+    localStorage.setItem('drumio-onboarding', JSON.stringify(updatedData));
+    
     setTimeout(goNext, 300); // Small delay for visual feedback
   };
 

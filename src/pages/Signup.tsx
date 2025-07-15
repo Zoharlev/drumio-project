@@ -2,18 +2,73 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Eye, EyeOff, Chrome, Facebook } from "lucide-react";
 import DrumLogo from "@/components/DrumLogo";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Signup() {
   const navigate = useNavigate();
+  const { signUp, signInWithProvider } = useAuth();
+  const { toast } = useToast();
   const [showPassword, setShowPassword] = useState(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSignup = (e: React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle signup logic here
-    console.log("Signup:", { name, email, password });
+    setLoading(true);
+    
+    try {
+      const { data, error } = await signUp(email, password, name);
+      
+      if (error) {
+        toast({
+          title: "Error creating account",
+          description: error.message,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (data.user) {
+        toast({
+          title: "Account created successfully!",
+          description: "Welcome to Drumio! You can now explore lessons.",
+        });
+        
+        // Navigate to home page
+        navigate("/");
+      }
+    } catch (error) {
+      toast({
+        title: "Error creating account",
+        description: "Something went wrong. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSocialSignup = async (provider: 'google' | 'facebook') => {
+    try {
+      const { error } = await signInWithProvider(provider);
+      
+      if (error) {
+        toast({
+          title: "Error signing up",
+          description: error.message,
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error signing up",
+        description: "Something went wrong. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -99,9 +154,10 @@ export default function Signup() {
         {/* Signup button */}
         <button
           type="submit"
-          className="w-full py-4 px-12 rounded-xl border-2 border-drumio-purple bg-gradient-to-r from-transparent via-white/10 to-transparent text-drumio-purple text-2xl font-semibold font-poppins hover:bg-white/5 transition-all duration-200"
+          disabled={loading}
+          className="w-full py-4 px-12 rounded-xl border-2 border-drumio-purple bg-gradient-to-r from-transparent via-white/10 to-transparent text-drumio-purple text-2xl font-semibold font-poppins hover:bg-white/5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          Create Account
+          {loading ? "Creating Account..." : "Create Account"}
         </button>
       </form>
 
@@ -119,11 +175,17 @@ export default function Signup() {
         </div>
 
         <div className="mt-6 grid grid-cols-2 gap-4">
-          <button className="flex items-center justify-center gap-3 py-3 px-4 rounded-lg border-2 border-secondary hover:border-drumio-purple/50 transition-colors">
+          <button 
+            onClick={() => handleSocialSignup('google')}
+            className="flex items-center justify-center gap-3 py-3 px-4 rounded-lg border-2 border-secondary hover:border-drumio-purple/50 transition-colors"
+          >
             <Chrome className="w-5 h-5 text-white" />
             <span className="text-white font-poppins">Google</span>
           </button>
-          <button className="flex items-center justify-center gap-3 py-3 px-4 rounded-lg border-2 border-secondary hover:border-drumio-purple/50 transition-colors">
+          <button 
+            onClick={() => handleSocialSignup('facebook')}
+            className="flex items-center justify-center gap-3 py-3 px-4 rounded-lg border-2 border-secondary hover:border-drumio-purple/50 transition-colors"
+          >
             <Facebook className="w-5 h-5 text-blue-500" />
             <span className="text-white font-poppins">Facebook</span>
           </button>
