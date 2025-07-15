@@ -35,10 +35,10 @@ const Explore = () => {
 
   const renderStars = (level: number) => {
     return Array.from({
-      length: 5
-    }, (_, i) => <span key={i} className={`text-lg ${i < level ? 'text-drumio-yellow' : 'text-muted-foreground'}`}>
-        ★
-      </span>);
+      length: level
+    }, (_, i) => <span key={i} className="text-lg text-drumio-yellow">
+      ★
+    </span>);
   };
 
   const handleStartPractice = (lessonId: string) => {
