@@ -160,11 +160,11 @@ export default function Onboarding() {
 
             <div className="space-y-4">
               {[
-                { id: "acoustic", label: "Acoustic drum kit", desc: "Full traditional drum set" },
+                { id: "acoustic", label: "Acoustic drum kit", desc: "Full traditional drum set", icon: "/lovable-uploads/da44e5a4-12a3-46d2-b4d9-5818c68062e5.png" },
                 { id: "electronic", label: "Electronic drums", desc: "Digital/electric drum kit" },
                 { id: "practice", label: "Practice pad", desc: "Drum pad or practice setup" },
                 { id: "none", label: "No drums yet", desc: "Planning to get equipment" },
-              ].map((option) => (
+               ].map((option) => (
                 <button
                   key={option.id}
                   onClick={() => selectOption("setup", option.id)}
@@ -174,11 +174,22 @@ export default function Onboarding() {
                       : "border-secondary hover:border-drumio-purple/50"
                   }`}
                 >
-                  <div className="font-semibold text-foreground font-poppins">
-                    {option.label}
-                  </div>
-                  <div className="text-sm text-text-secondary font-outfit">
-                    {option.desc}
+                  <div className="flex items-center gap-3">
+                    {option.icon && (
+                      <img 
+                        src={option.icon} 
+                        alt="Drum kit icon" 
+                        className="w-9 h-9 object-contain" 
+                      />
+                    )}
+                    <div className="flex-1">
+                      <div className="font-semibold text-foreground font-poppins">
+                        {option.label}
+                      </div>
+                      <div className="text-sm text-text-secondary font-outfit">
+                        {option.desc}
+                      </div>
+                    </div>
                   </div>
                 </button>
               ))}
