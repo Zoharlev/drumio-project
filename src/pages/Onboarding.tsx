@@ -210,7 +210,7 @@ export default function Onboarding() {
 
             <div className="space-y-4">
               {[
-                { id: "fun", label: "Play for fun", desc: "Casual playing and enjoyment" },
+                { id: "fun", label: "Play for fun", desc: "Casual playing and enjoyment", icon: "/lovable-uploads/f3b9ec0d-331a-427b-a5e1-6936ebacc0d5.png" },
                 { id: "band", label: "Join a band", desc: "Play with others and perform" },
                 { id: "professional", label: "Professional skills", desc: "Career or serious development" },
                 { id: "specific", label: "Learn specific songs", desc: "Master particular tracks" },
@@ -223,14 +223,25 @@ export default function Onboarding() {
                       ? "border-drumio-purple bg-drumio-purple/10"
                       : "border-secondary hover:border-drumio-purple/50"
                   }`}
-                >
-                  <div className="font-semibold text-foreground font-poppins">
-                    {option.label}
-                  </div>
-                  <div className="text-sm text-text-secondary font-outfit">
-                    {option.desc}
-                  </div>
-                </button>
+                 >
+                   <div className="flex items-center gap-3">
+                     {option.icon && (
+                       <img 
+                         src={option.icon} 
+                         alt="Goal icon" 
+                         className="w-9 h-9 object-contain" 
+                       />
+                     )}
+                     <div className="flex-1">
+                       <div className="font-semibold text-foreground font-poppins">
+                         {option.label}
+                       </div>
+                       <div className="text-sm text-text-secondary font-outfit">
+                         {option.desc}
+                       </div>
+                     </div>
+                   </div>
+                 </button>
               ))}
             </div>
           </div>
