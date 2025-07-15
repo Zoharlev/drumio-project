@@ -110,7 +110,7 @@ export default function Onboarding() {
 
             <div className="space-y-4">
               {[
-                { id: "beginner", label: "Complete beginner", desc: "Never played drums before" },
+                { id: "beginner", label: "Complete beginner", desc: "Never played drums before", icon: "/lovable-uploads/16ca57ab-639e-4c77-839e-781d337260b3.png" },
                 { id: "some", label: "Some experience", desc: "Played a bit, know basics" },
                 { id: "intermediate", label: "Intermediate", desc: "Can play songs, want to improve" },
                 { id: "advanced", label: "Advanced", desc: "Looking for challenges and refinement" },
@@ -124,11 +124,22 @@ export default function Onboarding() {
                       : "border-secondary hover:border-drumio-purple/50"
                   }`}
                 >
-                  <div className="font-semibold text-foreground font-poppins">
-                    {option.label}
-                  </div>
-                  <div className="text-sm text-text-secondary font-outfit">
-                    {option.desc}
+                  <div className="flex items-center gap-3">
+                    {option.icon && (
+                      <img 
+                        src={option.icon} 
+                        alt="Drumsticks icon" 
+                        className="w-6 h-6 object-contain" 
+                      />
+                    )}
+                    <div className="flex-1">
+                      <div className="font-semibold text-foreground font-poppins">
+                        {option.label}
+                      </div>
+                      <div className="text-sm text-text-secondary font-outfit">
+                        {option.desc}
+                      </div>
+                    </div>
                   </div>
                 </button>
               ))}
