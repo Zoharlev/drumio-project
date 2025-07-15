@@ -24,12 +24,6 @@ export default function Signup() {
           <DrumLogo size="xl" showGlow={true} />
         </div>
 
-        <img 
-          src="/lovable-uploads/43b2135e-5902-4572-aa30-eefd5de07c4d.png" 
-          alt="Drum icon" 
-          className="w-24 h-24 object-contain"
-        />
-
         <h1 className="text-2xl font-bold text-drumio-yellow font-poppins">
           Drumio
         </h1>
