@@ -124,20 +124,11 @@ export default function Onboarding() {
                       : "border-secondary hover:border-drumio-purple/50"
                   }`}
                 >
-                  <div className="flex items-center gap-3">
-                    <img 
-                      src="/lovable-uploads/c409d493-1df1-465c-9b66-6f9c59c3926f.png" 
-                      alt="Drumsticks" 
-                      className="w-6 h-6"
-                    />
-                    <div className="flex-1">
-                      <div className="font-semibold text-foreground font-poppins">
-                        {option.label}
-                      </div>
-                      <div className="text-sm text-text-secondary font-outfit">
-                        {option.desc}
-                      </div>
-                    </div>
+                  <div className="font-semibold text-foreground font-poppins">
+                    {option.label}
+                  </div>
+                  <div className="text-sm text-text-secondary font-outfit">
+                    {option.desc}
                   </div>
                 </button>
               ))}
