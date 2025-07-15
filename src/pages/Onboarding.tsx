@@ -112,7 +112,7 @@ export default function Onboarding() {
               {[
                 { id: "beginner", label: "Complete beginner", desc: "Never played drums before", icon: "/lovable-uploads/16ca57ab-639e-4c77-839e-781d337260b3.png" },
                 { id: "some", label: "Some experience", desc: "Played a bit, know basics", icon: "/lovable-uploads/b1bd418f-dca1-4f04-8bf7-1a3370c6d3f5.png" },
-                { id: "intermediate", label: "Intermediate", desc: "Can play songs, want to improve" },
+                { id: "intermediate", label: "Intermediate", desc: "Can play songs, want to improve", icon: "/lovable-uploads/9acf55f7-fbae-4949-8c5c-c3f053472cf2.png" },
                 { id: "advanced", label: "Advanced", desc: "Looking for challenges and refinement" },
               ].map((option) => (
                 <button
