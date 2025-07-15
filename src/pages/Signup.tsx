@@ -20,7 +20,7 @@ export default function Signup() {
     <div className="min-h-screen bg-background flex flex-col px-6 py-8 max-w-md mx-auto">
       {/* Logo */}
       <div className="flex flex-col items-center gap-4 mb-8">
-        <div className="w-48 h-48 flex items-center justify-center">
+        <div className="w-48 h-48 flex items-center justify-center bg-cover bg-center bg-no-repeat" style={{backgroundImage: 'url(/lovable-uploads/e7badd3c-5e88-46ce-a0f7-05b2cde01ed8.png)'}}>
           <DrumLogo size="xl" showGlow={true} />
         </div>
 
