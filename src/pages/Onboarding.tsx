@@ -213,7 +213,7 @@ export default function Onboarding() {
                 { id: "fun", label: "Play for fun", desc: "Casual playing and enjoyment", icon: "/lovable-uploads/f3b9ec0d-331a-427b-a5e1-6936ebacc0d5.png" },
                 { id: "band", label: "Join a band", desc: "Play with others and perform", icon: "/lovable-uploads/a5f56d46-e4d7-41ff-8e55-5002aad52e2c.png" },
                 { id: "professional", label: "Professional skills", desc: "Career or serious development", icon: "/lovable-uploads/a512b8e1-5320-4945-bcff-3a02a1c24254.png" },
-                { id: "specific", label: "Learn specific songs", desc: "Master particular tracks" },
+                { id: "specific", label: "Learn specific songs", desc: "Master particular tracks", icon: "/lovable-uploads/e4d271d2-a8b5-491d-8964-85ad967d64a2.png" },
               ].map((option) => (
                 <button
                   key={option.id}
