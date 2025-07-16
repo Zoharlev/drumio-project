@@ -260,7 +260,7 @@ export default function Onboarding() {
 
             <div className="space-y-4">
               {[
-                { id: "search", label: "Search engine", desc: "Google, Bing, etc." },
+                { id: "search", label: "Search engine", desc: "Google, Bing, etc.", icon: "/lovable-uploads/23e326fa-7eb6-46c3-a6b9-b2772e92b8da.png" },
                 { id: "social", label: "Social media", desc: "Instagram, TikTok, YouTube" },
                 { id: "friend", label: "Friend or family", desc: "Someone recommended us" },
                 { id: "ad", label: "Advertisement", desc: "Saw an ad somewhere" },
