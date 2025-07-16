@@ -163,7 +163,7 @@ export default function Onboarding() {
                 { id: "acoustic", label: "Acoustic drum kit", desc: "Full traditional drum set", icon: "/lovable-uploads/da44e5a4-12a3-46d2-b4d9-5818c68062e5.png" },
                 { id: "electronic", label: "Electronic drums", desc: "Digital/electric drum kit", icon: "/lovable-uploads/afd53a4f-533b-4344-873d-e3dd42113d04.png" },
                 { id: "practice", label: "Practice pad", desc: "Drum pad or practice setup", icon: "/lovable-uploads/68f61ab6-2d54-4ab1-8750-68501d901ae9.png" },
-                { id: "none", label: "No drums yet", desc: "Planning to get equipment", icon: "/lovable-uploads/17fdbf16-1a1d-4c5d-9e4e-33f3c03475c8.png" },
+                { id: "none", label: "No drums yet", desc: "Planning to get equipment", icon: "/lovable-uploads/019dc1ea-8c36-44a8-9089-10cafb8a1cee.png" },
                ].map((option) => (
                 <button
                   key={option.id}
