@@ -211,7 +211,7 @@ export default function Onboarding() {
             <div className="space-y-4">
               {[
                 { id: "fun", label: "Play for fun", desc: "Casual playing and enjoyment", icon: "/lovable-uploads/f3b9ec0d-331a-427b-a5e1-6936ebacc0d5.png" },
-                { id: "band", label: "Join a band", desc: "Play with others and perform" },
+                { id: "band", label: "Join a band", desc: "Play with others and perform", icon: "/lovable-uploads/a5f56d46-e4d7-41ff-8e55-5002aad52e2c.png" },
                 { id: "professional", label: "Professional skills", desc: "Career or serious development" },
                 { id: "specific", label: "Learn specific songs", desc: "Master particular tracks" },
               ].map((option) => (
