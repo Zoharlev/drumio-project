@@ -261,7 +261,7 @@ export default function Onboarding() {
             <div className="space-y-4">
               {[
                 { id: "search", label: "Search engine", desc: "Google, Bing, etc.", icon: "/lovable-uploads/23e326fa-7eb6-46c3-a6b9-b2772e92b8da.png" },
-                { id: "social", label: "Social media", desc: "Instagram, TikTok, YouTube", icon: "/lovable-uploads/2c12f2a9-23b6-4821-a695-d0f4516195c6.png" },
+                { id: "social", label: "Social media", desc: "Instagram, TikTok, YouTube", icon: "/lovable-uploads/7a3b4ed3-273b-4011-bb8c-37d204192c18.png" },
                 { id: "friend", label: "Friend or family", desc: "Someone recommended us", icon: "/lovable-uploads/63796174-1c95-4d3e-a110-e71c341f5086.png" },
                 { id: "ad", label: "Advertisement", desc: "Saw an ad somewhere" },
                 { id: "other", label: "Other", desc: "Different source" },
