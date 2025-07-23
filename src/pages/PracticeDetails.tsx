@@ -125,7 +125,11 @@ const PracticeDetails = () => {
 
         {/* Start Practice Button */}
         <div className="mb-12">
-          <Button className="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-semibold py-4 text-lg rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 border-none" size="lg">
+          <Button 
+            onClick={() => navigate(`/lesson/${lessonId}/practice/${practiceId}/session`)}
+            className="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-semibold py-4 text-lg rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 border-none" 
+            size="lg"
+          >
             Start Practice
             <ArrowRight className="ml-2 h-5 w-5" />
           </Button>

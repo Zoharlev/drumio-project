@@ -12,6 +12,7 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import NotFound from "./pages/NotFound";
 import { AuthCallback } from "@/components/AuthCallback";
+import { PracticeSession } from "@/components/PracticeSession";
 
 const queryClient = new QueryClient();
 
@@ -27,6 +28,7 @@ const App = () => (
           <Route path="/explore" element={<Explore />} />
           <Route path="/lesson/:lessonId/practices" element={<LessonPractices />} />
           <Route path="/lesson/:lessonId/practice/:practiceId" element={<PracticeDetails />} />
+          <Route path="/lesson/:lessonId/practice/:practiceId/session" element={<PracticeSession />} />
           <Route path="/onboarding" element={<Onboarding />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
