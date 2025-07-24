@@ -206,23 +206,65 @@ export const PracticeSession = () => {
         noise.stop(context.currentTime + duration);
       }
     } else if (drum === 'snare') {
+      // Create a more realistic snare with both tone and noise components
+      
+      // Tonal component (drum head)
       const oscillator = context.createOscillator();
-      const gainNode = context.createGain();
+      const toneGain = context.createGain();
       
       oscillator.frequency.setValueAtTime(200, context.currentTime);
-      oscillator.frequency.exponentialRampToValueAtTime(80, context.currentTime + 0.02);
+      oscillator.frequency.exponentialRampToValueAtTime(60, context.currentTime + 0.05);
       oscillator.type = 'triangle';
       
-      oscillator.connect(gainNode);
-      gainNode.connect(context.destination);
+      oscillator.connect(toneGain);
       
-      const duration = 0.15;
-      gainNode.gain.setValueAtTime(0, context.currentTime);
-      gainNode.gain.linearRampToValueAtTime(0.4, context.currentTime + 0.002);
-      gainNode.gain.exponentialRampToValueAtTime(0.001, context.currentTime + duration);
+      // Noise component (snares)
+      const bufferSize = context.sampleRate * 0.2;
+      const buffer = context.createBuffer(1, bufferSize, context.sampleRate);
+      const data = buffer.getChannelData(0);
+      
+      for (let i = 0; i < bufferSize; i++) {
+        data[i] = Math.random() * 2 - 1;
+      }
+      
+      const noise = context.createBufferSource();
+      noise.buffer = buffer;
+      
+      // Filter the noise for snare character
+      const bandpassFilter = context.createBiquadFilter();
+      bandpassFilter.type = 'bandpass';
+      bandpassFilter.frequency.setValueAtTime(400, context.currentTime);
+      bandpassFilter.Q.setValueAtTime(1, context.currentTime);
+      
+      const noiseGain = context.createGain();
+      noise.connect(bandpassFilter);
+      bandpassFilter.connect(noiseGain);
+      
+      // Mix both components
+      const mixGain = context.createGain();
+      toneGain.connect(mixGain);
+      noiseGain.connect(mixGain);
+      mixGain.connect(context.destination);
+      
+      const duration = 0.2;
+      
+      // Envelope for tone component
+      toneGain.gain.setValueAtTime(0, context.currentTime);
+      toneGain.gain.linearRampToValueAtTime(0.3, context.currentTime + 0.001);
+      toneGain.gain.exponentialRampToValueAtTime(0.001, context.currentTime + duration);
+      
+      // Envelope for noise component (sharper attack)
+      noiseGain.gain.setValueAtTime(0, context.currentTime);
+      noiseGain.gain.linearRampToValueAtTime(0.5, context.currentTime + 0.002);
+      noiseGain.gain.exponentialRampToValueAtTime(0.001, context.currentTime + duration * 0.3);
+      
+      // Overall mix level
+      mixGain.gain.setValueAtTime(0.6, context.currentTime);
       
       oscillator.start(context.currentTime);
       oscillator.stop(context.currentTime + duration);
+      noise.start(context.currentTime);
+      noise.stop(context.currentTime + duration);
     } else {
       // Kick drum
       const oscillator = context.createOscillator();
