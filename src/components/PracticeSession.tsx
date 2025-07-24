@@ -266,23 +266,85 @@ export const PracticeSession = () => {
       noise.start(context.currentTime);
       noise.stop(context.currentTime + duration);
     } else {
-      // Kick drum
-      const oscillator = context.createOscillator();
-      const gainNode = context.createGain();
+      // Enhanced kick drum with multiple components
       
-      oscillator.frequency.setValueAtTime(60, context.currentTime);
-      oscillator.frequency.exponentialRampToValueAtTime(35, context.currentTime + 0.05);
-      oscillator.type = 'sine';
+      // Main low-frequency component
+      const kickOsc = context.createOscillator();
+      const kickGain = context.createGain();
+      const kickFilter = context.createBiquadFilter();
       
-      oscillator.connect(gainNode);
-      gainNode.connect(context.destination);
+      kickOsc.frequency.setValueAtTime(65, context.currentTime);
+      kickOsc.frequency.exponentialRampToValueAtTime(30, context.currentTime + 0.08);
+      kickOsc.type = 'sine';
       
-      const duration = 0.3;
-      gainNode.gain.setValueAtTime(1.0, context.currentTime);
-      gainNode.gain.exponentialRampToValueAtTime(0.001, context.currentTime + duration);
+      // Low-pass filter for warmth
+      kickFilter.type = 'lowpass';
+      kickFilter.frequency.setValueAtTime(120, context.currentTime);
+      kickFilter.Q.setValueAtTime(1, context.currentTime);
       
-      oscillator.start(context.currentTime);
-      oscillator.stop(context.currentTime + duration);
+      kickOsc.connect(kickFilter);
+      kickFilter.connect(kickGain);
+      
+      // Transient click component for punch
+      const clickOsc = context.createOscillator();
+      const clickGain = context.createGain();
+      const clickFilter = context.createBiquadFilter();
+      
+      clickOsc.frequency.setValueAtTime(1200, context.currentTime);
+      clickOsc.frequency.exponentialRampToValueAtTime(80, context.currentTime + 0.005);
+      clickOsc.type = 'triangle';
+      
+      // High-pass filter for click
+      clickFilter.type = 'highpass';
+      clickFilter.frequency.setValueAtTime(400, context.currentTime);
+      clickFilter.Q.setValueAtTime(0.5, context.currentTime);
+      
+      clickOsc.connect(clickFilter);
+      clickFilter.connect(clickGain);
+      
+      // Sub-bass component for depth
+      const subOsc = context.createOscillator();
+      const subGain = context.createGain();
+      
+      subOsc.frequency.setValueAtTime(45, context.currentTime);
+      subOsc.frequency.exponentialRampToValueAtTime(25, context.currentTime + 0.1);
+      subOsc.type = 'sine';
+      
+      subOsc.connect(subGain);
+      
+      // Mix all components
+      const mixGain = context.createGain();
+      kickGain.connect(mixGain);
+      clickGain.connect(mixGain);
+      subGain.connect(mixGain);
+      mixGain.connect(context.destination);
+      
+      const duration = 0.4;
+      
+      // Main kick envelope
+      kickGain.gain.setValueAtTime(0, context.currentTime);
+      kickGain.gain.linearRampToValueAtTime(1.2, context.currentTime + 0.003);
+      kickGain.gain.exponentialRampToValueAtTime(0.001, context.currentTime + duration);
+      
+      // Click envelope (very short)
+      clickGain.gain.setValueAtTime(0, context.currentTime);
+      clickGain.gain.linearRampToValueAtTime(0.8, context.currentTime + 0.001);
+      clickGain.gain.exponentialRampToValueAtTime(0.001, context.currentTime + 0.01);
+      
+      // Sub-bass envelope
+      subGain.gain.setValueAtTime(0, context.currentTime);
+      subGain.gain.linearRampToValueAtTime(0.6, context.currentTime + 0.005);
+      subGain.gain.exponentialRampToValueAtTime(0.001, context.currentTime + duration * 0.8);
+      
+      // Overall mix level
+      mixGain.gain.setValueAtTime(1.8, context.currentTime);
+      
+      kickOsc.start(context.currentTime);
+      kickOsc.stop(context.currentTime + duration);
+      clickOsc.start(context.currentTime);
+      clickOsc.stop(context.currentTime + 0.01);
+      subOsc.start(context.currentTime);
+      subOsc.stop(context.currentTime + duration);
     }
   };
 
