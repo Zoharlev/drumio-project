@@ -38,17 +38,7 @@ const PracticeDetails = () => {
       const {
         data,
         error
-      } = await supabase.from("lessons").select(`
-        *,
-        lesson_tags (
-          tags (
-            id,
-            name,
-            type,
-            tag_color
-          )
-        )
-      `).eq("id", lessonId).maybeSingle();
+      } = await supabase.from("lessons").select("*").eq("id", lessonId).maybeSingle();
       if (error) throw error;
       return data;
     }
@@ -127,21 +117,9 @@ const PracticeDetails = () => {
                 </div>
                 <span className="text-white text-sm font-medium capitalize">{lesson.level}</span>
               </div>}
-            {lesson?.lesson_tags?.map((lessonTag: any) => 
-              lessonTag.tags && (
-                <Badge 
-                  key={lessonTag.tags.id} 
-                  variant="outline" 
-                  className="border-white/30 text-white/80 bg-white/10"
-                  style={lessonTag.tags.tag_color ? { 
-                    borderColor: lessonTag.tags.tag_color, 
-                    color: lessonTag.tags.tag_color 
-                  } : {}}
-                >
-                  {lessonTag.tags.name}
-                </Badge>
-              )
-            )}
+            <Badge variant="outline" className="border-white/30 text-white/80 bg-white/10">
+              Tag name
+            </Badge>
           </div>
         </div>
 
