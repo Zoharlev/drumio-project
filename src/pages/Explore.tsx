@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -8,9 +9,29 @@ import { useLessons } from "@/hooks/useLessons";
 import { useNavigate } from "react-router-dom";
 const Explore = () => {
   const [activeCategory, setActiveCategory] = useState("lessons");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [showSearch, setShowSearch] = useState(false);
   const navigate = useNavigate();
   
-  const { data: lessons = [], isLoading } = useLessons(activeCategory === "lessons" ? undefined : activeCategory);
+  const { data: allLessons = [], isLoading } = useLessons(activeCategory === "lessons" ? undefined : activeCategory);
+  
+  // Filter lessons based on search term
+  const lessons = allLessons.filter(lesson => {
+    if (!searchTerm) return true;
+    
+    const searchLower = searchTerm.toLowerCase();
+    
+    // Search in lesson title
+    if (lesson.title.toLowerCase().includes(searchLower)) return true;
+    
+    // Search in lesson level
+    if (lesson.level.toLowerCase().includes(searchLower)) return true;
+    
+    // Search in tags
+    if (lesson.tags?.some(tag => tag.name.toLowerCase().includes(searchLower))) return true;
+    
+    return false;
+  });
   const categories = [{
     id: "lessons",
     label: "Lessons"
@@ -47,11 +68,29 @@ const Explore = () => {
   return <div className="min-h-screen bg-background px-6 py-8">
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
-        <h1 className="text-2xl font-bold text-foreground font-poppins"></h1>
-        <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
+        <h1 className="text-2xl font-bold text-foreground font-poppins">Explore</h1>
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="text-muted-foreground hover:text-foreground"
+          onClick={() => setShowSearch(!showSearch)}
+        >
           <Search className="h-5 w-5" />
         </Button>
       </div>
+
+      {/* Search Input */}
+      {showSearch && (
+        <div className="mb-6">
+          <Input
+            type="text"
+            placeholder="Search lessons by name, level, or tags..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full"
+          />
+        </div>
+      )}
 
       {/* Category Tabs */}
       <Tabs value={activeCategory} onValueChange={setActiveCategory} className="mb-8">
