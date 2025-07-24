@@ -30,6 +30,36 @@ const PracticeDetails = () => {
       return data;
     }
   });
+
+  const { data: practiceTags } = useQuery({
+    queryKey: ["practice-tags", practiceId],
+    queryFn: async () => {
+      if (!practiceId) return [];
+      
+      const { data, error } = await supabase
+        .rpc('get_practice_tags', { practice_id: practiceId });
+      
+      if (error) {
+        // Fallback to manual query if RPC doesn't exist
+        const { data: manualData, error: manualError } = await supabase
+          .from("tags")
+          .select("*")
+          .in("id", 
+            await supabase
+              .from("practice_tags")
+              .select("tag_id")
+              .eq("practice_id", practiceId)
+              .then(({ data }) => data?.map(pt => pt.tag_id) || [])
+          );
+        
+        if (manualError) throw manualError;
+        return manualData || [];
+      }
+      
+      return data || [];
+    },
+    enabled: !!practiceId
+  });
   const {
     data: lesson
   } = useQuery({
@@ -117,9 +147,16 @@ const PracticeDetails = () => {
                 </div>
                 <span className="text-white text-sm font-medium capitalize">{lesson.level}</span>
               </div>}
-            <Badge variant="outline" className="border-white/30 text-white/80 bg-white/10">
-              Tag name
-            </Badge>
+            {practice.practice_tags?.map((pt: any) => (
+              <Badge 
+                key={pt.tags.id} 
+                variant="outline" 
+                className="border-white/30 text-white/80 bg-white/10"
+                style={{ borderColor: pt.tags.tag_color }}
+              >
+                {pt.tags.name}
+              </Badge>
+            ))}
           </div>
         </div>
 
