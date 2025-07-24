@@ -54,42 +54,55 @@ export const PracticeSession = () => {
     };
   }, []);
 
-  // Load pattern from practice pattern field
+  // Load pattern from practice notes field
   useEffect(() => {
-    if (practice?.pattern) {
+    if ((practice as any)?.practice_note) {
       try {
-        // Parse the pattern field as JSON to extract the drum pattern
-        const patternData = JSON.parse(practice.pattern);
-        
-        if (patternData && typeof patternData === 'object') {
-          setPattern(patternData);
-        } else {
-          // If pattern is not in expected format, create basic pattern
-          const hihatPattern = new Array(16).fill(false);
-          hihatPattern[2] = true;  // 0.25s
-          hihatPattern[6] = true;  // 0.73s
-          hihatPattern[10] = true; // 1.22s
-          hihatPattern[14] = true; // 1.7s
-
-          setPattern({
-            kick: new Array(16).fill(false),
-            snare: new Array(16).fill(false),
-            hihat: hihatPattern,
-            openhat: new Array(16).fill(false),
-          });
-        }
-      } catch (error) {
-        console.error('Error parsing practice pattern:', error);
-        // Fallback to basic pattern if parsing fails
-        const hihatPattern = new Array(16).fill(false);
-        hihatPattern[2] = true;
-        hihatPattern[6] = true;
-        hihatPattern[10] = true;
-        hihatPattern[14] = true;
-
-        setPattern({
+        // Parse the practice_note field as CSV-like format
+        const lines = (practice as any).practice_note.split('\n');
+        const newPattern: DrumPattern = {
           kick: new Array(16).fill(false),
           snare: new Array(16).fill(false),
+          hihat: new Array(16).fill(false),
+          openhat: new Array(16).fill(false),
+        };
+
+        lines.forEach((line: string) => {
+          if (line.startsWith('Hi-Hat,') || line.startsWith('Kick,') || line.startsWith('Snare,')) {
+            const parts = line.split(',');
+            const drumType = parts[0].toLowerCase();
+            
+            // Map drum names to our pattern keys
+            let patternKey = '';
+            if (drumType === 'hi-hat') patternKey = 'hihat';
+            else if (drumType === 'kick') patternKey = 'kick';
+            else if (drumType === 'snare') patternKey = 'snare';
+
+            if (patternKey && newPattern[patternKey]) {
+              // Parse the pattern - 'X' means hit, empty means rest
+              for (let i = 1; i < Math.min(parts.length, 17); i++) {
+                const stepIndex = (i - 1) * 4; // Convert 4/4 beats to 16th notes
+                if (stepIndex < 16 && parts[i]?.trim() === 'X') {
+                  newPattern[patternKey][stepIndex] = true;
+                }
+              }
+            }
+          }
+        });
+
+        setPattern(newPattern);
+      } catch (error) {
+        console.error('Error parsing practice notes:', error);
+        // Fallback to basic pattern if parsing fails
+        const hihatPattern = new Array(16).fill(false);
+        hihatPattern[0] = true;
+        hihatPattern[4] = true;
+        hihatPattern[8] = true;
+        hihatPattern[12] = true;
+
+        setPattern({
+          kick: [true, false, false, false, true, false, false, false, true, false, false, false, true, false, false, false],
+          snare: [false, false, false, false, true, false, false, false, false, false, false, false, true, false, false, false],
           hihat: hihatPattern,
           openhat: new Array(16).fill(false),
         });
