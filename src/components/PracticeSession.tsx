@@ -6,10 +6,9 @@ import { DrumGrid } from "./DrumGrid";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-
-interface DrumPattern {
-  [key: string]: boolean[];
-}
+import { DrumPattern, PatternComplexity, createEmptyPattern } from "@/types/drumPatterns";
+import { parsePatternFromNotes } from "@/utils/patternParser";
+import { AudioEngine } from "@/utils/audioEngine";
 
 export const PracticeSession = () => {
   const navigate = useNavigate();
@@ -18,15 +17,17 @@ export const PracticeSession = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [bpm, setBpm] = useState(120);
   const [metronomeEnabled, setMetronomeEnabled] = useState(true);
-  const [pattern, setPattern] = useState<DrumPattern>({
-    kick: new Array(16).fill(false),
-    snare: new Array(16).fill(false),
-    hihat: new Array(16).fill(false),
-    openhat: new Array(16).fill(false),
+  const [pattern, setPattern] = useState<DrumPattern>(createEmptyPattern(16));
+  const [complexity, setComplexity] = useState<PatternComplexity>({
+    hasEighthNotes: false,
+    hasSixteenthNotes: false,
+    hasVelocityVariation: false,
+    hasOpenHats: false,
+    maxSteps: 16
   });
 
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
-  const audioContextRef = useRef<AudioContext | null>(null);
+  const audioEngineRef = useRef<AudioEngine | null>(null);
   const { toast } = useToast();
 
   // Fetch practice data
@@ -46,11 +47,11 @@ export const PracticeSession = () => {
     }
   });
 
-  // Initialize audio context
+  // Initialize audio engine
   useEffect(() => {
-    audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+    audioEngineRef.current = new AudioEngine();
     return () => {
-      audioContextRef.current?.close();
+      audioEngineRef.current?.close();
     };
   }, []);
 
@@ -58,66 +59,42 @@ export const PracticeSession = () => {
   useEffect(() => {
     if ((practice as any)?.practice_note) {
       try {
-        // Parse the practice_note field as CSV-like format
-        const lines = (practice as any).practice_note.split('\n');
-        const newPattern: DrumPattern = {
-          kick: new Array(16).fill(false),
-          snare: new Array(16).fill(false),
-          hihat: new Array(16).fill(false),
-          openhat: new Array(16).fill(false),
-        };
-
-        lines.forEach((line: string) => {
-          if (line.startsWith('Hi-Hat,') || line.startsWith('Kick,') || line.startsWith('Snare,')) {
-            const parts = line.split(',');
-            const drumType = parts[0].toLowerCase();
-            
-            // Map drum names to our pattern keys
-            let patternKey = '';
-            if (drumType === 'hi-hat') patternKey = 'hihat';
-            else if (drumType === 'kick') patternKey = 'kick';
-            else if (drumType === 'snare') patternKey = 'snare';
-
-            if (patternKey && newPattern[patternKey]) {
-              // Parse the pattern - 'X' means hit, empty means rest
-              for (let i = 1; i < Math.min(parts.length, 17); i++) {
-                const stepIndex = (i - 1) * 4; // Convert 4/4 beats to 16th notes
-                if (stepIndex < 16 && parts[i]?.trim() === 'X') {
-                  newPattern[patternKey][stepIndex] = true;
-                }
-              }
-            }
-          }
-        });
-
-        setPattern(newPattern);
+        const { pattern: parsedPattern, complexity: parsedComplexity } = parsePatternFromNotes((practice as any).practice_note);
+        setPattern(parsedPattern);
+        setComplexity(parsedComplexity);
       } catch (error) {
         console.error('Error parsing practice notes:', error);
-        // Fallback to basic pattern if parsing fails
-        const hihatPattern = new Array(16).fill(false);
-        hihatPattern[0] = true;
-        hihatPattern[4] = true;
-        hihatPattern[8] = true;
-        hihatPattern[12] = true;
-
-        setPattern({
-          kick: [true, false, false, false, true, false, false, false, true, false, false, false, true, false, false, false],
-          snare: [false, false, false, false, true, false, false, false, false, false, false, false, true, false, false, false],
-          hihat: hihatPattern,
-          openhat: new Array(16).fill(false),
+        // Fallback to basic pattern
+        const fallbackPattern = createEmptyPattern(16);
+        fallbackPattern.kick[0] = { active: true, velocity: 0.7, type: 'normal' };
+        fallbackPattern.kick[8] = { active: true, velocity: 0.7, type: 'normal' };
+        fallbackPattern.snare[4] = { active: true, velocity: 0.7, type: 'normal' };
+        fallbackPattern.snare[12] = { active: true, velocity: 0.7, type: 'normal' };
+        fallbackPattern.hihat[0] = { active: true, velocity: 0.7, type: 'normal', open: false };
+        fallbackPattern.hihat[4] = { active: true, velocity: 0.7, type: 'normal', open: false };
+        fallbackPattern.hihat[8] = { active: true, velocity: 0.7, type: 'normal', open: false };
+        fallbackPattern.hihat[12] = { active: true, velocity: 0.7, type: 'normal', open: false };
+        
+        setPattern(fallbackPattern);
+        setComplexity({
+          hasEighthNotes: true,
+          hasSixteenthNotes: false,
+          hasVelocityVariation: false,
+          hasOpenHats: false,
+          maxSteps: 16
         });
       }
     }
   }, [practice]);
 
-  // Step timing based on BPM
-  const stepDuration = (60 / bpm / 4) * 1000; // 16th notes
+  // Step timing based on BPM and complexity
+  const stepDuration = (60 / bpm / (complexity.maxSteps / 4)) * 1000;
 
   useEffect(() => {
     if (isPlaying) {
       intervalRef.current = setInterval(() => {
         setCurrentStep((prev) => {
-          const nextStep = (prev + 1) % 16;
+          const nextStep = (prev + 1) % complexity.maxSteps;
           return nextStep;
         });
       }, stepDuration);
@@ -137,236 +114,27 @@ export const PracticeSession = () => {
 
   // Play sounds based on currentStep
   useEffect(() => {
-    if (isPlaying) {
+    if (isPlaying && audioEngineRef.current) {
+      audioEngineRef.current.resumeContext();
+      
       // Play sounds for active notes at current step
       Object.entries(pattern).forEach(([drum, steps]) => {
-        if (steps[currentStep]) {
-          playDrumSound(drum);
+        const note = steps[currentStep];
+        if (note?.active) {
+          const velocity = note.velocity || 0.7;
+          const isOpen = (note as any).open || false;
+          audioEngineRef.current?.playDrumSound(drum, velocity, isOpen);
         }
       });
 
-      // Play metronome on beat 1
-      if (metronomeEnabled && currentStep % 4 === 0) {
-        playMetronome();
+      // Play metronome on main beats
+      const beatsPerMeasure = complexity.maxSteps / 4;
+      if (metronomeEnabled && currentStep % (complexity.maxSteps / beatsPerMeasure) === 0) {
+        audioEngineRef.current?.playMetronome();
       }
     }
-  }, [currentStep, isPlaying, pattern, metronomeEnabled]);
+  }, [currentStep, isPlaying, pattern, metronomeEnabled, complexity]);
 
-  const playDrumSound = (drum: string) => {
-    if (!audioContextRef.current) return;
-
-    const context = audioContextRef.current;
-
-    if (drum === 'hihat' || drum === 'openhat') {
-      // Create white noise for hi-hat sounds
-      const bufferSize = context.sampleRate * 0.1;
-      const buffer = context.createBuffer(1, bufferSize, context.sampleRate);
-      const data = buffer.getChannelData(0);
-
-      for (let i = 0; i < bufferSize; i++) {
-        data[i] = Math.random() * 2 - 1;
-      }
-
-      const noise = context.createBufferSource();
-      noise.buffer = buffer;
-
-      if (drum === 'openhat') {
-        const highpassFilter = context.createBiquadFilter();
-        highpassFilter.type = 'highpass';
-        highpassFilter.frequency.setValueAtTime(6000, context.currentTime);
-        
-        const gainNode = context.createGain();
-        noise.connect(highpassFilter);
-        highpassFilter.connect(gainNode);
-        gainNode.connect(context.destination);
-
-        const duration = 0.4;
-        gainNode.gain.setValueAtTime(0, context.currentTime);
-        gainNode.gain.linearRampToValueAtTime(0.7, context.currentTime + 0.002);
-        gainNode.gain.exponentialRampToValueAtTime(0.001, context.currentTime + duration);
-
-        noise.start(context.currentTime);
-        noise.stop(context.currentTime + duration);
-      } else {
-        const highpassFilter = context.createBiquadFilter();
-        highpassFilter.type = 'highpass';
-        highpassFilter.frequency.setValueAtTime(8000, context.currentTime);
-        
-        const gainNode = context.createGain();
-        noise.connect(highpassFilter);
-        highpassFilter.connect(gainNode);
-        gainNode.connect(context.destination);
-
-        const duration = 0.08;
-        gainNode.gain.setValueAtTime(0, context.currentTime);
-        gainNode.gain.linearRampToValueAtTime(0.6, context.currentTime + 0.001);
-        gainNode.gain.exponentialRampToValueAtTime(0.001, context.currentTime + duration);
-
-        noise.start(context.currentTime);
-        noise.stop(context.currentTime + duration);
-      }
-    } else if (drum === 'snare') {
-      // Create a more realistic snare with both tone and noise components
-      
-      // Tonal component (drum head)
-      const oscillator = context.createOscillator();
-      const toneGain = context.createGain();
-      
-      oscillator.frequency.setValueAtTime(200, context.currentTime);
-      oscillator.frequency.exponentialRampToValueAtTime(60, context.currentTime + 0.05);
-      oscillator.type = 'triangle';
-      
-      oscillator.connect(toneGain);
-      
-      // Noise component (snares)
-      const bufferSize = context.sampleRate * 0.2;
-      const buffer = context.createBuffer(1, bufferSize, context.sampleRate);
-      const data = buffer.getChannelData(0);
-      
-      for (let i = 0; i < bufferSize; i++) {
-        data[i] = Math.random() * 2 - 1;
-      }
-      
-      const noise = context.createBufferSource();
-      noise.buffer = buffer;
-      
-      // Filter the noise for snare character
-      const bandpassFilter = context.createBiquadFilter();
-      bandpassFilter.type = 'bandpass';
-      bandpassFilter.frequency.setValueAtTime(400, context.currentTime);
-      bandpassFilter.Q.setValueAtTime(1, context.currentTime);
-      
-      const noiseGain = context.createGain();
-      noise.connect(bandpassFilter);
-      bandpassFilter.connect(noiseGain);
-      
-      // Mix both components
-      const mixGain = context.createGain();
-      toneGain.connect(mixGain);
-      noiseGain.connect(mixGain);
-      mixGain.connect(context.destination);
-      
-      const duration = 0.2;
-      
-      // Envelope for tone component
-      toneGain.gain.setValueAtTime(0, context.currentTime);
-      toneGain.gain.linearRampToValueAtTime(0.8, context.currentTime + 0.001);
-      toneGain.gain.exponentialRampToValueAtTime(0.001, context.currentTime + duration);
-      
-      // Envelope for noise component (sharper attack)
-      noiseGain.gain.setValueAtTime(0, context.currentTime);
-      noiseGain.gain.linearRampToValueAtTime(1.2, context.currentTime + 0.002);
-      noiseGain.gain.exponentialRampToValueAtTime(0.001, context.currentTime + duration * 0.3);
-      
-      // Overall mix level
-      mixGain.gain.setValueAtTime(1.5, context.currentTime);
-      
-      oscillator.start(context.currentTime);
-      oscillator.stop(context.currentTime + duration);
-      noise.start(context.currentTime);
-      noise.stop(context.currentTime + duration);
-    } else {
-      // Enhanced kick drum with multiple components
-      
-      // Main low-frequency component
-      const kickOsc = context.createOscillator();
-      const kickGain = context.createGain();
-      const kickFilter = context.createBiquadFilter();
-      
-      kickOsc.frequency.setValueAtTime(65, context.currentTime);
-      kickOsc.frequency.exponentialRampToValueAtTime(30, context.currentTime + 0.08);
-      kickOsc.type = 'sine';
-      
-      // Low-pass filter for warmth
-      kickFilter.type = 'lowpass';
-      kickFilter.frequency.setValueAtTime(120, context.currentTime);
-      kickFilter.Q.setValueAtTime(1, context.currentTime);
-      
-      kickOsc.connect(kickFilter);
-      kickFilter.connect(kickGain);
-      
-      // Transient click component for punch
-      const clickOsc = context.createOscillator();
-      const clickGain = context.createGain();
-      const clickFilter = context.createBiquadFilter();
-      
-      clickOsc.frequency.setValueAtTime(1200, context.currentTime);
-      clickOsc.frequency.exponentialRampToValueAtTime(80, context.currentTime + 0.005);
-      clickOsc.type = 'triangle';
-      
-      // High-pass filter for click
-      clickFilter.type = 'highpass';
-      clickFilter.frequency.setValueAtTime(400, context.currentTime);
-      clickFilter.Q.setValueAtTime(0.5, context.currentTime);
-      
-      clickOsc.connect(clickFilter);
-      clickFilter.connect(clickGain);
-      
-      // Sub-bass component for depth
-      const subOsc = context.createOscillator();
-      const subGain = context.createGain();
-      
-      subOsc.frequency.setValueAtTime(45, context.currentTime);
-      subOsc.frequency.exponentialRampToValueAtTime(25, context.currentTime + 0.1);
-      subOsc.type = 'sine';
-      
-      subOsc.connect(subGain);
-      
-      // Mix all components
-      const mixGain = context.createGain();
-      kickGain.connect(mixGain);
-      clickGain.connect(mixGain);
-      subGain.connect(mixGain);
-      mixGain.connect(context.destination);
-      
-      const duration = 0.4;
-      
-      // Main kick envelope
-      kickGain.gain.setValueAtTime(0, context.currentTime);
-      kickGain.gain.linearRampToValueAtTime(1.2, context.currentTime + 0.003);
-      kickGain.gain.exponentialRampToValueAtTime(0.001, context.currentTime + duration);
-      
-      // Click envelope (very short)
-      clickGain.gain.setValueAtTime(0, context.currentTime);
-      clickGain.gain.linearRampToValueAtTime(0.8, context.currentTime + 0.001);
-      clickGain.gain.exponentialRampToValueAtTime(0.001, context.currentTime + 0.01);
-      
-      // Sub-bass envelope
-      subGain.gain.setValueAtTime(0, context.currentTime);
-      subGain.gain.linearRampToValueAtTime(0.6, context.currentTime + 0.005);
-      subGain.gain.exponentialRampToValueAtTime(0.001, context.currentTime + duration * 0.8);
-      
-      // Overall mix level
-      mixGain.gain.setValueAtTime(1.8, context.currentTime);
-      
-      kickOsc.start(context.currentTime);
-      kickOsc.stop(context.currentTime + duration);
-      clickOsc.start(context.currentTime);
-      clickOsc.stop(context.currentTime + 0.01);
-      subOsc.start(context.currentTime);
-      subOsc.stop(context.currentTime + duration);
-    }
-  };
-
-  const playMetronome = () => {
-    if (!audioContextRef.current) return;
-
-    const context = audioContextRef.current;
-    const oscillator = context.createOscillator();
-    const gainNode = context.createGain();
-
-    oscillator.connect(gainNode);
-    gainNode.connect(context.destination);
-
-    oscillator.frequency.setValueAtTime(1000, context.currentTime);
-    oscillator.type = 'sine';
-
-    gainNode.gain.setValueAtTime(0.1, context.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, context.currentTime + 0.05);
-
-    oscillator.start(context.currentTime);
-    oscillator.stop(context.currentTime + 0.05);
-  };
 
   const togglePlay = () => {
     setIsPlaying(!isPlaying);
@@ -394,19 +162,21 @@ export const PracticeSession = () => {
   const toggleStep = (drum: string, step: number) => {
     setPattern(prev => ({
       ...prev,
-      [drum]: prev[drum].map((active, index) =>
-        index === step ? !active : active
-      )
+      [drum]: prev[drum].map((note, index) => {
+        if (index === step) {
+          if (note.active) {
+            return { ...note, active: false };
+          } else {
+            return { ...note, active: true, velocity: 0.7, type: 'normal' };
+          }
+        }
+        return note;
+      })
     }));
   };
 
   const clearPattern = () => {
-    setPattern({
-      kick: new Array(16).fill(false),
-      snare: new Array(16).fill(false),
-      hihat: new Array(16).fill(false),
-      openhat: new Array(16).fill(false),
-    });
+    setPattern(createEmptyPattern(complexity.maxSteps));
     toast({
       title: "Cleared",
       description: "All patterns cleared",
@@ -537,6 +307,7 @@ export const PracticeSession = () => {
             onClearPattern={clearPattern}
             metronomeEnabled={metronomeEnabled}
             onMetronomeToggle={() => setMetronomeEnabled(!metronomeEnabled)}
+            complexity={complexity}
           />
         </div>
       </div>

@@ -3,12 +3,19 @@ import { Trash2, Volume2, VolumeX } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface DrumGridProps {
-  pattern: { [key: string]: boolean[] };
+  pattern: { [key: string]: any[] };
   currentStep: number;
   onStepToggle: (drum: string, step: number) => void;
   onClearPattern: () => void;
   metronomeEnabled: boolean;
   onMetronomeToggle: () => void;
+  complexity: {
+    hasEighthNotes: boolean;
+    hasSixteenthNotes: boolean;
+    hasVelocityVariation: boolean;
+    hasOpenHats: boolean;
+    maxSteps: number;
+  };
 }
 
 const drumLabels: { [key: string]: { name: string; symbol: string } } = {
@@ -25,7 +32,10 @@ export const DrumGrid = ({
   onClearPattern,
   metronomeEnabled,
   onMetronomeToggle,
+  complexity
 }: DrumGridProps) => {
+  const stepsToShow = complexity.maxSteps;
+  const beatsToShow = Math.ceil(stepsToShow / 4);
   return (
     <div className="space-y-6">
       {/* Controls */}
@@ -61,7 +71,7 @@ export const DrumGrid = ({
         <div
           className="absolute top-0 bottom-0 w-1 bg-primary transition-all duration-75 z-10"
           style={{
-            left: `${88 + (currentStep * (100 - 88 / 16)) / 16}%`,
+            left: `${88 + (currentStep * (100 - 88 / stepsToShow)) / stepsToShow}%`,
             boxShadow: "0 0 20px hsl(var(--primary) / 0.6)",
           }}
         />
@@ -69,17 +79,35 @@ export const DrumGrid = ({
         {/* Beat Numbers */}
         <div className="flex mb-4">
           <div className="w-20"></div>
-          {Array.from({ length: 16 }, (_, i) => (
-            <div
-              key={i}
-              className={cn(
-                "flex-1 text-center text-sm font-mono",
-                i % 4 === 0 ? "text-primary font-bold" : "text-muted-foreground"
-              )}
-            >
-              {i % 4 === 0 ? Math.floor(i / 4) + 1 : ""}
-            </div>
-          ))}
+          {Array.from({ length: stepsToShow }, (_, i) => {
+            const beat = Math.floor(i / (stepsToShow / beatsToShow)) + 1;
+            const subdivision = i % (stepsToShow / beatsToShow);
+            const isMainBeat = subdivision === 0;
+            
+            let label = '';
+            if (isMainBeat) {
+              label = beat.toString();
+            } else if (stepsToShow === 16 && subdivision === 2) {
+              label = '&';
+            } else if (stepsToShow === 32) {
+              if (subdivision === 1) label = 'e';
+              else if (subdivision === 2) label = '&';
+              else if (subdivision === 3) label = 'a';
+            }
+            
+            return (
+              <div
+                key={i}
+                className={cn(
+                  "flex-1 text-center text-sm font-mono",
+                  isMainBeat ? "text-primary font-bold" : "text-muted-foreground",
+                  i === currentStep && "bg-primary/20 rounded"
+                )}
+              >
+                {label}
+              </div>
+            );
+          })}
         </div>
 
         {/* Drum Rows */}
@@ -97,31 +125,67 @@ export const DrumGrid = ({
 
               {/* Step Buttons */}
               <div className="flex relative z-10">
-                {pattern[drumKey]?.map((active, stepIndex) => (
-                  <button
-                    key={stepIndex}
-                    onClick={() => onStepToggle(drumKey, stepIndex)}
-                    className={cn(
-                      "flex-1 h-12 border-r border-border last:border-r-0 transition-all duration-200",
-                      "flex items-center justify-center group-hover:bg-muted/20",
-                      stepIndex === currentStep && "bg-primary/10",
-                      stepIndex % 4 === 0 && "border-r-2 border-primary/30"
-                    )}
-                  >
-                    {active && (
-                      <div
-                        className={cn(
-                          "w-6 h-6 rounded-full bg-gradient-to-br from-primary to-primary/80",
-                          "shadow-lg transition-transform duration-200 hover:scale-110",
-                          "flex items-center justify-center text-xs font-bold text-primary-foreground",
-                          stepIndex === currentStep && active && "animate-bounce"
-                        )}
-                      >
-                        {symbol}
+                {pattern[drumKey]?.slice(0, stepsToShow).map((note, stepIndex) => {
+                  const isActive = note?.active || note === true; // Handle both new and old format
+                  const velocity = note?.velocity || 0.7;
+                  const isOpen = (note as any)?.open;
+                  const noteType = note?.type || 'normal';
+                  const isCurrentStep = stepIndex === currentStep;
+                  const isMainBeat = stepIndex % (stepsToShow / beatsToShow) === 0;
+                  
+                  let noteDisplay = null;
+                  let buttonClass = "flex-1 h-12 border-r border-border last:border-r-0 transition-all duration-200 flex items-center justify-center group-hover:bg-muted/20";
+                  
+                  if (isCurrentStep) {
+                    buttonClass += " bg-primary/10";
+                  }
+                  
+                  if (isMainBeat) {
+                    buttonClass += " border-r-2 border-primary/30";
+                  }
+                  
+                  if (isActive) {
+                    let noteClass = "w-6 h-6 rounded-full shadow-lg transition-transform duration-200 hover:scale-110 flex items-center justify-center text-xs font-bold";
+                    
+                    if (noteType === 'ghost') {
+                      noteClass += " bg-primary/40 text-primary-foreground/70";
+                      noteDisplay = <div className="w-2 h-2 bg-current rounded-full opacity-60" />;
+                    } else if (noteType === 'accent') {
+                      noteClass += " bg-gradient-to-br from-primary to-primary/80 text-primary-foreground";
+                      noteDisplay = <div className="w-4 h-4 bg-current rounded-full font-bold" />;
+                    } else {
+                      noteClass += " bg-gradient-to-br from-primary to-primary/80 text-primary-foreground";
+                      noteDisplay = <div className="w-3 h-3 bg-current rounded-full" />;
+                    }
+                    
+                    // Add open hat indicator
+                    if (isOpen && (drumKey === 'hihat' || drumKey === 'openhat')) {
+                      noteDisplay = (
+                        <div className={`${noteType === 'ghost' ? 'w-2 h-2' : noteType === 'accent' ? 'w-4 h-4' : 'w-3 h-3'} border-2 border-current rounded-full`} />
+                      );
+                    }
+                    
+                    if (isCurrentStep && isActive) {
+                      noteClass += " animate-bounce";
+                    }
+                    
+                    noteDisplay = (
+                      <div className={noteClass}>
+                        {noteDisplay || symbol}
                       </div>
-                    )}
-                  </button>
-                ))}
+                    );
+                  }
+                  
+                  return (
+                    <button
+                      key={stepIndex}
+                      onClick={() => onStepToggle(drumKey, stepIndex)}
+                      className={buttonClass}
+                    >
+                      {noteDisplay}
+                    </button>
+                  );
+                })}
               </div>
             </div>
           </div>
@@ -130,11 +194,11 @@ export const DrumGrid = ({
         {/* Grid Enhancement */}
         <div className="absolute inset-6 pointer-events-none">
           {/* Vertical beat lines */}
-          {Array.from({ length: 4 }, (_, i) => (
+          {Array.from({ length: beatsToShow }, (_, i) => (
             <div
               key={i}
               className="absolute top-0 bottom-0 border-l border-primary/20"
-              style={{ left: `${88 + (i * 25)}%` }}
+              style={{ left: `${88 + (i * (100 - 88 / beatsToShow)) / beatsToShow}%` }}
             />
           ))}
         </div>
