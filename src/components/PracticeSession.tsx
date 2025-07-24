@@ -54,23 +54,23 @@ export const PracticeSession = () => {
     };
   }, []);
 
-  // Load pattern from chords file URL if available
+  // Load pattern from practice data
   useEffect(() => {
-    if (practice?.chords_file_url) {
-      // TODO: Parse the chords file to load the actual pattern
-      // For now, initialize with a basic pattern
-      const hihatPattern = new Array(16).fill(false);
-      hihatPattern[2] = true;  // 0.25s
-      hihatPattern[6] = true;  // 0.73s
-      hihatPattern[10] = true; // 1.22s
-      hihatPattern[14] = true; // 1.7s
-
-      setPattern({
-        kick: new Array(16).fill(false),
-        snare: new Array(16).fill(false),
-        hihat: hihatPattern,
-        openhat: new Array(16).fill(false),
-      });
+    if (practice?.pattern) {
+      try {
+        // Parse the pattern JSON string
+        const parsedPattern = JSON.parse(practice.pattern);
+        setPattern(parsedPattern);
+      } catch (error) {
+        console.error('Error parsing pattern:', error);
+        // Fallback to empty pattern
+        setPattern({
+          kick: new Array(16).fill(false),
+          snare: new Array(16).fill(false),
+          hihat: new Array(16).fill(false),
+          openhat: new Array(16).fill(false),
+        });
+      }
     }
   }, [practice]);
 
