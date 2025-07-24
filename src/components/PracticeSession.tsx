@@ -15,7 +15,7 @@ export const PracticeSession = () => {
   const { practiceId, lessonId } = useParams<{ practiceId: string; lessonId: string }>();
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
-  const [bpm, setBpm] = useState(120);
+  const [bpm, setBpm] = useState(90);
   const [metronomeEnabled, setMetronomeEnabled] = useState(true);
   const [pattern, setPattern] = useState<DrumPattern>(createEmptyPattern(16));
   const [complexity, setComplexity] = useState<PatternComplexity>({
@@ -83,6 +83,20 @@ export const PracticeSession = () => {
           hasOpenHats: false,
           maxSteps: 16
         });
+      }
+    }
+  }, [practice]);
+
+  // Set initial BPM from practice tempo
+  useEffect(() => {
+    if (practice?.tempo) {
+      // Parse tempo from practice - could be "120", "120 BPM", etc.
+      const tempoMatch = practice.tempo.match(/\d+/);
+      if (tempoMatch) {
+        const parsedTempo = parseInt(tempoMatch[0], 10);
+        if (parsedTempo >= 60 && parsedTempo <= 200) {
+          setBpm(parsedTempo);
+        }
       }
     }
   }, [practice]);
