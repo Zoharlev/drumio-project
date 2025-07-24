@@ -36,8 +36,8 @@ export default function Login() {
           description: "You've successfully logged in.",
         });
         
-        // Navigate to home page
-        navigate("/");
+        // Navigate to explore page
+        navigate("/explore");
       }
     } catch (error) {
       toast({
