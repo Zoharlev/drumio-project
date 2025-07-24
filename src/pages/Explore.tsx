@@ -126,7 +126,7 @@ const Explore = () => {
                           <h2 className="text-3xl font-bold text-white mb-2 font-poppins">
                             {lesson.title}
                           </h2>
-                          <p className="text-white/80 text-lg mb-6">
+                          <p className="text-white/80 text-lg mb-6 line-clamp-3">
                             {lesson.description || "No description available"}
                           </p>
                         </div>
