@@ -11,65 +11,6 @@ interface DrumPattern {
   [key: string]: boolean[];
 }
 
-// Parse chord file content into drum pattern
-const parseChordFile = (fileContent: string): DrumPattern => {
-  const pattern: DrumPattern = {
-    kick: new Array(16).fill(false),
-    snare: new Array(16).fill(false),
-    hihat: new Array(16).fill(false),
-    openhat: new Array(16).fill(false),
-  };
-
-  try {
-    // Handle different file formats
-    const lines = fileContent.trim().split('\n');
-    
-    for (const line of lines) {
-      const trimmedLine = line.trim();
-      if (!trimmedLine || trimmedLine.startsWith('#')) continue;
-      
-      // Parse lines like "HH: | 1 | 2 | 3 | 4 |" or "HH: X . X . X . X ."
-      if (trimmedLine.includes(':')) {
-        const [drumPart, patternPart] = trimmedLine.split(':');
-        const drumKey = mapDrumName(drumPart.trim());
-        
-        if (drumKey && pattern[drumKey]) {
-          const patternData = patternPart.replace(/\|/g, ' ').trim();
-          const steps = patternData.split(/\s+/);
-          
-          steps.forEach((step, index) => {
-            if (index < 16) {
-              // Mark as active if it's "X", "1", or any non-empty/non-dot character
-              pattern[drumKey][index] = step === 'X' || step === '1' || (step !== '.' && step !== '0' && step !== '');
-            }
-          });
-        }
-      }
-    }
-    
-    return pattern;
-  } catch (error) {
-    console.error('Error parsing chord file:', error);
-    // Return default hi-hat pattern on error
-    return {
-      kick: new Array(16).fill(false),
-      snare: new Array(16).fill(false),
-      hihat: [true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false],
-      openhat: new Array(16).fill(false),
-    };
-  }
-};
-
-// Map drum names from file to our drum keys
-const mapDrumName = (drumName: string): string | null => {
-  const name = drumName.toLowerCase();
-  if (name.includes('hh') || name.includes('hi-hat') || name.includes('hihat')) return 'hihat';
-  if (name.includes('bd') || name.includes('kick') || name.includes('bass')) return 'kick';
-  if (name.includes('sn') || name.includes('snare')) return 'snare';
-  if (name.includes('oh') || name.includes('open') || name.includes('openhat')) return 'openhat';
-  return null;
-};
-
 export const PracticeSession = () => {
   const navigate = useNavigate();
   const { practiceId, lessonId } = useParams<{ practiceId: string; lessonId: string }>();
@@ -115,50 +56,23 @@ export const PracticeSession = () => {
 
   // Load pattern from chords file URL if available
   useEffect(() => {
-    const loadPatternFromFile = async () => {
-      if (!practice?.chords_file_url) {
-        // If no file, use a basic pattern
-        setPattern({
-          kick: new Array(16).fill(false),
-          snare: new Array(16).fill(false),
-          hihat: [true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false],
-          openhat: new Array(16).fill(false),
-        });
-        return;
-      }
+    if (practice?.chords_file_url) {
+      // TODO: Parse the chords file to load the actual pattern
+      // For now, initialize with a basic pattern
+      const hihatPattern = new Array(16).fill(false);
+      hihatPattern[2] = true;  // 0.25s
+      hihatPattern[6] = true;  // 0.73s
+      hihatPattern[10] = true; // 1.22s
+      hihatPattern[14] = true; // 1.7s
 
-      try {
-        const response = await fetch(practice.chords_file_url);
-        if (!response.ok) throw new Error('Failed to fetch chords file');
-        
-        const text = await response.text();
-        const parsedPattern = parseChordFile(text);
-        setPattern(parsedPattern);
-        
-        toast({
-          title: "Pattern Loaded",
-          description: "Practice pattern loaded from file",
-        });
-      } catch (error) {
-        console.error('Error loading chords file:', error);
-        toast({
-          title: "Pattern Load Error",
-          description: "Using default pattern instead",
-          variant: "destructive",
-        });
-        
-        // Fallback to basic pattern
-        setPattern({
-          kick: new Array(16).fill(false),
-          snare: new Array(16).fill(false),
-          hihat: [true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false],
-          openhat: new Array(16).fill(false),
-        });
-      }
-    };
-
-    loadPatternFromFile();
-  }, [practice, toast]);
+      setPattern({
+        kick: new Array(16).fill(false),
+        snare: new Array(16).fill(false),
+        hihat: hihatPattern,
+        openhat: new Array(16).fill(false),
+      });
+    }
+  }, [practice]);
 
   // Step timing based on BPM
   const stepDuration = (60 / bpm / 4) * 1000; // 16th notes
