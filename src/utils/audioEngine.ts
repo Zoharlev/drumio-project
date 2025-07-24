@@ -114,77 +114,137 @@ export class AudioEngine {
   }
 
   private playKick(velocity: number) {
-    // Main component
+    const currentTime = this.context.currentTime;
+    
+    // Main low-frequency body
     const kickOsc = this.context.createOscillator();
     const kickGain = this.context.createGain();
     const kickFilter = this.context.createBiquadFilter();
+    const kickCompressor = this.context.createDynamicsCompressor();
     
-    kickOsc.frequency.setValueAtTime(65, this.context.currentTime);
-    kickOsc.frequency.exponentialRampToValueAtTime(30, this.context.currentTime + 0.08);
+    kickOsc.frequency.setValueAtTime(80, currentTime);
+    kickOsc.frequency.exponentialRampToValueAtTime(35, currentTime + 0.1);
+    kickOsc.frequency.exponentialRampToValueAtTime(25, currentTime + 0.3);
     kickOsc.type = 'sine';
     
     kickFilter.type = 'lowpass';
-    kickFilter.frequency.setValueAtTime(120, this.context.currentTime);
-    kickFilter.Q.setValueAtTime(1, this.context.currentTime);
+    kickFilter.frequency.setValueAtTime(150, currentTime);
+    kickFilter.frequency.exponentialRampToValueAtTime(80, currentTime + 0.2);
+    kickFilter.Q.setValueAtTime(2, currentTime);
+    
+    // Enhanced compression for punch
+    kickCompressor.threshold.setValueAtTime(-12, currentTime);
+    kickCompressor.ratio.setValueAtTime(8, currentTime);
+    kickCompressor.attack.setValueAtTime(0.001, currentTime);
+    kickCompressor.release.setValueAtTime(0.1, currentTime);
     
     kickOsc.connect(kickFilter);
-    kickFilter.connect(kickGain);
+    kickFilter.connect(kickCompressor);
+    kickCompressor.connect(kickGain);
     
-    // Click component
+    // Enhanced transient click
     const clickOsc = this.context.createOscillator();
     const clickGain = this.context.createGain();
     const clickFilter = this.context.createBiquadFilter();
     
-    clickOsc.frequency.setValueAtTime(1200, this.context.currentTime);
-    clickOsc.frequency.exponentialRampToValueAtTime(80, this.context.currentTime + 0.005);
-    clickOsc.type = 'triangle';
+    clickOsc.frequency.setValueAtTime(2000, currentTime);
+    clickOsc.frequency.exponentialRampToValueAtTime(200, currentTime + 0.008);
+    clickOsc.type = 'sawtooth';
     
-    clickFilter.type = 'highpass';
-    clickFilter.frequency.setValueAtTime(400, this.context.currentTime);
-    clickFilter.Q.setValueAtTime(0.5, this.context.currentTime);
+    clickFilter.type = 'bandpass';
+    clickFilter.frequency.setValueAtTime(800, currentTime);
+    clickFilter.Q.setValueAtTime(3, currentTime);
     
     clickOsc.connect(clickFilter);
     clickFilter.connect(clickGain);
     
-    // Sub component
+    // Deep sub bass
     const subOsc = this.context.createOscillator();
     const subGain = this.context.createGain();
+    const subFilter = this.context.createBiquadFilter();
     
-    subOsc.frequency.setValueAtTime(45, this.context.currentTime);
-    subOsc.frequency.exponentialRampToValueAtTime(25, this.context.currentTime + 0.1);
+    subOsc.frequency.setValueAtTime(50, currentTime);
+    subOsc.frequency.exponentialRampToValueAtTime(20, currentTime + 0.15);
     subOsc.type = 'sine';
-    subOsc.connect(subGain);
     
-    // Mix all
+    subFilter.type = 'lowpass';
+    subFilter.frequency.setValueAtTime(60, currentTime);
+    subFilter.Q.setValueAtTime(1.5, currentTime);
+    
+    subOsc.connect(subFilter);
+    subFilter.connect(subGain);
+    
+    // Noise burst for texture
+    const noiseBuffer = this.context.createBuffer(1, this.context.sampleRate * 0.05, this.context.sampleRate);
+    const noiseData = noiseBuffer.getChannelData(0);
+    for (let i = 0; i < noiseData.length; i++) {
+      noiseData[i] = (Math.random() * 2 - 1) * 0.5;
+    }
+    
+    const noiseSource = this.context.createBufferSource();
+    const noiseGain = this.context.createGain();
+    const noiseFilter = this.context.createBiquadFilter();
+    
+    noiseSource.buffer = noiseBuffer;
+    noiseFilter.type = 'bandpass';
+    noiseFilter.frequency.setValueAtTime(300, currentTime);
+    noiseFilter.Q.setValueAtTime(2, currentTime);
+    
+    noiseSource.connect(noiseFilter);
+    noiseFilter.connect(noiseGain);
+    
+    // Master mix with saturation
     const mixGain = this.context.createGain();
+    const waveshaper = this.context.createWaveShaper();
+    
+    // Subtle distortion for warmth
+    const curve = new Float32Array(256);
+    for (let i = 0; i < 256; i++) {
+      const x = (i - 128) / 128;
+      curve[i] = Math.tanh(x * 0.8) * 0.9;
+    }
+    waveshaper.curve = curve;
+    
     kickGain.connect(mixGain);
     clickGain.connect(mixGain);
     subGain.connect(mixGain);
-    mixGain.connect(this.context.destination);
+    noiseGain.connect(mixGain);
+    mixGain.connect(waveshaper);
+    waveshaper.connect(this.context.destination);
     
-    const duration = 0.4;
+    const duration = 0.5;
+    const velocityMultiplier = Math.pow(velocity, 0.8);
     
-    // Apply velocity to all components
-    kickGain.gain.setValueAtTime(0, this.context.currentTime);
-    kickGain.gain.linearRampToValueAtTime(1.2 * velocity, this.context.currentTime + 0.003);
-    kickGain.gain.exponentialRampToValueAtTime(0.001, this.context.currentTime + duration);
+    // More dynamic envelope shaping
+    kickGain.gain.setValueAtTime(0, currentTime);
+    kickGain.gain.linearRampToValueAtTime(1.8 * velocityMultiplier, currentTime + 0.005);
+    kickGain.gain.exponentialRampToValueAtTime(0.3 * velocityMultiplier, currentTime + 0.08);
+    kickGain.gain.exponentialRampToValueAtTime(0.001, currentTime + duration);
     
-    clickGain.gain.setValueAtTime(0, this.context.currentTime);
-    clickGain.gain.linearRampToValueAtTime(0.8 * velocity, this.context.currentTime + 0.001);
-    clickGain.gain.exponentialRampToValueAtTime(0.001, this.context.currentTime + 0.01);
+    clickGain.gain.setValueAtTime(0, currentTime);
+    clickGain.gain.linearRampToValueAtTime(1.2 * velocityMultiplier, currentTime + 0.001);
+    clickGain.gain.exponentialRampToValueAtTime(0.001, currentTime + 0.015);
     
-    subGain.gain.setValueAtTime(0, this.context.currentTime);
-    subGain.gain.linearRampToValueAtTime(0.6 * velocity, this.context.currentTime + 0.005);
-    subGain.gain.exponentialRampToValueAtTime(0.001, this.context.currentTime + duration * 0.8);
+    subGain.gain.setValueAtTime(0, currentTime);
+    subGain.gain.linearRampToValueAtTime(0.9 * velocityMultiplier, currentTime + 0.008);
+    subGain.gain.exponentialRampToValueAtTime(0.2 * velocityMultiplier, currentTime + 0.1);
+    subGain.gain.exponentialRampToValueAtTime(0.001, currentTime + duration * 0.9);
     
-    mixGain.gain.setValueAtTime(1.8 * velocity, this.context.currentTime);
+    noiseGain.gain.setValueAtTime(0, currentTime);
+    noiseGain.gain.linearRampToValueAtTime(0.4 * velocityMultiplier, currentTime + 0.002);
+    noiseGain.gain.exponentialRampToValueAtTime(0.001, currentTime + 0.03);
     
-    kickOsc.start(this.context.currentTime);
-    kickOsc.stop(this.context.currentTime + duration);
-    clickOsc.start(this.context.currentTime);
-    clickOsc.stop(this.context.currentTime + 0.01);
-    subOsc.start(this.context.currentTime);
-    subOsc.stop(this.context.currentTime + duration);
+    mixGain.gain.setValueAtTime(1.5 * velocity, currentTime);
+    
+    // Start all components
+    kickOsc.start(currentTime);
+    kickOsc.stop(currentTime + duration);
+    clickOsc.start(currentTime);
+    clickOsc.stop(currentTime + 0.015);
+    subOsc.start(currentTime);
+    subOsc.stop(currentTime + duration);
+    noiseSource.start(currentTime);
+    noiseSource.stop(currentTime + 0.05);
   }
 
   playMetronome() {
