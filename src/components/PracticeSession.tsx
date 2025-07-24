@@ -182,7 +182,7 @@ export const PracticeSession = () => {
 
         const duration = 0.4;
         gainNode.gain.setValueAtTime(0, context.currentTime);
-        gainNode.gain.linearRampToValueAtTime(0.35, context.currentTime + 0.002);
+        gainNode.gain.linearRampToValueAtTime(0.7, context.currentTime + 0.002);
         gainNode.gain.exponentialRampToValueAtTime(0.001, context.currentTime + duration);
 
         noise.start(context.currentTime);
@@ -199,7 +199,7 @@ export const PracticeSession = () => {
 
         const duration = 0.08;
         gainNode.gain.setValueAtTime(0, context.currentTime);
-        gainNode.gain.linearRampToValueAtTime(0.3, context.currentTime + 0.001);
+        gainNode.gain.linearRampToValueAtTime(0.6, context.currentTime + 0.001);
         gainNode.gain.exponentialRampToValueAtTime(0.001, context.currentTime + duration);
 
         noise.start(context.currentTime);
@@ -250,16 +250,16 @@ export const PracticeSession = () => {
       
       // Envelope for tone component
       toneGain.gain.setValueAtTime(0, context.currentTime);
-      toneGain.gain.linearRampToValueAtTime(0.3, context.currentTime + 0.001);
+      toneGain.gain.linearRampToValueAtTime(0.8, context.currentTime + 0.001);
       toneGain.gain.exponentialRampToValueAtTime(0.001, context.currentTime + duration);
       
       // Envelope for noise component (sharper attack)
       noiseGain.gain.setValueAtTime(0, context.currentTime);
-      noiseGain.gain.linearRampToValueAtTime(0.5, context.currentTime + 0.002);
+      noiseGain.gain.linearRampToValueAtTime(1.2, context.currentTime + 0.002);
       noiseGain.gain.exponentialRampToValueAtTime(0.001, context.currentTime + duration * 0.3);
       
       // Overall mix level
-      mixGain.gain.setValueAtTime(0.6, context.currentTime);
+      mixGain.gain.setValueAtTime(1.5, context.currentTime);
       
       oscillator.start(context.currentTime);
       oscillator.stop(context.currentTime + duration);
@@ -278,7 +278,7 @@ export const PracticeSession = () => {
       gainNode.connect(context.destination);
       
       const duration = 0.3;
-      gainNode.gain.setValueAtTime(0.5, context.currentTime);
+      gainNode.gain.setValueAtTime(1.0, context.currentTime);
       gainNode.gain.exponentialRampToValueAtTime(0.001, context.currentTime + duration);
       
       oscillator.start(context.currentTime);
