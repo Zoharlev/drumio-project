@@ -49,7 +49,7 @@ const Explore = () => {
     const levelMap: { [key: string]: number } = {
       'beginner': 1,
       'intermediate': 3,
-      'advanced': 5,
+      'advanced': 2,
       'professional': 3,
       'professionals': 3
     };
