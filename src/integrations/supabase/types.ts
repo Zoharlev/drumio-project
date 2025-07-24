@@ -71,6 +71,75 @@ export type Database = {
         }
         Relationships: []
       }
+      learning_paths: {
+        Row: {
+          created_at: string
+          description: string | null
+          drum_set: Database["public"]["Enums"]["drum_set_type"]
+          id: number
+          level: Database["public"]["Enums"]["learning_path_level"]
+          path_name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          drum_set: Database["public"]["Enums"]["drum_set_type"]
+          id?: number
+          level: Database["public"]["Enums"]["learning_path_level"]
+          path_name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          drum_set?: Database["public"]["Enums"]["drum_set_type"]
+          id?: number
+          level?: Database["public"]["Enums"]["learning_path_level"]
+          path_name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      learningpath_lessons: {
+        Row: {
+          created_at: string
+          display_order: number
+          id: string
+          learning_path_id: number
+          lesson_id: string
+        }
+        Insert: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          learning_path_id: number
+          lesson_id: string
+        }
+        Update: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          learning_path_id?: number
+          lesson_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "learningpath_lessons_learning_path_id_fkey"
+            columns: ["learning_path_id"]
+            isOneToOne: false
+            referencedRelation: "learning_paths"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "learningpath_lessons_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lesson_practices: {
         Row: {
           created_at: string
@@ -179,6 +248,21 @@ export type Database = {
         }
         Relationships: []
       }
+      practice_tags: {
+        Row: {
+          practice_id: string
+          tag_id: string
+        }
+        Insert: {
+          practice_id: string
+          tag_id: string
+        }
+        Update: {
+          practice_id?: string
+          tag_id?: string
+        }
+        Relationships: []
+      }
       practice_tips: {
         Row: {
           created_at: string
@@ -232,6 +316,7 @@ export type Database = {
           focus: string | null
           id: string
           pattern: string | null
+          practice_note: string | null
           sound_file_url: string | null
           tempo: string | null
           title: string
@@ -246,6 +331,7 @@ export type Database = {
           focus?: string | null
           id?: string
           pattern?: string | null
+          practice_note?: string | null
           sound_file_url?: string | null
           tempo?: string | null
           title: string
@@ -260,6 +346,7 @@ export type Database = {
           focus?: string | null
           id?: string
           pattern?: string | null
+          practice_note?: string | null
           sound_file_url?: string | null
           tempo?: string | null
           title?: string
@@ -552,6 +639,15 @@ export type Database = {
         }
         Returns: Json
       }
+      get_practice_tags: {
+        Args: { practice_id: string }
+        Returns: {
+          tag_id: string
+          tag_name: string
+          tag_type: string
+          tag_color: string
+        }[]
+      }
       get_translation: {
         Args: {
           p_entity_type: string
@@ -563,7 +659,8 @@ export type Database = {
       }
     }
     Enums: {
-      [_ in never]: never
+      drum_set_type: "None" | "Practice pad" | "Drum kit"
+      learning_path_level: "Beginners" | "Advanced" | "Professionals"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -690,6 +787,9 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      drum_set_type: ["None", "Practice pad", "Drum kit"],
+      learning_path_level: ["Beginners", "Advanced", "Professionals"],
+    },
   },
 } as const

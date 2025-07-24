@@ -36,27 +36,30 @@ const PracticeDetails = () => {
     queryFn: async () => {
       if (!practiceId) return [];
       
-      const { data, error } = await supabase
-        .rpc('get_practice_tags', { practice_id: practiceId });
-      
-      if (error) {
-        // Fallback to manual query if RPC doesn't exist
-        const { data: manualData, error: manualError } = await supabase
+      try {
+        // First get the tag IDs for this practice
+        const { data: practiceTagData, error: practiceTagError } = await supabase
+          .from("practice_tags" as any)
+          .select("tag_id")
+          .eq("practice_id", practiceId);
+        
+        if (practiceTagError || !practiceTagData || practiceTagData.length === 0) {
+          return [];
+        }
+        
+        // Then get the tag details
+        const tagIds = practiceTagData.map((pt: any) => pt.tag_id);
+        const { data: tagsData, error: tagsError } = await supabase
           .from("tags")
           .select("*")
-          .in("id", 
-            await supabase
-              .from("practice_tags")
-              .select("tag_id")
-              .eq("practice_id", practiceId)
-              .then(({ data }) => data?.map(pt => pt.tag_id) || [])
-          );
+          .in("id", tagIds);
         
-        if (manualError) throw manualError;
-        return manualData || [];
+        if (tagsError) throw tagsError;
+        return tagsData || [];
+      } catch (error) {
+        console.error("Error fetching practice tags:", error);
+        return [];
       }
-      
-      return data || [];
     },
     enabled: !!practiceId
   });
@@ -147,14 +150,14 @@ const PracticeDetails = () => {
                 </div>
                 <span className="text-white text-sm font-medium capitalize">{lesson.level}</span>
               </div>}
-            {practice.practice_tags?.map((pt: any) => (
+            {practiceTags?.map((tag: any) => (
               <Badge 
-                key={pt.tags.id} 
+                key={tag.id} 
                 variant="outline" 
                 className="border-white/30 text-white/80 bg-white/10"
-                style={{ borderColor: pt.tags.tag_color }}
+                style={{ borderColor: tag.tag_color }}
               >
-                {pt.tags.name}
+                {tag.name}
               </Badge>
             ))}
           </div>
