@@ -55,6 +55,13 @@
     --text-tertiary: 0 0% 48%; /* #7A7A7A - Medium gray */
     --text-muted: 220 13% 69%; /* #9CA3AF - Muted gray */
 
+    /* Drum Grid Specific Colors */
+    --playhead: 244 64% 61%; /* #6764DB - Purple playhead */
+    --note-active: 244 64% 61%; /* #6764DB - Active note */
+    --grid-line: 215 25% 22%; /* #374151 - Grid lines */
+    --shadow-elevated: 0 10px 30px -10px hsl(244 64% 61% / 0.3);
+    --shadow-note: 0 0 15px hsl(244 64% 61% / 0.5);
+
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
     --sidebar-primary: 224.3 76.3% 48%;

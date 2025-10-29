@@ -53,6 +53,8 @@ export class AudioEngine {
       this.playSnare(adjustedVelocity);
     } else if (drum === 'kick') {
       this.playKick(adjustedVelocity);
+    } else if (drum === 'tom') {
+      this.playTom(adjustedVelocity);
     }
   }
 
@@ -289,6 +291,30 @@ export class AudioEngine {
     subOsc.stop(currentTime + duration);
     noiseSource.start(currentTime);
     noiseSource.stop(currentTime + 0.05);
+  }
+
+  private playTom(velocity: number) {
+    const currentTime = this.context.currentTime;
+    
+    // Main tom body
+    const tomOsc = this.context.createOscillator();
+    const tomGain = this.context.createGain();
+    
+    tomOsc.frequency.setValueAtTime(150, currentTime);
+    tomOsc.frequency.exponentialRampToValueAtTime(80, currentTime + 0.2);
+    tomOsc.type = 'sine';
+    
+    tomOsc.connect(tomGain);
+    tomGain.connect(this.context.destination);
+    
+    const duration = 0.3;
+    
+    tomGain.gain.setValueAtTime(0, currentTime);
+    tomGain.gain.linearRampToValueAtTime(1.2 * velocity, currentTime + 0.005);
+    tomGain.gain.exponentialRampToValueAtTime(0.001, currentTime + duration);
+    
+    tomOsc.start(currentTime);
+    tomOsc.stop(currentTime + duration);
   }
 
   playMetronome() {

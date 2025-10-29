@@ -415,6 +415,8 @@ export const PracticeSession = () => {
             onClearPattern={clearPattern}
             metronomeEnabled={metronomeEnabled}
             onMetronomeToggle={() => setMetronomeEnabled(!metronomeEnabled)}
+            onTogglePlay={togglePlay}
+            isPlaying={isPlaying}
             complexity={complexity}
           />
         </div>

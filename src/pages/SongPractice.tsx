@@ -269,6 +269,8 @@ const SongPractice = () => {
           onClearPattern={handleClearPattern}
           onMetronomeToggle={() => setMetronomeEnabled(!metronomeEnabled)}
           metronomeEnabled={metronomeEnabled}
+          onTogglePlay={togglePlayback}
+          isPlaying={isPlaying}
           complexity={complexity}
         />
       </div>
