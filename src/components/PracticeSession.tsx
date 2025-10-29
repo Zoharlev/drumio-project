@@ -8,6 +8,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { DrumPattern, PatternComplexity, createEmptyPattern } from "@/types/drumPatterns";
 import { parsePatternFromNotes } from "@/utils/patternParser";
+import { parseCSVNotation } from "@/utils/csvParser";
 import { AudioEngine } from "@/utils/audioEngine";
 
 export const PracticeSession = () => {
@@ -47,6 +48,35 @@ export const PracticeSession = () => {
     }
   });
 
+  // Fetch song data with practice relationships
+  const { data: songData } = useQuery({
+    queryKey: ["practice-song", practiceId],
+    queryFn: async () => {
+      // First get the song_id from song_practices
+      const { data: practiceData, error: practiceError } = await supabase
+        .from("song_practices")
+        .select("song_id")
+        .eq("practice_id", practiceId)
+        .maybeSingle();
+      
+      if (practiceError || !practiceData) {
+        console.log('No song linked to this practice');
+        return null;
+      }
+
+      // Then get the song data
+      const { data: song, error: songError } = await supabase
+        .from("songs")
+        .select("*")
+        .eq("id", practiceData.song_id)
+        .maybeSingle();
+      
+      if (songError) throw songError;
+      return song;
+    },
+    enabled: !!practiceId
+  });
+
   // Initialize audio engine
   useEffect(() => {
     audioEngineRef.current = new AudioEngine();
@@ -55,42 +85,101 @@ export const PracticeSession = () => {
     };
   }, []);
 
-  // Load pattern from practice notes field
+  // Load pattern from CSV notation file or practice notes
   useEffect(() => {
-    if ((practice as any)?.practice_note) {
-      try {
-        const { pattern: parsedPattern, complexity: parsedComplexity } = parsePatternFromNotes((practice as any).practice_note);
-        setPattern(parsedPattern);
-        setComplexity(parsedComplexity);
-      } catch (error) {
-        console.error('Error parsing practice notes:', error);
-        // Fallback to basic pattern
-        const fallbackPattern = createEmptyPattern(16);
-        fallbackPattern.kick[0] = { active: true, velocity: 0.7, type: 'normal' };
-        fallbackPattern.kick[8] = { active: true, velocity: 0.7, type: 'normal' };
-        fallbackPattern.snare[4] = { active: true, velocity: 0.7, type: 'normal' };
-        fallbackPattern.snare[12] = { active: true, velocity: 0.7, type: 'normal' };
-        fallbackPattern.hihat[0] = { active: true, velocity: 0.7, type: 'normal', open: false };
-        fallbackPattern.hihat[4] = { active: true, velocity: 0.7, type: 'normal', open: false };
-        fallbackPattern.hihat[8] = { active: true, velocity: 0.7, type: 'normal', open: false };
-        fallbackPattern.hihat[12] = { active: true, velocity: 0.7, type: 'normal', open: false };
-        
-        setPattern(fallbackPattern);
-        setComplexity({
-          hasEighthNotes: true,
-          hasSixteenthNotes: false,
-          hasVelocityVariation: false,
-          hasOpenHats: false,
-          maxSteps: 16
-        });
+    const loadPattern = async () => {
+      // Priority 1: Load from song's notation_file_url if available
+      if (songData?.notation_file_url) {
+        try {
+          const { pattern: parsedPattern, complexity: parsedComplexity, bpm: csvBpm } = await parseCSVNotation(songData.notation_file_url);
+          setPattern(parsedPattern);
+          setComplexity(parsedComplexity);
+          if (csvBpm) {
+            setBpm(csvBpm);
+          }
+          toast({
+            title: "Pattern loaded",
+            description: "Drum notation loaded from CSV file",
+          });
+          return;
+        } catch (error) {
+          console.error('Error loading CSV notation:', error);
+          toast({
+            title: "CSV load failed",
+            description: "Falling back to text notation",
+            variant: "destructive",
+          });
+        }
       }
-    }
-  }, [practice]);
 
-  // Set initial BPM from practice tempo
+      // Priority 2: Parse from practice_note field
+      if ((practice as any)?.practice_note) {
+        try {
+          const { pattern: parsedPattern, complexity: parsedComplexity } = parsePatternFromNotes((practice as any).practice_note);
+          setPattern(parsedPattern);
+          setComplexity(parsedComplexity);
+        } catch (error) {
+          console.error('Error parsing practice notes:', error);
+          // Fallback to basic pattern
+          const fallbackPattern = createEmptyPattern(16);
+          fallbackPattern.kick[0] = { active: true, velocity: 0.7, type: 'normal' };
+          fallbackPattern.kick[8] = { active: true, velocity: 0.7, type: 'normal' };
+          fallbackPattern.snare[4] = { active: true, velocity: 0.7, type: 'normal' };
+          fallbackPattern.snare[12] = { active: true, velocity: 0.7, type: 'normal' };
+          fallbackPattern.hihat[0] = { active: true, velocity: 0.7, type: 'normal', open: false };
+          fallbackPattern.hihat[4] = { active: true, velocity: 0.7, type: 'normal', open: false };
+          fallbackPattern.hihat[8] = { active: true, velocity: 0.7, type: 'normal', open: false };
+          fallbackPattern.hihat[12] = { active: true, velocity: 0.7, type: 'normal', open: false };
+          
+          setPattern(fallbackPattern);
+          setComplexity({
+            hasEighthNotes: true,
+            hasSixteenthNotes: false,
+            hasVelocityVariation: false,
+            hasOpenHats: false,
+            maxSteps: 16
+          });
+        }
+      }
+    };
+
+    loadPattern();
+  }, [practice, songData, toast]);
+
+  // Load audio file from song data
   useEffect(() => {
+    const loadAudio = async () => {
+      if (songData?.audio_file_url && audioEngineRef.current) {
+        try {
+          await audioEngineRef.current.loadAudioFile(songData.audio_file_url);
+          toast({
+            title: "Audio loaded",
+            description: "Song audio file loaded successfully",
+          });
+        } catch (error) {
+          console.error('Error loading audio file:', error);
+          toast({
+            title: "Audio load failed",
+            description: "Using synthesized drum sounds",
+            variant: "destructive",
+          });
+        }
+      }
+    };
+
+    loadAudio();
+  }, [songData, toast]);
+
+  // Set initial BPM from song or practice tempo
+  useEffect(() => {
+    // Priority 1: BPM from song data
+    if (songData?.bpm) {
+      setBpm(songData.bpm);
+      return;
+    }
+
+    // Priority 2: Parse tempo from practice
     if (practice?.tempo) {
-      // Parse tempo from practice - could be "120", "120 BPM", etc.
       const tempoMatch = practice.tempo.match(/\d+/);
       if (tempoMatch) {
         const parsedTempo = parseInt(tempoMatch[0], 10);
@@ -99,7 +188,7 @@ export const PracticeSession = () => {
         }
       }
     }
-  }, [practice]);
+  }, [practice, songData]);
 
   // Step timing based on BPM and complexity
   const stepDuration = (60 / bpm / (complexity.maxSteps / 4)) * 1000;

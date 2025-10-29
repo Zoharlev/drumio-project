@@ -1,8 +1,31 @@
 export class AudioEngine {
   private context: AudioContext;
+  private audioBuffers: Map<string, AudioBuffer> = new Map();
+  private loadedAudioUrl: string | null = null;
 
   constructor() {
     this.context = new (window.AudioContext || (window as any).webkitAudioContext)();
+  }
+
+  async loadAudioFile(url: string) {
+    if (this.loadedAudioUrl === url && this.audioBuffers.size > 0) {
+      return; // Already loaded
+    }
+
+    try {
+      const response = await fetch(url);
+      const arrayBuffer = await response.arrayBuffer();
+      const audioBuffer = await this.context.decodeAudioData(arrayBuffer);
+      
+      // Store the full audio buffer (could be used for backing track)
+      this.audioBuffers.set('full', audioBuffer);
+      this.loadedAudioUrl = url;
+      
+      console.log('Audio file loaded successfully');
+    } catch (error) {
+      console.error('Error loading audio file:', error);
+      // Fallback to synthesized sounds if loading fails
+    }
   }
 
   async resumeContext() {
@@ -16,6 +39,14 @@ export class AudioEngine {
 
     const adjustedVelocity = Math.max(0.1, Math.min(1.0, velocity));
 
+    // Check if we have loaded audio samples for specific drums
+    const drumBuffer = this.audioBuffers.get(drum);
+    if (drumBuffer) {
+      this.playBufferSound(drumBuffer, adjustedVelocity);
+      return;
+    }
+
+    // Fallback to synthesized sounds
     if (drum === 'hihat' || drum === 'openhat') {
       this.playHiHat(adjustedVelocity, isOpen || drum === 'openhat');
     } else if (drum === 'snare') {
@@ -23,6 +54,19 @@ export class AudioEngine {
     } else if (drum === 'kick') {
       this.playKick(adjustedVelocity);
     }
+  }
+
+  private playBufferSound(buffer: AudioBuffer, velocity: number) {
+    const source = this.context.createBufferSource();
+    const gainNode = this.context.createGain();
+    
+    source.buffer = buffer;
+    source.connect(gainNode);
+    gainNode.connect(this.context.destination);
+    
+    gainNode.gain.setValueAtTime(velocity, this.context.currentTime);
+    
+    source.start(this.context.currentTime);
   }
 
   private playHiHat(velocity: number, isOpen: boolean) {
