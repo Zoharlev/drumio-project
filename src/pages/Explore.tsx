@@ -34,7 +34,7 @@ const Explore = () => {
   });
   const categories = [{
     id: "lessons",
-    label: "Lessons"
+    label: "Songs"
   }, {
     id: "songs",
     label: "Songs"
