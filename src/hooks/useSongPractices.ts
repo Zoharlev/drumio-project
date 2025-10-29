@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
-export interface LessonWithPractices {
-  lesson: {
+export interface SongWithPractices {
+  song: {
     id: string;
     title: string;
     description: string | null;
@@ -22,15 +22,15 @@ export interface LessonWithPractices {
   }>;
 }
 
-export const useLessonPractices = (lessonId: string) => {
+export const useSongPractices = (songId: string) => {
   return useQuery({
-    queryKey: ["lesson-practices", lessonId],
-    queryFn: async (): Promise<LessonWithPractices | null> => {
-      if (!lessonId) return null;
+    queryKey: ["song-practices", songId],
+    queryFn: async (): Promise<SongWithPractices | null> => {
+      if (!songId) return null;
 
-      // First fetch the lesson
-      const { data: lesson, error: lessonError } = await supabase
-        .from("lessons")
+      // First fetch the song
+      const { data: song, error: songError } = await supabase
+        .from("songs")
         .select(`
           id,
           title,
@@ -39,15 +39,15 @@ export const useLessonPractices = (lessonId: string) => {
           background_image_url,
           category
         `)
-        .eq("id", lessonId)
+        .eq("id", songId)
         .single();
 
-      if (lessonError) throw lessonError;
-      if (!lesson) return null;
+      if (songError) throw songError;
+      if (!song) return null;
 
-      // Then fetch the practices for this lesson, ordered by display_order
-      const { data: lessonPractices, error: practicesError } = await supabase
-        .from("lesson_practices")
+      // Then fetch the practices for this song, ordered by display_order
+      const { data: songPractices, error: practicesError } = await supabase
+        .from("song_practices")
         .select(`
           display_order,
           practices (
@@ -60,21 +60,21 @@ export const useLessonPractices = (lessonId: string) => {
             )
           )
         `)
-        .eq("lesson_id", lessonId)
+        .eq("song_id", songId)
         .order("display_order", { ascending: true });
 
       if (practicesError) throw practicesError;
 
-      const practices = (lessonPractices || []).map((lp: any) => ({
-        ...lp.practices,
-        display_order: lp.display_order,
+      const practices = (songPractices || []).map((sp: any) => ({
+        ...sp.practices,
+        display_order: sp.display_order,
       }));
 
       return {
-        lesson,
+        song,
         practices,
       };
     },
-    enabled: !!lessonId,
+    enabled: !!songId,
   });
 };

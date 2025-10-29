@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { useLessonPractices } from "@/hooks/useLessonPractices";
+import { useSongPractices } from "@/hooks/useSongPractices";
 const LessonPractices = () => {
   const navigate = useNavigate();
   const {
@@ -14,7 +14,7 @@ const LessonPractices = () => {
   const {
     data,
     isLoading
-  } = useLessonPractices(lessonId || "");
+  } = useSongPractices(lessonId || "");
   const getLevelStars = (level: string) => {
     const levelMap: {
       [key: string]: number;
@@ -53,7 +53,7 @@ const LessonPractices = () => {
           <ArrowLeft className="h-5 w-5" />
         </Button>
         <h1 className="text-2xl font-bold text-foreground font-poppins">
-          {data.lesson.title}
+          {data.song.title}
         </h1>
       </div>
 
@@ -74,7 +74,7 @@ const LessonPractices = () => {
               rgba(0, 0, 0, 0.6) 0%, 
               rgba(0, 0, 0, 0.8) 35%, 
               #1F2937 35%), 
-              url(${data.lesson.background_image_url || '/lovable-uploads/ced3ac1d-0317-4c8a-9be2-23b8f68dac90.png'}) top/cover no-repeat`,
+              url(${data.song.background_image_url || '/lovable-uploads/ced3ac1d-0317-4c8a-9be2-23b8f68dac90.png'}) top/cover no-repeat`,
             backgroundColor: '#1F2937'
           }}>
                   <CardContent className="absolute inset-0 p-6 flex flex-col">
@@ -103,7 +103,7 @@ const LessonPractices = () => {
                       <div className="flex items-center gap-2 bg-black/40 rounded-full px-4 py-2">
                         <span className="text-yellow-400 text-sm">★</span>
                         <span className="text-white text-sm font-medium capitalize">
-                          {data.lesson.level}
+                          {data.song.level}
                         </span>
                       </div>
 

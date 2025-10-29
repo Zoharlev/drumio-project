@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { useLessons } from "@/hooks/useLessons";
+import { useSongs } from "@/hooks/useSongs";
 import { useNavigate } from "react-router-dom";
 const Explore = () => {
   const [activeCategory, setActiveCategory] = useState("lessons");
@@ -13,22 +13,22 @@ const Explore = () => {
   const [showSearch, setShowSearch] = useState(false);
   const navigate = useNavigate();
   
-  const { data: allLessons = [], isLoading } = useLessons(activeCategory === "lessons" ? undefined : activeCategory);
+  const { data: allSongs = [], isLoading } = useSongs(activeCategory === "lessons" ? undefined : activeCategory);
   
-  // Filter lessons based on search term
-  const lessons = allLessons.filter(lesson => {
+  // Filter songs based on search term
+  const songs = allSongs.filter(song => {
     if (!searchTerm) return true;
     
     const searchLower = searchTerm.toLowerCase();
     
-    // Search in lesson title
-    if (lesson.title.toLowerCase().includes(searchLower)) return true;
+    // Search in song title
+    if (song.title.toLowerCase().includes(searchLower)) return true;
     
-    // Search in lesson level
-    if (lesson.level.toLowerCase().includes(searchLower)) return true;
+    // Search in song level
+    if (song.level.toLowerCase().includes(searchLower)) return true;
     
     // Search in tags
-    if (lesson.tags?.some(tag => tag.name.toLowerCase().includes(searchLower))) return true;
+    if (song.tags?.some(tag => tag.name.toLowerCase().includes(searchLower))) return true;
     
     return false;
   });
@@ -107,29 +107,29 @@ const Explore = () => {
             <div className="space-y-4">
               {isLoading ? (
                 <div className="text-center py-8">
-                  <p className="text-muted-foreground">Loading lessons...</p>
+                  <p className="text-muted-foreground">Loading songs...</p>
                 </div>
-              ) : lessons.length === 0 ? (
+              ) : songs.length === 0 ? (
                 <div className="text-center py-8">
-                  <p className="text-muted-foreground">No lessons found for this category.</p>
+                  <p className="text-muted-foreground">No songs found for this category.</p>
                 </div>
               ) : (
-                lessons.map((lesson) => (
-                  <Card key={lesson.id} className="relative overflow-hidden border-none bg-card">
+                songs.map((song) => (
+                  <Card key={song.id} className="relative overflow-hidden border-none bg-card">
                     <div 
                       className="relative h-80 bg-cover bg-center bg-no-repeat" 
                       style={{
-                        backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6)), url(${lesson.background_image_url || '/lovable-uploads/ced3ac1d-0317-4c8a-9be2-23b8f68dac90.png'})`
+                        backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6)), url(${song.background_image_url || '/lovable-uploads/ced3ac1d-0317-4c8a-9be2-23b8f68dac90.png'})`
                       }}
                     >
                       <CardContent className="absolute inset-0 p-6 flex flex-col justify-between">
                         {/* Content */}
                         <div className="flex-1 flex flex-col justify-center">
                           <h2 className="text-3xl font-bold text-white mb-2 font-poppins">
-                            {lesson.title}
+                            {song.title}
                           </h2>
                           <p className="text-white/80 text-lg mb-6 line-clamp-3">
-                            {lesson.description || "No description available"}
+                            {song.description || "No description available"}
                           </p>
                         </div>
 
@@ -140,14 +140,14 @@ const Explore = () => {
                             {/* Level indicator */}
                             <div className="flex items-center gap-2 bg-black/40 rounded-lg px-3 py-2">
                               <div className="flex items-center">
-                                {renderStars(getLevelStars(lesson.level))}
+                                {renderStars(getLevelStars(song.level))}
                               </div>
-                              <span className="text-white text-sm font-medium capitalize">{lesson.level === 'advanced' ? 'Intermediate' : lesson.level}</span>
+                              <span className="text-white text-sm font-medium capitalize">{song.level === 'advanced' ? 'Intermediate' : song.level}</span>
                             </div>
 
                             {/* Tags */}
                             <div className="flex gap-2">
-                              {lesson.tags.map((tag) => (
+                              {song.tags.map((tag) => (
                                 <Badge 
                                   key={tag.id} 
                                   variant="secondary" 
@@ -162,7 +162,7 @@ const Explore = () => {
 
                           {/* Start Practice Button */}
                           <Button 
-                            onClick={() => handleStartPractice(lesson.id)}
+                            onClick={() => handleStartPractice(song.id)}
                             className="w-fit bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-8 py-3 rounded-full"
                           >
                             Start Practice

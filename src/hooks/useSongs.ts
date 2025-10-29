@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
-export interface LessonWithTags {
+export interface SongWithTags {
   id: string;
   title: string;
   description: string | null;
@@ -16,12 +16,12 @@ export interface LessonWithTags {
   }>;
 }
 
-export const useLessons = (category?: string) => {
+export const useSongs = (category?: string) => {
   return useQuery({
-    queryKey: ["lessons", category],
-    queryFn: async (): Promise<LessonWithTags[]> => {
+    queryKey: ["songs", category],
+    queryFn: async (): Promise<SongWithTags[]> => {
       let query = supabase
-        .from("lessons")
+        .from("songs")
         .select(`
           id,
           title,
@@ -29,7 +29,7 @@ export const useLessons = (category?: string) => {
           level,
           background_image_url,
           category,
-          lesson_tags (
+          song_tags (
             tags (
               id,
               name,
@@ -47,9 +47,9 @@ export const useLessons = (category?: string) => {
 
       if (error) throw error;
 
-      return (data || []).map((lesson) => ({
-        ...lesson,
-        tags: lesson.lesson_tags?.map((lt: any) => lt.tags).filter(Boolean) || [],
+      return (data || []).map((song) => ({
+        ...song,
+        tags: song.song_tags?.map((st: any) => st.tags).filter(Boolean) || [],
       }));
     },
   });

@@ -64,14 +64,14 @@ const PracticeDetails = () => {
     enabled: !!practiceId
   });
   const {
-    data: lesson
+    data: song
   } = useQuery({
-    queryKey: ["lesson", lessonId],
+    queryKey: ["song", lessonId],
     queryFn: async () => {
       const {
         data,
         error
-      } = await supabase.from("lessons").select("*").eq("id", lessonId).maybeSingle();
+      } = await supabase.from("songs").select("*").eq("id", lessonId).maybeSingle();
       if (error) throw error;
       return data;
     }
@@ -112,7 +112,7 @@ const PracticeDetails = () => {
   const practiceSkills = ["Ghost Notes", "Accents", "Swells", "Level Matching"];
   return <div className="min-h-screen relative overflow-hidden" style={{
     background: `linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.98) 100%), 
-                     url(${lesson?.background_image_url || '/lovable-uploads/ced3ac1d-0317-4c8a-9be2-23b8f68dac90.png'})`,
+                     url(${song?.background_image_url || '/lovable-uploads/ced3ac1d-0317-4c8a-9be2-23b8f68dac90.png'})`,
     backgroundSize: 'cover',
     backgroundPosition: 'center',
     backgroundAttachment: 'fixed'
@@ -144,11 +144,11 @@ const PracticeDetails = () => {
           
           {/* Level and Tags */}
           <div className="flex items-center justify-center gap-3 mt-4">
-            {lesson && <div className="flex items-center gap-2 bg-black/40 rounded-lg px-3 py-2">
+            {song && <div className="flex items-center gap-2 bg-black/40 rounded-lg px-3 py-2">
                 <div className="flex items-center">
-                  {renderStars(getLevelStars(lesson.level))}
+                  {renderStars(getLevelStars(song.level))}
                 </div>
-                <span className="text-white text-sm font-medium capitalize">{lesson.level}</span>
+                <span className="text-white text-sm font-medium capitalize">{song.level}</span>
               </div>}
             {practiceTags?.map((tag: any) => (
               <Badge 

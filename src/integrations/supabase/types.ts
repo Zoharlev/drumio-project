@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.3 (519615d)"
@@ -98,153 +98,6 @@ export type Database = {
           level?: Database["public"]["Enums"]["learning_path_level"]
           path_name?: string
           updated_at?: string
-        }
-        Relationships: []
-      }
-      learningpath_lessons: {
-        Row: {
-          created_at: string
-          display_order: number
-          id: string
-          learning_path_id: number
-          lesson_id: string
-        }
-        Insert: {
-          created_at?: string
-          display_order?: number
-          id?: string
-          learning_path_id: number
-          lesson_id: string
-        }
-        Update: {
-          created_at?: string
-          display_order?: number
-          id?: string
-          learning_path_id?: number
-          lesson_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "learningpath_lessons_learning_path_id_fkey"
-            columns: ["learning_path_id"]
-            isOneToOne: false
-            referencedRelation: "learning_paths"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "learningpath_lessons_lesson_id_fkey"
-            columns: ["lesson_id"]
-            isOneToOne: false
-            referencedRelation: "lessons"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      lesson_practices: {
-        Row: {
-          created_at: string
-          display_order: number
-          id: string
-          lesson_id: string
-          practice_id: string
-        }
-        Insert: {
-          created_at?: string
-          display_order?: number
-          id?: string
-          lesson_id: string
-          practice_id: string
-        }
-        Update: {
-          created_at?: string
-          display_order?: number
-          id?: string
-          lesson_id?: string
-          practice_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "lesson_practices_lesson_id_fkey"
-            columns: ["lesson_id"]
-            isOneToOne: false
-            referencedRelation: "lessons"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "lesson_practices_practice_id_fkey"
-            columns: ["practice_id"]
-            isOneToOne: false
-            referencedRelation: "practices"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      lesson_tags: {
-        Row: {
-          lesson_id: string
-          tag_id: string
-        }
-        Insert: {
-          lesson_id: string
-          tag_id: string
-        }
-        Update: {
-          lesson_id?: string
-          tag_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "lesson_tags_lesson_id_fkey"
-            columns: ["lesson_id"]
-            isOneToOne: false
-            referencedRelation: "lessons"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "lesson_tags_tag_id_fkey"
-            columns: ["tag_id"]
-            isOneToOne: false
-            referencedRelation: "tags"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      lessons: {
-        Row: {
-          background_image_url: string | null
-          category: string | null
-          created_at: string
-          description: string | null
-          id: string
-          level: string
-          notation_svg_url: string | null
-          steps_count: number | null
-          title: string
-          video_url: string | null
-        }
-        Insert: {
-          background_image_url?: string | null
-          category?: string | null
-          created_at?: string
-          description?: string | null
-          id?: string
-          level: string
-          notation_svg_url?: string | null
-          steps_count?: number | null
-          title: string
-          video_url?: string | null
-        }
-        Update: {
-          background_image_url?: string | null
-          category?: string | null
-          created_at?: string
-          description?: string | null
-          id?: string
-          level?: string
-          notation_svg_url?: string | null
-          steps_count?: number | null
-          title?: string
-          video_url?: string | null
         }
         Relationships: []
       }
@@ -364,51 +217,6 @@ export type Database = {
           },
         ]
       }
-      recordings: {
-        Row: {
-          analysis: Json | null
-          created_at: string
-          file_url: string
-          id: string
-          lesson_id: string
-          score: number | null
-          user_id: string
-        }
-        Insert: {
-          analysis?: Json | null
-          created_at?: string
-          file_url: string
-          id?: string
-          lesson_id: string
-          score?: number | null
-          user_id: string
-        }
-        Update: {
-          analysis?: Json | null
-          created_at?: string
-          file_url?: string
-          id?: string
-          lesson_id?: string
-          score?: number | null
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "recordings_lesson_id_fkey"
-            columns: ["lesson_id"]
-            isOneToOne: false
-            referencedRelation: "lessons"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "recordings_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       settings: {
         Row: {
           bluetooth_enabled: boolean | null
@@ -437,6 +245,114 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      song_practices: {
+        Row: {
+          created_at: string
+          display_order: number
+          id: string
+          practice_id: string
+          song_id: string
+        }
+        Insert: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          practice_id: string
+          song_id: string
+        }
+        Update: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          practice_id?: string
+          song_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lesson_practices_lesson_id_fkey"
+            columns: ["song_id"]
+            isOneToOne: false
+            referencedRelation: "songs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lesson_practices_practice_id_fkey"
+            columns: ["practice_id"]
+            isOneToOne: false
+            referencedRelation: "practices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      song_tags: {
+        Row: {
+          song_id: string
+          tag_id: string
+        }
+        Insert: {
+          song_id: string
+          tag_id: string
+        }
+        Update: {
+          song_id?: string
+          tag_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lesson_tags_lesson_id_fkey"
+            columns: ["song_id"]
+            isOneToOne: false
+            referencedRelation: "songs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lesson_tags_tag_id_fkey"
+            columns: ["tag_id"]
+            isOneToOne: false
+            referencedRelation: "tags"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      songs: {
+        Row: {
+          background_image_url: string | null
+          category: string | null
+          created_at: string
+          description: string | null
+          id: string
+          level: string
+          notation_svg_url: string | null
+          steps_count: number | null
+          title: string
+          video_url: string | null
+        }
+        Insert: {
+          background_image_url?: string | null
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          level: string
+          notation_svg_url?: string | null
+          steps_count?: number | null
+          title: string
+          video_url?: string | null
+        }
+        Update: {
+          background_image_url?: string | null
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          level?: string
+          notation_svg_url?: string | null
+          steps_count?: number | null
+          title?: string
+          video_url?: string | null
+        }
+        Relationships: []
       }
       tags: {
         Row: {
@@ -527,13 +443,13 @@ export type Database = {
           },
         ]
       }
-      user_lessons_progress: {
+      user_songs_progress: {
         Row: {
           feedback: Json | null
           id: string
-          lesson_id: string
           liked: boolean | null
           score: number | null
+          song_id: string
           status: string
           updated_at: string
           user_id: string
@@ -541,9 +457,9 @@ export type Database = {
         Insert: {
           feedback?: Json | null
           id?: string
-          lesson_id: string
           liked?: boolean | null
           score?: number | null
+          song_id: string
           status?: string
           updated_at?: string
           user_id: string
@@ -551,9 +467,9 @@ export type Database = {
         Update: {
           feedback?: Json | null
           id?: string
-          lesson_id?: string
           liked?: boolean | null
           score?: number | null
+          song_id?: string
           status?: string
           updated_at?: string
           user_id?: string
@@ -561,9 +477,9 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "user_lessons_progress_lesson_id_fkey"
-            columns: ["lesson_id"]
+            columns: ["song_id"]
             isOneToOne: false
-            referencedRelation: "lessons"
+            referencedRelation: "songs"
             referencedColumns: ["id"]
           },
           {
@@ -633,8 +549,8 @@ export type Database = {
     Functions: {
       get_entity_translations: {
         Args: {
-          p_entity_type: string
           p_entity_id: string
+          p_entity_type: string
           p_language_code?: string
         }
         Returns: Json
@@ -642,16 +558,16 @@ export type Database = {
       get_practice_tags: {
         Args: { practice_id: string }
         Returns: {
+          tag_color: string
           tag_id: string
           tag_name: string
           tag_type: string
-          tag_color: string
         }[]
       }
       get_translation: {
         Args: {
-          p_entity_type: string
           p_entity_id: string
+          p_entity_type: string
           p_field_name: string
           p_language_code?: string
         }
