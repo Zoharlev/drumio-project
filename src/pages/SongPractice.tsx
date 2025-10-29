@@ -98,7 +98,9 @@ const SongPractice = () => {
   // Playback interval
   useEffect(() => {
     if (isPlaying) {
-      const stepDuration = (60 / bpm) * 1000 / (complexity.hasSixteenthNotes ? 4 : 2);
+      // Calculate step duration based on BPM and number of steps per measure
+      // complexity.maxSteps / 4 gives us how many beats are in the pattern
+      const stepDuration = (60 / bpm / (complexity.maxSteps / 4)) * 1000;
       
       intervalRef.current = setInterval(() => {
         setCurrentStep((prev) => (prev + 1) % complexity.maxSteps);
@@ -114,7 +116,7 @@ const SongPractice = () => {
         clearInterval(intervalRef.current);
       }
     };
-  }, [isPlaying, bpm, complexity.maxSteps, complexity.hasSixteenthNotes]);
+  }, [isPlaying, bpm, complexity.maxSteps]);
 
   // Play drum sounds
   useEffect(() => {
