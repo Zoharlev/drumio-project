@@ -150,14 +150,19 @@ const SongPractice = () => {
   };
 
   const handleStepToggle = (drum: string, step: number) => {
-    setDrumPattern(prev => ({
-      ...prev,
-      [drum]: prev[drum].map((note, i) => 
-        i === step 
-          ? { ...note, active: !note.active }
-          : note
-      )
-    }));
+    setDrumPattern(prev => {
+      const drumSteps = prev[drum];
+      if (!Array.isArray(drumSteps)) return prev;
+      
+      return {
+        ...prev,
+        [drum]: drumSteps.map((note, i) => 
+          i === step 
+            ? { ...note, active: !note.active }
+            : note
+        )
+      };
+    });
   };
 
   const handleClearPattern = () => {

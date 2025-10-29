@@ -263,19 +263,24 @@ export const PracticeSession = () => {
   };
 
   const toggleStep = (drum: string, step: number) => {
-    setPattern(prev => ({
-      ...prev,
-      [drum]: prev[drum].map((note, index) => {
-        if (index === step) {
-          if (note.active) {
-            return { ...note, active: false };
-          } else {
-            return { ...note, active: true, velocity: 0.7, type: 'normal' };
+    setPattern(prev => {
+      const drumSteps = prev[drum];
+      if (!Array.isArray(drumSteps)) return prev;
+      
+      return {
+        ...prev,
+        [drum]: drumSteps.map((note, index) => {
+          if (index === step) {
+            if (note.active) {
+              return { ...note, active: false };
+            } else {
+              return { ...note, active: true, velocity: 0.7, type: 'normal' };
+            }
           }
-        }
-        return note;
-      })
-    }));
+          return note;
+        })
+      };
+    });
   };
 
   const clearPattern = () => {

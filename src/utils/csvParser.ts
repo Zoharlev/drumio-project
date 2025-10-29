@@ -65,9 +65,19 @@ const parseSubdivisionFormat = (rows: CSVRow[], headers: string[]): { pattern: D
   const pattern = createEmptyPattern(maxSteps);
   let bpm: number | undefined;
   let stepIndex = 0;
+  
+  // Store subdivisions and sections
+  const subdivisions: string[] = [];
+  const sections: string[] = [];
 
   rows.forEach((row, index) => {
     if (stepIndex >= maxSteps) return;
+
+    // Store subdivision (count) and section
+    const count = row['Count'] || row['count'] || '';
+    const section = row['Section'] || row['section'] || '';
+    subdivisions[stepIndex] = count;
+    sections[stepIndex] = section;
 
     // Process Instrument 1
     const instrument1 = row['Instrument 1'] || row['instrument 1'] || '';
@@ -83,6 +93,11 @@ const parseSubdivisionFormat = (rows: CSVRow[], headers: string[]): { pattern: D
 
     stepIndex++;
   });
+  
+  // Add subdivisions and sections to pattern
+  pattern.subdivisions = subdivisions;
+  pattern.sections = sections;
+  pattern.length = stepIndex;
 
   return { pattern, complexity, bpm };
 };
@@ -124,7 +139,10 @@ const processInstrument = (instrumentName: string, pattern: DrumPattern, stepInd
     if (!patternKey) patternKey = 'snare';
   }
 
-  if (!patternKey || !pattern[patternKey] || stepIndex >= pattern[patternKey].length) return;
+  if (!patternKey) return;
+  
+  const drumSteps = pattern[patternKey];
+  if (!Array.isArray(drumSteps) || stepIndex >= drumSteps.length) return;
 
   const note: DrumNote | HiHatNote = {
     active: true,
@@ -136,7 +154,7 @@ const processInstrument = (instrumentName: string, pattern: DrumPattern, stepInd
     (note as HiHatNote).open = isOpen;
   }
 
-  pattern[patternKey][stepIndex] = note;
+  (drumSteps as any)[stepIndex] = note;
 };
 
 const parseColumnFormat = (rows: CSVRow[], headers: string[]): { pattern: DrumPattern; complexity: PatternComplexity; bpm?: number } => {

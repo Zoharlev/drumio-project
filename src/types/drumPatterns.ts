@@ -9,11 +9,15 @@ export interface HiHatNote extends DrumNote {
 }
 
 export interface DrumPattern {
-  [key: string]: DrumNote[] | HiHatNote[];
+  [key: string]: DrumNote[] | HiHatNote[] | number | string[] | number[];
   kick: DrumNote[];
   snare: DrumNote[];
   hihat: HiHatNote[];
   openhat: HiHatNote[];
+  length: number;
+  subdivisions?: string[];
+  offsets?: number[];
+  sections?: string[];
 }
 
 export interface PatternComplexity {
@@ -29,4 +33,8 @@ export const createEmptyPattern = (steps: number = 16): DrumPattern => ({
   snare: Array(steps).fill(null).map(() => ({ active: false, velocity: 0.7, type: 'normal' })),
   hihat: Array(steps).fill(null).map(() => ({ active: false, velocity: 0.7, type: 'normal', open: false })),
   openhat: Array(steps).fill(null).map(() => ({ active: false, velocity: 0.7, type: 'normal', open: true })),
+  length: steps,
+  subdivisions: [],
+  offsets: [],
+  sections: []
 });

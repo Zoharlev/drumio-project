@@ -42,6 +42,9 @@ export const parsePatternFromNotes = (practiceNotes: string): { pattern: DrumPat
       else if (drumType === 'snare') patternKey = 'snare';
 
       if (patternKey && pattern[patternKey]) {
+        const drumSteps = pattern[patternKey];
+        if (!Array.isArray(drumSteps)) return;
+        
         // Parse each beat
         for (let i = 1; i < Math.min(parts.length, 9); i++) { // 8 beats max
           const beatNotation = parts[i]?.trim();
@@ -51,9 +54,9 @@ export const parsePatternFromNotes = (practiceNotes: string): { pattern: DrumPat
           
           // Parse beat notation (e.g., "X", "x", "o", "(x)", "X-o", etc.)
           if (complexity.hasSixteenthNotes) {
-            parseDetailedNotation(beatNotation, pattern[patternKey], baseIndex, complexity);
+            parseDetailedNotation(beatNotation, drumSteps as DrumNote[] | HiHatNote[], baseIndex, complexity);
           } else {
-            parseSimpleNotation(beatNotation, pattern[patternKey], baseIndex);
+            parseSimpleNotation(beatNotation, drumSteps as DrumNote[] | HiHatNote[], baseIndex);
           }
         }
       }
