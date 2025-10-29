@@ -64,8 +64,8 @@ const Explore = () => {
     </span>);
   };
 
-  const handleStartPractice = (lessonId: string) => {
-    navigate(`/lesson/${lessonId}/practices`);
+  const handleStartPractice = (songId: string) => {
+    navigate(`/song/${songId}/practice`);
   };
   return <div className="min-h-screen bg-background px-6 py-8">
       {/* Header */}
