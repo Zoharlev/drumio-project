@@ -323,6 +323,7 @@ export type Database = {
           description: string | null
           id: string
           level: string
+          notation_file_url: string | null
           notation_svg_url: string | null
           steps_count: number | null
           title: string
@@ -335,6 +336,7 @@ export type Database = {
           description?: string | null
           id?: string
           level: string
+          notation_file_url?: string | null
           notation_svg_url?: string | null
           steps_count?: number | null
           title: string
@@ -347,6 +349,7 @@ export type Database = {
           description?: string | null
           id?: string
           level?: string
+          notation_file_url?: string | null
           notation_svg_url?: string | null
           steps_count?: number | null
           title?: string
