@@ -36,7 +36,111 @@ export const parseCSVText = (csvText: string): { pattern: DrumPattern; complexit
     rows.push(row);
   }
 
-  // Determine pattern length and complexity
+  // Check CSV format type
+  const hasCountColumn = headers.some(h => h.toLowerCase() === 'count');
+  const hasInstrumentColumns = headers.some(h => h.toLowerCase().includes('instrument'));
+  
+  if (hasCountColumn && hasInstrumentColumns) {
+    // New format: Count, Instrument 1, Instrument 2, Section
+    return parseSubdivisionFormat(rows, headers);
+  } else {
+    // Original format: columns for each beat
+    return parseColumnFormat(rows, headers);
+  }
+};
+
+const parseSubdivisionFormat = (rows: CSVRow[], headers: string[]): { pattern: DrumPattern; complexity: PatternComplexity; bpm?: number } => {
+  // Count total steps from Count column (1, e, &, a pattern = 16th notes)
+  const totalSteps = rows.length;
+  const maxSteps = totalSteps > 64 ? 128 : totalSteps > 32 ? 64 : 32; // Support up to 128 steps
+  
+  const complexity: PatternComplexity = {
+    hasEighthNotes: maxSteps >= 16,
+    hasSixteenthNotes: maxSteps >= 32,
+    hasVelocityVariation: false,
+    hasOpenHats: false,
+    maxSteps
+  };
+
+  const pattern = createEmptyPattern(maxSteps);
+  let bpm: number | undefined;
+  let stepIndex = 0;
+
+  rows.forEach((row, index) => {
+    if (stepIndex >= maxSteps) return;
+
+    // Process Instrument 1
+    const instrument1 = row['Instrument 1'] || row['instrument 1'] || '';
+    if (instrument1) {
+      processInstrument(instrument1, pattern, stepIndex, complexity);
+    }
+
+    // Process Instrument 2
+    const instrument2 = row['Instrument 2'] || row['instrument 2'] || '';
+    if (instrument2) {
+      processInstrument(instrument2, pattern, stepIndex, complexity);
+    }
+
+    stepIndex++;
+  });
+
+  return { pattern, complexity, bpm };
+};
+
+const processInstrument = (instrumentName: string, pattern: DrumPattern, stepIndex: number, complexity: PatternComplexity) => {
+  const inst = instrumentName.toLowerCase().trim();
+  if (!inst) return;
+
+  let patternKey: keyof DrumPattern | null = null;
+  let velocity = 0.7;
+  let type: 'normal' | 'ghost' | 'accent' = 'normal';
+  let isOpen = false;
+
+  // Map instrument names to pattern keys
+  if (inst.includes('bass drum') || inst.includes('kick')) {
+    patternKey = 'kick';
+  } else if (inst.includes('snare')) {
+    patternKey = 'snare';
+  } else if (inst.includes('tom')) {
+    patternKey = 'kick'; // Use kick for tom-tom for now
+    velocity = 0.8;
+  } else if (inst.includes('hi-hat') || inst.includes('hihat')) {
+    if (inst.includes('open')) {
+      patternKey = 'openhat';
+      isOpen = true;
+      complexity.hasOpenHats = true;
+    } else {
+      patternKey = 'hihat';
+      isOpen = false;
+    }
+  }
+
+  // Check for ghost notes
+  if (inst.includes('ghost')) {
+    velocity = 0.3;
+    type = 'ghost';
+    complexity.hasVelocityVariation = true;
+    // Ghost notes typically on snare
+    if (!patternKey) patternKey = 'snare';
+  }
+
+  if (!patternKey || !pattern[patternKey] || stepIndex >= pattern[patternKey].length) return;
+
+  const note: DrumNote | HiHatNote = {
+    active: true,
+    velocity,
+    type
+  };
+
+  if (patternKey === 'hihat' || patternKey === 'openhat') {
+    (note as HiHatNote).open = isOpen;
+  }
+
+  pattern[patternKey][stepIndex] = note;
+};
+
+const parseColumnFormat = (rows: CSVRow[], headers: string[]): { pattern: DrumPattern; complexity: PatternComplexity; bpm?: number } => {
+  // Original format handling
   const maxSteps = determineMaxSteps(rows, headers);
   const complexity: PatternComplexity = {
     hasEighthNotes: maxSteps >= 16,
@@ -49,11 +153,9 @@ export const parseCSVText = (csvText: string): { pattern: DrumPattern; complexit
   const pattern = createEmptyPattern(maxSteps);
   let bpm: number | undefined;
 
-  // Parse each row
   rows.forEach(row => {
     const instrument = row['Instrument']?.toLowerCase() || row['instrument']?.toLowerCase();
     
-    // Check for BPM in the CSV
     if (row['BPM'] || row['bpm']) {
       const bpmValue = parseInt(row['BPM'] || row['bpm']);
       if (!isNaN(bpmValue)) {
@@ -63,7 +165,6 @@ export const parseCSVText = (csvText: string): { pattern: DrumPattern; complexit
 
     if (!instrument) return;
 
-    // Map instrument names to pattern keys
     let patternKey: keyof DrumPattern | null = null;
     if (instrument.includes('kick') || instrument.includes('bass')) {
       patternKey = 'kick';
@@ -75,12 +176,11 @@ export const parseCSVText = (csvText: string): { pattern: DrumPattern; complexit
 
     if (!patternKey || !pattern[patternKey]) return;
 
-    // Parse note columns (assuming columns like "Beat1", "Beat2", etc., or "Step1", "Step2", etc.)
     headers.forEach((header, index) => {
       if (header.toLowerCase().includes('beat') || header.toLowerCase().includes('step')) {
         const stepMatch = header.match(/\d+/);
         if (stepMatch) {
-          const stepNumber = parseInt(stepMatch[0]) - 1; // 0-indexed
+          const stepNumber = parseInt(stepMatch[0]) - 1;
           if (stepNumber >= 0 && stepNumber < maxSteps) {
             const noteValue = row[header];
             if (noteValue) {
