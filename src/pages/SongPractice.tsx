@@ -98,9 +98,10 @@ const SongPractice = () => {
   // Playback interval
   useEffect(() => {
     if (isPlaying) {
-      // Calculate step duration based on BPM and number of steps per measure
-      // complexity.maxSteps / 4 gives us how many beats are in the pattern
-      const stepDuration = (60 / bpm / (complexity.maxSteps / 4)) * 1000;
+      // Calculate step duration based on BPM
+      // For 16th notes (32 steps): 60000 / bpm / 8
+      // For 8th notes (16 steps): 60000 / bpm / 4
+      const stepDuration = 60000 / bpm / (complexity.hasSixteenthNotes ? 8 : 4);
       
       intervalRef.current = setInterval(() => {
         setCurrentStep((prev) => (prev + 1) % complexity.maxSteps);
