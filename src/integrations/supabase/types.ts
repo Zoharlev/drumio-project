@@ -319,6 +319,7 @@ export type Database = {
         Row: {
           audio_file_url: string | null
           background_image_url: string | null
+          bpm: number | null
           category: string | null
           created_at: string
           description: string | null
@@ -333,6 +334,7 @@ export type Database = {
         Insert: {
           audio_file_url?: string | null
           background_image_url?: string | null
+          bpm?: number | null
           category?: string | null
           created_at?: string
           description?: string | null
@@ -347,6 +349,7 @@ export type Database = {
         Update: {
           audio_file_url?: string | null
           background_image_url?: string | null
+          bpm?: number | null
           category?: string | null
           created_at?: string
           description?: string | null
