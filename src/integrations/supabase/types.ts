@@ -317,6 +317,7 @@ export type Database = {
       }
       songs: {
         Row: {
+          audio_file_url: string | null
           background_image_url: string | null
           category: string | null
           created_at: string
@@ -330,6 +331,7 @@ export type Database = {
           video_url: string | null
         }
         Insert: {
+          audio_file_url?: string | null
           background_image_url?: string | null
           category?: string | null
           created_at?: string
@@ -343,6 +345,7 @@ export type Database = {
           video_url?: string | null
         }
         Update: {
+          audio_file_url?: string | null
           background_image_url?: string | null
           category?: string | null
           created_at?: string
