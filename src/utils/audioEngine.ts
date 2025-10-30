@@ -27,6 +27,21 @@ export class AudioEngine {
     this.backingTrackGain = this.context.createGain();
     this.backingTrackGain.connect(this.context.destination);
     this.backingTrackGain.gain.value = 0.6;
+    
+    // Load tom sample
+    this.loadDrumSample('tom', '/sounds/tom-arcane-2.wav');
+  }
+
+  private async loadDrumSample(drumName: string, url: string) {
+    try {
+      const response = await fetch(url);
+      const arrayBuffer = await response.arrayBuffer();
+      const audioBuffer = await this.context.decodeAudioData(arrayBuffer);
+      this.audioBuffers.set(drumName, audioBuffer);
+      console.log(`Drum sample '${drumName}' loaded successfully`);
+    } catch (error) {
+      console.error(`Error loading drum sample '${drumName}':`, error);
+    }
   }
 
   async loadAudioFile(url: string) {
