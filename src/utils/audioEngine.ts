@@ -30,6 +30,7 @@ export class AudioEngine {
     
     // Load drum samples
     this.loadDrumSample('tom', '/sounds/tom-arcane-2.wav');
+    this.loadDrumSample('snare', '/sounds/snare-acoustic-raw-2.wav');
     this.loadDrumSample('ghostsnare', '/sounds/snare-ghost_C_minor.wav');
     this.loadDrumSample('kick', '/sounds/bass-kick-drum-hit_D_minor.wav');
   }
