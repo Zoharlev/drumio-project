@@ -50,9 +50,9 @@ export const parseCSVText = (csvText: string): { pattern: DrumPattern; complexit
 };
 
 const parseSubdivisionFormat = (rows: CSVRow[], headers: string[]): { pattern: DrumPattern; complexity: PatternComplexity; bpm?: number } => {
-  // Count total steps from Count column (1, e, &, a pattern = 16th notes)
+  // Use exact number of rows from CSV as pattern length
   const totalSteps = rows.length;
-  const maxSteps = totalSteps > 64 ? 128 : totalSteps > 32 ? 64 : 32; // Support up to 128 steps
+  const maxSteps = totalSteps;
   
   const complexity: PatternComplexity = {
     hasEighthNotes: maxSteps >= 16,
