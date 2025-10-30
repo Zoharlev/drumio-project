@@ -121,14 +121,23 @@ export const DrumGrid = ({
           />
         )}
 
-        {/* Beat Numbers */}
-        <div className="flex mb-4 flex-col gap-1">
+        {/* Beat Numbers - Enhanced with Progress Indicators */}
+        <div className="flex mb-4 flex-col gap-2 pb-2 border-b-2 border-primary/10">
           <div className="flex">
-            <div className="w-20 text-xs text-muted-foreground/50">Step#</div>
+            <div className="w-20 text-xs font-semibold text-primary/70">Step#</div>
             {Array.from({ length: visibleSteps }, (_, i) => {
               const stepIndex = startStep + i;
+              const isCurrent = stepIndex === currentStep;
               return (
-                <div key={`step-${stepIndex}`} className="flex-1 text-center text-[10px] font-mono text-muted-foreground/40">
+                <div 
+                  key={`step-${stepIndex}`} 
+                  className={cn(
+                    "flex-1 text-center text-[11px] font-mono transition-all duration-150",
+                    isCurrent 
+                      ? "text-playhead font-bold scale-125 bg-playhead/10 rounded" 
+                      : "text-muted-foreground/50"
+                  )}
+                >
                   {stepIndex}
                 </div>
               );
@@ -136,9 +145,10 @@ export const DrumGrid = ({
           </div>
           
           <div className="flex">
-            <div className="w-20 text-xs text-muted-foreground/50">Count</div>
+            <div className="w-20 text-xs font-semibold text-primary/70">Count</div>
             {Array.from({ length: visibleSteps }, (_, i) => {
               const stepIndex = startStep + i;
+              const isCurrent = stepIndex === currentStep;
               let displayText = "";
               let textStyle = "text-muted-foreground/60";
 
@@ -176,11 +186,31 @@ export const DrumGrid = ({
               }
               
               return (
-                <div key={stepIndex} className={cn("flex-1 text-center text-sm font-mono", textStyle)}>
+                <div 
+                  key={stepIndex} 
+                  className={cn(
+                    "flex-1 text-center text-base font-mono transition-all duration-150",
+                    textStyle,
+                    isCurrent && "scale-125 text-playhead font-extrabold animate-pulse"
+                  )}
+                >
                   {displayText}
                 </div>
               );
             })}
+          </div>
+          
+          {/* Progress Bar */}
+          <div className="flex mt-1">
+            <div className="w-20"></div>
+            <div className="flex-1 h-1 bg-muted/30 rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-gradient-to-r from-primary via-accent to-playhead transition-all duration-75"
+                style={{ 
+                  width: `${((currentStep - startStep + 1) / visibleSteps) * 100}%` 
+                }}
+              />
+            </div>
           </div>
         </div>
 
