@@ -68,7 +68,13 @@ export default {
 				'drumio-intro-bg': 'hsl(var(--drumio-intro-bg))',
 				'text-secondary': 'hsl(var(--text-secondary))',
 				'text-tertiary': 'hsl(var(--text-tertiary))',
-				'text-muted': 'hsl(var(--text-muted))'
+				'text-muted': 'hsl(var(--text-muted))',
+				// Note and grid colors
+				'playhead': 'hsl(var(--playhead))',
+				'note-active': 'hsl(var(--note-active))',
+				'note-inactive': 'hsl(var(--note-inactive))',
+				'grid-line': 'hsl(var(--grid-line))',
+				'tempo-accent': 'hsl(var(--tempo-accent))'
 			},
 			fontFamily: {
 				'poppins': ['Poppins', 'sans-serif'],

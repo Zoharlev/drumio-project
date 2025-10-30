@@ -71,11 +71,19 @@
     --text-muted: 220 13% 69%; /* #9CA3AF - Muted gray */
 
     /* Drum Grid Specific Colors */
-    --playhead: 244 64% 61%; /* #6764DB - Purple playhead */
-    --note-active: 244 64% 61%; /* #6764DB - Active note */
-    --grid-line: 215 25% 22%; /* #374151 - Grid lines */
-    --shadow-elevated: 0 10px 30px -10px hsl(244 64% 61% / 0.3);
-    --shadow-note: 0 0 15px hsl(244 64% 61% / 0.5);
+    --playhead: 60 95% 65%; /* Bright yellow/gold for the playhead */
+    --note-active: 270 95% 75%; /* Vibrant purple for active notes */
+    --note-inactive: 220 13% 25%; /* Dark gray for inactive notes */
+    --grid-line: 220 13% 18%; /* Subtle dark gray for grid lines */
+    --tempo-accent: 250 95% 70%; /* Blue-purple for tempo accents */
+
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)));
+    --gradient-note: radial-gradient(circle, hsl(var(--note-active)), hsl(270 95% 65%));
+
+    /* Shadows */
+    --shadow-note: 0 4px 20px hsl(var(--primary) / 0.4); /* Purple glow */
+    --shadow-elevated: 0 8px 32px hsl(220 13% 4% / 0.8);
 
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
