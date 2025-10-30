@@ -13,7 +13,7 @@ import { AudioEngine } from "@/utils/audioEngine";
 
 export const PracticeSession = () => {
   const navigate = useNavigate();
-  const { practiceId, lessonId } = useParams<{ practiceId: string; lessonId: string }>();
+  const { practiceId, lessonId, songId } = useParams<{ practiceId: string; lessonId: string; songId: string }>();
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [bpm, setBpm] = useState(90);
@@ -31,8 +31,8 @@ export const PracticeSession = () => {
   const audioEngineRef = useRef<AudioEngine | null>(null);
   const { toast } = useToast();
 
-  // Fetch practice data
-  const { data: practice, isLoading } = useQuery({
+  // Fetch practice data (only when practiceId is provided)
+  const { data: practice, isLoading: practiceLoading } = useQuery({
     queryKey: ["practice", practiceId],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -45,11 +45,27 @@ export const PracticeSession = () => {
         .maybeSingle();
       if (error) throw error;
       return data;
-    }
+    },
+    enabled: !!practiceId
   });
 
-  // Fetch song data with practice relationships
-  const { data: songData } = useQuery({
+  // Fetch song data directly when coming from song route
+  const { data: directSongData, isLoading: songLoading } = useQuery({
+    queryKey: ["direct-song", songId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("songs")
+        .select("*")
+        .eq("id", songId)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!songId
+  });
+
+  // Fetch song data via practice relationships (when practiceId is provided)
+  const { data: linkedSongData } = useQuery({
     queryKey: ["practice-song", practiceId],
     queryFn: async () => {
       // First get the song_id from song_practices
@@ -76,6 +92,10 @@ export const PracticeSession = () => {
     },
     enabled: !!practiceId
   });
+
+  // Use direct song data if available, otherwise use linked song data
+  const songData = directSongData || linkedSongData;
+  const isLoading = practiceLoading || songLoading;
 
   // Initialize audio engine
   useEffect(() => {
@@ -308,7 +328,8 @@ export const PracticeSession = () => {
     );
   }
 
-  if (!practice) {
+  // If coming from song route, we don't need practice data
+  if (!songId && !practice) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
@@ -325,6 +346,24 @@ export const PracticeSession = () => {
     );
   }
 
+  // If coming from song route but song not found
+  if (songId && !songData && !isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-muted-foreground">Song not found.</p>
+          <Button 
+            variant="outline" 
+            onClick={() => navigate('/explore')}
+            className="mt-4"
+          >
+            Back to Explore
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -333,13 +372,13 @@ export const PracticeSession = () => {
           <Button 
             variant="ghost" 
             size="icon" 
-            onClick={() => navigate(`/lesson/${lessonId}/practice/${practiceId}`)}
+            onClick={() => songId ? navigate('/explore') : navigate(`/lesson/${lessonId}/practice/${practiceId}`)}
           >
             <ArrowLeft className="h-6 w-6" />
           </Button>
           <div>
-            <h1 className="text-2xl font-bold">{practice.title}</h1>
-            <p className="text-muted-foreground">{practice.practice_type?.title}</p>
+            <h1 className="text-2xl font-bold">{songId ? songData?.title : practice?.title}</h1>
+            <p className="text-muted-foreground">{songId ? songData?.level : practice?.practice_type?.title}</p>
           </div>
         </div>
         
