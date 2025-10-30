@@ -73,6 +73,8 @@ export class AudioEngine {
       this.playHiHat(adjustedVelocity, isOpen || drum === 'openhat');
     } else if (drum === 'snare') {
       this.playSnare(adjustedVelocity);
+    } else if (drum === 'ghostsnare') {
+      this.playSnare(adjustedVelocity * 0.4); // Ghost snare is much softer
     } else if (drum === 'kick') {
       this.playKick(adjustedVelocity);
     } else if (drum === 'tom') {

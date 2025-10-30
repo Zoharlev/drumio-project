@@ -21,6 +21,7 @@ interface DrumGridProps {
 const drumLabels: { [key: string]: { name: string; symbol: string } } = {
   kick: { name: "Kick", symbol: "●" },
   snare: { name: "Snare", symbol: "×" },
+  ghostsnare: { name: "Ghost Snare", symbol: "⊗" },
   hihat: { name: "Hi-Hat", symbol: "○" },
   openhat: { name: "Open Hat", symbol: "◎" },
   tom: { name: "Tom", symbol: "◆" },
