@@ -233,13 +233,17 @@ export const PracticeSession = () => {
         }
       });
 
-      // Play metronome on main beats
-      const beatsPerMeasure = complexity.maxSteps / 4;
-      if (metronomeEnabled && currentStep % (complexity.maxSteps / beatsPerMeasure) === 0) {
-        audioEngineRef.current?.playMetronome();
+      // Play metronome only on main beats (quarter notes)
+      // For 16th notes: play every 4 steps (0, 4, 8, 12...)
+      // For 8th notes: play every 2 steps (0, 2, 4, 6...)
+      if (metronomeEnabled && audioEngineRef.current) {
+        const stepsPerBeat = complexity.hasSixteenthNotes ? 4 : 2;
+        if (currentStep % stepsPerBeat === 0) {
+          audioEngineRef.current.playMetronome();
+        }
       }
     }
-  }, [currentStep, isPlaying, pattern, metronomeEnabled, complexity]);
+  }, [currentStep, isPlaying, pattern, metronomeEnabled, complexity.hasSixteenthNotes]);
 
 
   const togglePlay = () => {

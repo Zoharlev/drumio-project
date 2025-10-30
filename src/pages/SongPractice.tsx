@@ -155,13 +155,19 @@ const SongPractice = () => {
         });
       }
 
+      // Play metronome only on main beats (quarter notes)
+      // For 16th notes: play every 4 steps (0, 4, 8, 12...)
+      // For 8th notes: play every 2 steps (0, 2, 4, 6...)
       if (metronomeEnabled && audioEngineRef.current) {
-        audioEngineRef.current.playMetronome();
+        const stepsPerBeat = complexity.hasSixteenthNotes ? 4 : 2;
+        if (currentStep % stepsPerBeat === 0) {
+          audioEngineRef.current.playMetronome();
+        }
       }
     };
 
     playDrums();
-  }, [currentStep, isPlaying, drumPattern, metronomeEnabled, drumSoundEnabled]);
+  }, [currentStep, isPlaying, drumPattern, metronomeEnabled, drumSoundEnabled, complexity.hasSixteenthNotes]);
 
   const togglePlayback = async () => {
     if (audioEngineRef.current) {
