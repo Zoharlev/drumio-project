@@ -428,6 +428,11 @@ export class AudioEngine {
     return this.backingTrackPauseTime;
   }
 
+  getBackingTrackDuration(): number {
+    const buffer = this.audioBuffers.get('full');
+    return buffer ? buffer.duration : 0;
+  }
+
   close() {
     this.stopBackingTrack();
     this.context?.close();

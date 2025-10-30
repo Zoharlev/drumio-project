@@ -245,7 +245,10 @@ const SongPractice = () => {
   // Calculate current time and total time
   const stepDuration = 60000 / bpm / (complexity.hasSixteenthNotes ? 4 : 2);
   const currentTime = currentStep * stepDuration;
-  const totalTime = complexity.maxSteps * stepDuration;
+  // Use audio file duration if available, otherwise calculate from pattern
+  const totalTime = audioEngineRef.current 
+    ? (audioEngineRef.current.getBackingTrackDuration() * 1000) || (complexity.maxSteps * stepDuration)
+    : complexity.maxSteps * stepDuration;
 
   // Toggle audio playback
   useEffect(() => {
