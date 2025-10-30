@@ -28,8 +28,9 @@ export class AudioEngine {
     this.backingTrackGain.connect(this.context.destination);
     this.backingTrackGain.gain.value = 0.6;
     
-    // Load tom sample
+    // Load drum samples
     this.loadDrumSample('tom', '/sounds/tom-arcane-2.wav');
+    this.loadDrumSample('ghostsnare', '/sounds/snare-ghost_C_minor.wav');
   }
 
   private async loadDrumSample(drumName: string, url: string) {
