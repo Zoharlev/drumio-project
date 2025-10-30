@@ -2,9 +2,31 @@ export class AudioEngine {
   private context: AudioContext;
   private audioBuffers: Map<string, AudioBuffer> = new Map();
   private loadedAudioUrl: string | null = null;
+  private backingTrackSource: AudioBufferSourceNode | null = null;
+  private backingTrackStartTime: number = 0;
+  private backingTrackPauseTime: number = 0;
+  private isBackingTrackPlaying: boolean = false;
+  
+  // Volume control gain nodes
+  private metronomeGain: GainNode;
+  private drumGain: GainNode;
+  private backingTrackGain: GainNode;
 
   constructor() {
     this.context = new (window.AudioContext || (window as any).webkitAudioContext)();
+    
+    // Initialize gain nodes for volume control
+    this.metronomeGain = this.context.createGain();
+    this.metronomeGain.connect(this.context.destination);
+    this.metronomeGain.gain.value = 0.5;
+    
+    this.drumGain = this.context.createGain();
+    this.drumGain.connect(this.context.destination);
+    this.drumGain.gain.value = 0.8;
+    
+    this.backingTrackGain = this.context.createGain();
+    this.backingTrackGain.connect(this.context.destination);
+    this.backingTrackGain.gain.value = 0.6;
   }
 
   async loadAudioFile(url: string) {
@@ -64,7 +86,7 @@ export class AudioEngine {
     
     source.buffer = buffer;
     source.connect(gainNode);
-    gainNode.connect(this.context.destination);
+    gainNode.connect(this.drumGain); // Connect to drum gain for volume control
     
     gainNode.gain.setValueAtTime(velocity, this.context.currentTime);
     
@@ -90,7 +112,7 @@ export class AudioEngine {
     const gainNode = this.context.createGain();
     noise.connect(highpassFilter);
     highpassFilter.connect(gainNode);
-    gainNode.connect(this.context.destination);
+    gainNode.connect(this.drumGain); // Connect to drum gain
 
     const duration = isOpen ? 0.4 : 0.08;
     const maxGain = isOpen ? 0.7 : 0.6;
@@ -138,7 +160,7 @@ export class AudioEngine {
     const mixGain = this.context.createGain();
     toneGain.connect(mixGain);
     noiseGain.connect(mixGain);
-    mixGain.connect(this.context.destination);
+    mixGain.connect(this.drumGain); // Connect to drum gain
     
     const duration = 0.2;
     
@@ -256,7 +278,7 @@ export class AudioEngine {
     subGain.connect(mixGain);
     noiseGain.connect(mixGain);
     mixGain.connect(waveshaper);
-    waveshaper.connect(this.context.destination);
+    waveshaper.connect(this.drumGain); // Connect to drum gain
     
     const duration = 0.5;
     const velocityMultiplier = Math.pow(velocity, 0.8);
@@ -305,7 +327,7 @@ export class AudioEngine {
     tomOsc.type = 'sine';
     
     tomOsc.connect(tomGain);
-    tomGain.connect(this.context.destination);
+    tomGain.connect(this.drumGain); // Connect to drum gain
     
     const duration = 0.3;
     
@@ -322,7 +344,7 @@ export class AudioEngine {
     const gainNode = this.context.createGain();
 
     oscillator.connect(gainNode);
-    gainNode.connect(this.context.destination);
+    gainNode.connect(this.metronomeGain); // Connect to metronome gain for volume control
 
     oscillator.frequency.setValueAtTime(1000, this.context.currentTime);
     oscillator.type = 'sine';
@@ -334,7 +356,78 @@ export class AudioEngine {
     oscillator.stop(this.context.currentTime + 0.05);
   }
 
+  // Volume control methods
+  setMetronomeVolume(volume: number) {
+    this.metronomeGain.gain.value = Math.max(0, Math.min(1, volume));
+  }
+
+  setDrumVolume(volume: number) {
+    this.drumGain.gain.value = Math.max(0, Math.min(1, volume));
+  }
+
+  setBackingTrackVolume(volume: number) {
+    this.backingTrackGain.gain.value = Math.max(0, Math.min(1, volume));
+  }
+
+  // Backing track playback methods
+  playBackingTrack() {
+    const buffer = this.audioBuffers.get('full');
+    if (!buffer || this.isBackingTrackPlaying) return;
+
+    this.backingTrackSource = this.context.createBufferSource();
+    this.backingTrackSource.buffer = buffer;
+    this.backingTrackSource.connect(this.backingTrackGain);
+    
+    const offset = this.backingTrackPauseTime || 0;
+    this.backingTrackSource.start(0, offset);
+    this.backingTrackStartTime = this.context.currentTime - offset;
+    this.isBackingTrackPlaying = true;
+  }
+
+  pauseBackingTrack() {
+    if (this.backingTrackSource && this.isBackingTrackPlaying) {
+      this.backingTrackPauseTime = this.context.currentTime - this.backingTrackStartTime;
+      this.backingTrackSource.stop();
+      this.backingTrackSource = null;
+      this.isBackingTrackPlaying = false;
+    }
+  }
+
+  stopBackingTrack() {
+    if (this.backingTrackSource) {
+      this.backingTrackSource.stop();
+      this.backingTrackSource = null;
+    }
+    this.backingTrackPauseTime = 0;
+    this.backingTrackStartTime = 0;
+    this.isBackingTrackPlaying = false;
+  }
+
+  seekBackingTrack(timeInSeconds: number) {
+    const wasPlaying = this.isBackingTrackPlaying;
+    
+    if (this.backingTrackSource) {
+      this.backingTrackSource.stop();
+      this.backingTrackSource = null;
+    }
+    
+    this.backingTrackPauseTime = timeInSeconds;
+    this.isBackingTrackPlaying = false;
+    
+    if (wasPlaying) {
+      this.playBackingTrack();
+    }
+  }
+
+  getCurrentBackingTrackTime(): number {
+    if (this.isBackingTrackPlaying) {
+      return this.context.currentTime - this.backingTrackStartTime;
+    }
+    return this.backingTrackPauseTime;
+  }
+
   close() {
+    this.stopBackingTrack();
     this.context?.close();
   }
 }
