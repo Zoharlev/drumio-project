@@ -191,9 +191,10 @@ export const PracticeSession = () => {
   }, [practice, songData]);
 
   // Step timing based on BPM and complexity
-  // For 16th notes (32 steps): 60000 / bpm / 8
-  // For 8th notes (16 steps): 60000 / bpm / 4
-  const stepDuration = 60000 / bpm / (complexity.hasSixteenthNotes ? 8 : 4);
+  // At 120 BPM: 1 quarter note = 500ms
+  // For 16th notes: 60000 / bpm / 4 = 125ms per step
+  // For 8th notes: 60000 / bpm / 2 = 250ms per step
+  const stepDuration = 60000 / bpm / (complexity.hasSixteenthNotes ? 4 : 2);
 
   useEffect(() => {
     if (isPlaying) {

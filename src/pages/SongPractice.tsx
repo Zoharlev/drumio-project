@@ -110,9 +110,10 @@ const SongPractice = () => {
   useEffect(() => {
     if (isPlaying) {
       // Calculate step duration based on BPM
-      // For 16th notes (32 steps): 60000 / bpm / 8
-      // For 8th notes (16 steps): 60000 / bpm / 4
-      const stepDuration = 60000 / bpm / (complexity.hasSixteenthNotes ? 8 : 4);
+      // At 120 BPM: 1 quarter note = 500ms
+      // For 16th notes: 60000 / bpm / 4 = 125ms per step
+      // For 8th notes: 60000 / bpm / 2 = 250ms per step
+      const stepDuration = 60000 / bpm / (complexity.hasSixteenthNotes ? 4 : 2);
       
       intervalRef.current = setInterval(() => {
         setCurrentStep((prev) => (prev + 1) % complexity.maxSteps);
@@ -189,7 +190,7 @@ const SongPractice = () => {
 
   const handleSeek = (step: number) => {
     setCurrentStep(step);
-    const stepDuration = 60000 / bpm / (complexity.hasSixteenthNotes ? 8 : 4);
+    const stepDuration = 60000 / bpm / (complexity.hasSixteenthNotes ? 4 : 2);
     const timeInSeconds = (step * stepDuration) / 1000;
     
     if (audioEngineRef.current) {
@@ -236,7 +237,7 @@ const SongPractice = () => {
     : [];
 
   // Calculate current time and total time
-  const stepDuration = 60000 / bpm / (complexity.hasSixteenthNotes ? 8 : 4);
+  const stepDuration = 60000 / bpm / (complexity.hasSixteenthNotes ? 4 : 2);
   const currentTime = currentStep * stepDuration;
   const totalTime = complexity.maxSteps * stepDuration;
 
