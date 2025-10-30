@@ -110,8 +110,14 @@ export const PracticeSession = () => {
     const loadPattern = async () => {
       // Priority 1: Load from song's notation_file_url if available
       if (songData?.notation_file_url) {
+        console.log('Loading CSV from:', songData.notation_file_url);
         try {
           const { pattern: parsedPattern, complexity: parsedComplexity, bpm: csvBpm } = await parseCSVNotation(songData.notation_file_url);
+          console.log('CSV parsed successfully:', { 
+            patternLength: parsedPattern.length, 
+            complexity: parsedComplexity,
+            subdivisions: parsedPattern.subdivisions?.length 
+          });
           setPattern(parsedPattern);
           setComplexity(parsedComplexity);
           if (csvBpm) {
@@ -119,14 +125,14 @@ export const PracticeSession = () => {
           }
           toast({
             title: "Pattern loaded",
-            description: "Drum notation loaded from CSV file",
+            description: `Loaded ${parsedPattern.length} steps from CSV`,
           });
           return;
         } catch (error) {
           console.error('Error loading CSV notation:', error);
           toast({
             title: "CSV load failed",
-            description: "Falling back to text notation",
+            description: error instanceof Error ? error.message : "Unknown error",
             variant: "destructive",
           });
         }
