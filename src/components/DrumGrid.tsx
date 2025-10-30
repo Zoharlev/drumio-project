@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Trash2, Settings, ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { DrumPattern, PatternComplexity } from "@/types/drumPatterns";
 
 interface DrumGridProps {
@@ -60,6 +60,16 @@ export const DrumGrid = ({
     setCurrentView(prev => Math.min(totalViews - 1, prev + 1));
   };
 
+  // Auto-scroll during playback
+  useEffect(() => {
+    if (isPlaying) {
+      const newView = Math.floor(currentStep / stepsPerView);
+      if (newView !== currentView && newView < totalViews) {
+        setCurrentView(newView);
+      }
+    }
+  }, [currentStep, isPlaying, currentView, totalViews, stepsPerView]);
+
   return (
     <div className="space-y-6">
       {/* Controls */}
@@ -109,7 +119,7 @@ export const DrumGrid = ({
       </div>
 
       {/* Grid Container */}
-      <div className="relative bg-card rounded-lg p-6 shadow-elevated">
+      <div className="relative bg-card rounded-lg p-6 shadow-elevated transition-opacity duration-300">
         {/* Playhead */}
         {currentStep >= startStep && currentStep < endStep && (
           <div
