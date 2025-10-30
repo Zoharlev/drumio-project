@@ -96,7 +96,7 @@ const Explore = () => {
 
       {/* Category Tabs */}
       <Tabs value={activeCategory} onValueChange={setActiveCategory} className="mb-8">
-        <TabsList className="bg-muted/50 p-1 h-auto rounded-full">
+        <TabsList className="hidden">
           {categories.map(category => <TabsTrigger key={category.id} value={category.id} className="rounded-full px-6 py-2 text-sm font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               {category.label}
             </TabsTrigger>)}
