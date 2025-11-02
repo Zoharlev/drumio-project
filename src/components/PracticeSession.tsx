@@ -53,12 +53,19 @@ export const PracticeSession = () => {
   const { data: directSongData, isLoading: songLoading } = useQuery({
     queryKey: ["direct-song", songId],
     queryFn: async () => {
+      console.log('🔍 Fetching song data for songId:', songId);
       const { data, error } = await supabase
         .from("songs")
         .select("*")
         .eq("id", songId)
         .maybeSingle();
       if (error) throw error;
+      console.log('✅ Song data fetched:', { 
+        id: data?.id, 
+        title: data?.title, 
+        notation_file_url: data?.notation_file_url,
+        audio_file_url: data?.audio_file_url 
+      });
       return data;
     },
     enabled: !!songId
@@ -97,6 +104,17 @@ export const PracticeSession = () => {
   const songData = directSongData || linkedSongData;
   const isLoading = practiceLoading || songLoading;
 
+  // Log songData changes
+  useEffect(() => {
+    console.log('📊 songData updated:', {
+      hasSongData: !!songData,
+      songId: songData?.id,
+      title: songData?.title,
+      notation_file_url: songData?.notation_file_url,
+      audio_file_url: songData?.audio_file_url
+    });
+  }, [songData]);
+
   // Initialize audio engine
   useEffect(() => {
     audioEngineRef.current = new AudioEngine();
@@ -107,16 +125,27 @@ export const PracticeSession = () => {
 
   // Load pattern from CSV notation file or practice notes
   useEffect(() => {
+    console.log('🔄 loadPattern useEffect triggered', {
+      hasSongData: !!songData,
+      hasNotationUrl: !!songData?.notation_file_url,
+      notationUrl: songData?.notation_file_url,
+      hasPractice: !!practice,
+      hasPracticeNote: !!(practice as any)?.practice_note
+    });
+
     const loadPattern = async () => {
       // Priority 1: Load from song's notation_file_url if available
       if (songData?.notation_file_url) {
-        console.log('Loading CSV from:', songData.notation_file_url);
+        console.log('📥 Loading CSV from:', songData.notation_file_url);
         try {
           const { pattern: parsedPattern, complexity: parsedComplexity, bpm: csvBpm } = await parseCSVNotation(songData.notation_file_url);
-          console.log('CSV parsed successfully:', { 
+          console.log('✅ CSV parsed successfully:', { 
             patternLength: parsedPattern.length, 
             complexity: parsedComplexity,
-            subdivisions: parsedPattern.subdivisions?.length 
+            subdivisions: parsedPattern.subdivisions?.length,
+            hasKickNotes: parsedPattern.kick?.filter(n => n.active).length || 0,
+            hasSnareNotes: parsedPattern.snare?.filter(n => n.active).length || 0,
+            hasHihatNotes: parsedPattern.hihat?.filter(n => n.active).length || 0
           });
           setPattern(parsedPattern);
           setComplexity(parsedComplexity);
@@ -129,13 +158,15 @@ export const PracticeSession = () => {
           });
           return;
         } catch (error) {
-          console.error('Error loading CSV notation:', error);
+          console.error('❌ Error loading CSV notation:', error);
           toast({
             title: "CSV load failed",
             description: error instanceof Error ? error.message : "Unknown error",
             variant: "destructive",
           });
         }
+      } else {
+        console.log('⚠️ No CSV notation URL found in songData');
       }
 
       // Priority 2: Parse from practice_note field
