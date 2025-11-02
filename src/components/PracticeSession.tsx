@@ -154,7 +154,7 @@ export const PracticeSession = () => {
           }
           toast({
             title: "Pattern loaded",
-            description: `Loaded ${parsedPattern.length} steps from CSV`,
+            description: `Loaded ${parsedPattern.length}-step pattern with ${parsedPattern.kick?.filter(n => n.active).length || 0} kick, ${parsedPattern.snare?.filter(n => n.active).length || 0} snare, ${parsedPattern.hihat?.filter(n => n.active).length || 0} hihat notes`,
           });
           return;
         } catch (error) {
@@ -200,7 +200,19 @@ export const PracticeSession = () => {
       }
     };
 
-    loadPattern();
+    if (songData) {
+      console.log('🚀 Starting pattern load...');
+      loadPattern().catch(error => {
+        console.error('💥 Pattern load failed:', error);
+        toast({
+          title: "Pattern load error",
+          description: "Failed to load drum pattern",
+          variant: "destructive",
+        });
+      });
+    } else {
+      console.log('⏳ Waiting for songData...');
+    }
   }, [practice, songData, toast]);
 
   // Load audio file from song data

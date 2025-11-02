@@ -17,13 +17,18 @@ export const parseCSVNotation = async (csvUrl: string): Promise<{ pattern: DrumP
 };
 
 export const parseCSVText = (csvText: string): { pattern: DrumPattern; complexity: PatternComplexity; bpm?: number } => {
+  console.log('📄 Parsing CSV text, length:', csvText.length);
+  
   const lines = csvText.trim().split('\n');
+  console.log('📊 CSV lines:', lines.length);
+  
   if (lines.length === 0) {
     throw new Error('Empty CSV file');
   }
 
   // Parse header
   const headers = lines[0].split(',').map(h => h.trim());
+  console.log('📋 CSV headers:', headers);
   
   // Parse rows
   const rows: CSVRow[] = [];
@@ -35,21 +40,34 @@ export const parseCSVText = (csvText: string): { pattern: DrumPattern; complexit
     });
     rows.push(row);
   }
+  console.log('📦 Parsed rows:', rows.length);
+  if (rows.length > 0) {
+    console.log('🔍 First row sample:', rows[0]);
+  }
 
   // Check CSV format type
   const hasCountColumn = headers.some(h => h.toLowerCase() === 'count');
   const hasInstrumentColumns = headers.some(h => h.toLowerCase().includes('instrument'));
   
+  console.log('🔍 Format detection:', { hasCountColumn, hasInstrumentColumns });
+  
   if (hasCountColumn && hasInstrumentColumns) {
-    // New format: Count, Instrument 1, Instrument 2, Section
+    console.log('✅ Using subdivision format parser');
     return parseSubdivisionFormat(rows, headers);
   } else {
-    // Original format: columns for each beat
+    console.log('✅ Using column format parser');
     return parseColumnFormat(rows, headers);
   }
 };
 
 const parseSubdivisionFormat = (rows: CSVRow[], headers: string[]): { pattern: DrumPattern; complexity: PatternComplexity; bpm?: number } => {
+  console.log('🎵 parseSubdivisionFormat: Processing', rows.length, 'rows');
+  
+  if (rows.length === 0) {
+    console.warn('⚠️ No rows to process');
+    throw new Error('No data rows in CSV');
+  }
+  
   // Use exact number of rows from CSV as pattern length
   const totalSteps = rows.length;
   const maxSteps = totalSteps;
@@ -65,6 +83,7 @@ const parseSubdivisionFormat = (rows: CSVRow[], headers: string[]): { pattern: D
   const pattern = createEmptyPattern(maxSteps);
   let bpm: number | undefined;
   let stepIndex = 0;
+  let notesProcessed = 0;
   
   // Store subdivisions and sections
   const subdivisions: string[] = [];
@@ -82,13 +101,17 @@ const parseSubdivisionFormat = (rows: CSVRow[], headers: string[]): { pattern: D
     // Process Instrument 1
     const instrument1 = row['Instrument 1'] || row['instrument 1'] || '';
     if (instrument1) {
+      console.log(`  Step ${stepIndex}: Instrument 1 = "${instrument1}"`);
       processInstrument(instrument1, pattern, stepIndex, complexity);
+      notesProcessed++;
     }
 
     // Process Instrument 2
     const instrument2 = row['Instrument 2'] || row['instrument 2'] || '';
     if (instrument2) {
+      console.log(`  Step ${stepIndex}: Instrument 2 = "${instrument2}"`);
       processInstrument(instrument2, pattern, stepIndex, complexity);
+      notesProcessed++;
     }
 
     stepIndex++;
@@ -99,12 +122,24 @@ const parseSubdivisionFormat = (rows: CSVRow[], headers: string[]): { pattern: D
   pattern.sections = sections;
   pattern.length = stepIndex;
 
+  console.log('✅ parseSubdivisionFormat complete:', {
+    totalSteps: stepIndex,
+    notesProcessed,
+    kickNotes: pattern.kick.filter(n => n.active).length,
+    snareNotes: pattern.snare.filter(n => n.active).length,
+    hihatNotes: pattern.hihat.filter(n => n.active).length,
+    openhatNotes: pattern.openhat.filter(n => n.active).length
+  });
+
   return { pattern, complexity, bpm };
 };
 
 const processInstrument = (instrumentName: string, pattern: DrumPattern, stepIndex: number, complexity: PatternComplexity) => {
   const inst = instrumentName.toLowerCase().trim();
-  if (!inst) return;
+  if (!inst) {
+    console.log(`    ⚠️ Empty instrument name at step ${stepIndex}`);
+    return;
+  }
 
   let patternKey: keyof DrumPattern | null = null;
   let velocity = 0.7;
@@ -139,10 +174,16 @@ const processInstrument = (instrumentName: string, pattern: DrumPattern, stepInd
     if (!patternKey) patternKey = 'snare';
   }
 
-  if (!patternKey) return;
+  if (!patternKey) {
+    console.log(`    ⚠️ Unrecognized instrument: "${instrumentName}" at step ${stepIndex}`);
+    return;
+  }
   
   const drumSteps = pattern[patternKey];
-  if (!Array.isArray(drumSteps) || stepIndex >= drumSteps.length) return;
+  if (!Array.isArray(drumSteps) || stepIndex >= drumSteps.length) {
+    console.log(`    ⚠️ Invalid step index ${stepIndex} for ${patternKey}`);
+    return;
+  }
 
   const note: DrumNote | HiHatNote = {
     active: true,
@@ -155,6 +196,7 @@ const processInstrument = (instrumentName: string, pattern: DrumPattern, stepInd
   }
 
   (drumSteps as any)[stepIndex] = note;
+  console.log(`    ✅ Mapped "${instrumentName}" → ${patternKey}[${stepIndex}]`);
 };
 
 const parseColumnFormat = (rows: CSVRow[], headers: string[]): { pattern: DrumPattern; complexity: PatternComplexity; bpm?: number } => {
