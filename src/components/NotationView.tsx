@@ -7,13 +7,16 @@ interface NotationViewProps {
   complexity: PatternComplexity;
 }
 
-const drumStaffPositions = {
-  kick: 40,      // Bottom space
-  snare: 20,     // Middle line
-  tom: 10,       // Above snare
-  crash: 0,      // Above tom
-  hihat: -5,     // Top space
-  openhat: -5,   // Same as hihat
+const drumStaffPositions: {
+  [key: string]: { y: number; noteType: 'note' | 'x' | 'open' };
+} = {
+  kick: { y: 120, noteType: 'note' },
+  snare: { y: 80, noteType: 'note' },
+  tom: { y: 100, noteType: 'note' },
+  crash: { y: 20, noteType: 'x' },
+  hihat: { y: 40, noteType: 'x' },
+  openhat: { y: 40, noteType: 'open' },
+  ghostsnare: { y: 80, noteType: 'note' },
 };
 
 export const NotationView = ({ pattern, currentStep, complexity }: NotationViewProps) => {
@@ -29,135 +32,187 @@ export const NotationView = ({ pattern, currentStep, complexity }: NotationViewP
     const note = (pattern[drum as keyof DrumPattern] as any)[step];
     if (!note?.active) return null;
 
+    const drumInfo = drumStaffPositions[drum];
+    if (!drumInfo) return null;
+
     const noteType = note.type || 'normal';
-    const isOpen = (note as any)?.open;
     const isCurrentStep = step === currentStep;
 
-    // Note head based on drum type
-    let noteSymbol: JSX.Element;
-    
-    if (drum === 'kick') {
-      // Filled note head
-      noteSymbol = (
-        <ellipse 
-          cx={x} 
-          cy={y} 
-          rx="6" 
-          ry="5" 
-          fill="currentColor"
-          className={cn(
-            "transition-all duration-200",
-            isCurrentStep ? "text-[hsl(var(--playhead))]" : "text-[hsl(var(--note-active))]"
-          )}
-        />
-      );
-    } else if (drum === 'snare') {
-      // X note head
-      noteSymbol = (
-        <g className={cn(
-          "transition-all duration-200",
-          isCurrentStep ? "text-[hsl(var(--playhead))]" : "text-[hsl(var(--note-active))]"
-        )}>
-          <line x1={x - 5} y1={y - 5} x2={x + 5} y2={y + 5} stroke="currentColor" strokeWidth="2" />
-          <line x1={x - 5} y1={y + 5} x2={x + 5} y2={y - 5} stroke="currentColor" strokeWidth="2" />
+    if (drumInfo.noteType === 'x') {
+      // X-shaped notehead for crash and closed hi-hat
+      return (
+        <g key={`${drum}-${step}`}>
+          <line 
+            x1={x - 6} 
+            y1={y - 6} 
+            x2={x + 6} 
+            y2={y + 6} 
+            stroke="currentColor" 
+            strokeWidth="2" 
+            className={cn(
+              "transition-all duration-200",
+              isCurrentStep ? "text-[hsl(var(--playhead))]" : "text-[hsl(var(--note-active))]"
+            )} 
+          />
+          <line 
+            x1={x - 6} 
+            y1={y + 6} 
+            x2={x + 6} 
+            y2={y - 6} 
+            stroke="currentColor" 
+            strokeWidth="2" 
+            className={cn(
+              "transition-all duration-200",
+              isCurrentStep ? "text-[hsl(var(--playhead))]" : "text-[hsl(var(--note-active))]"
+            )} 
+          />
+          <line 
+            x1={x} 
+            y1={y + 6} 
+            x2={x} 
+            y2={y - 30} 
+            stroke="currentColor" 
+            strokeWidth="2" 
+            className={cn(
+              "transition-all duration-200",
+              isCurrentStep ? "text-[hsl(var(--playhead))]" : "text-[hsl(var(--note-active))]"
+            )} 
+          />
         </g>
       );
-    } else if (drum === 'tom') {
-      // Diamond note head
-      noteSymbol = (
-        <path
-          d={`M ${x},${y - 6} L ${x + 6},${y} L ${x},${y + 6} L ${x - 6},${y} Z`}
-          fill="currentColor"
-          className={cn(
-            "transition-all duration-200",
-            isCurrentStep ? "text-[hsl(var(--playhead))]" : "text-[hsl(var(--note-active))]"
-          )}
-        />
-      );
-    } else if (drum === 'crash') {
-      // Star/X note head for crash
-      noteSymbol = (
-        <g className={cn(
-          "transition-all duration-200",
-          isCurrentStep ? "text-[hsl(var(--playhead))]" : "text-[hsl(var(--note-active))]"
-        )}>
-          <line x1={x - 6} y1={y - 6} x2={x + 6} y2={y + 6} stroke="currentColor" strokeWidth="2" />
-          <line x1={x - 6} y1={y + 6} x2={x + 6} y2={y - 6} stroke="currentColor" strokeWidth="2" />
-          <line x1={x} y1={y - 7} x2={x} y2={y + 7} stroke="currentColor" strokeWidth="2" />
-          <line x1={x - 7} y1={y} x2={x + 7} y2={y} stroke="currentColor" strokeWidth="2" />
+    } else if (drumInfo.noteType === 'open') {
+      // Open hi-hat: X notehead with small circle above
+      return (
+        <g key={`${drum}-${step}`}>
+          {/* X notehead */}
+          <line 
+            x1={x - 6} 
+            y1={y - 6} 
+            x2={x + 6} 
+            y2={y + 6} 
+            stroke="currentColor" 
+            strokeWidth="2" 
+            className={cn(
+              "transition-all duration-200",
+              isCurrentStep ? "text-[hsl(var(--playhead))]" : "text-[hsl(var(--note-active))]"
+            )} 
+          />
+          <line 
+            x1={x - 6} 
+            y1={y + 6} 
+            x2={x + 6} 
+            y2={y - 6} 
+            stroke="currentColor" 
+            strokeWidth="2" 
+            className={cn(
+              "transition-all duration-200",
+              isCurrentStep ? "text-[hsl(var(--playhead))]" : "text-[hsl(var(--note-active))]"
+            )} 
+          />
+          {/* Stem */}
+          <line 
+            x1={x} 
+            y1={y + 6} 
+            x2={x} 
+            y2={y - 30} 
+            stroke="currentColor" 
+            strokeWidth="2" 
+            className={cn(
+              "transition-all duration-200",
+              isCurrentStep ? "text-[hsl(var(--playhead))]" : "text-[hsl(var(--note-active))]"
+            )} 
+          />
+          {/* Small circle above to indicate "open" */}
+          <circle 
+            cx={x} 
+            cy={y - 18} 
+            r="4" 
+            fill="none" 
+            stroke="currentColor" 
+            strokeWidth="1.5" 
+            className={cn(
+              "transition-all duration-200",
+              isCurrentStep ? "text-[hsl(var(--playhead))]" : "text-[hsl(var(--note-active))]"
+            )} 
+          />
         </g>
       );
     } else {
-      // Circle note head for hi-hat
-      noteSymbol = (
-        <g className={cn(
-          "transition-all duration-200",
-          isCurrentStep ? "text-[hsl(var(--playhead))]" : "text-[hsl(var(--note-active))]"
-        )}>
-          <circle 
+      // Filled ellipse note for kick, snare, tom
+      return (
+        <g key={`${drum}-${step}`}>
+          <ellipse 
             cx={x} 
             cy={y} 
-            r="5" 
-            stroke="currentColor" 
-            strokeWidth="1.5" 
-            fill={isOpen ? "none" : "currentColor"} 
+            rx="7" 
+            ry="5" 
+            fill="currentColor" 
+            className={cn(
+              "transition-all duration-200",
+              isCurrentStep ? "text-[hsl(var(--playhead))]" : "text-[hsl(var(--note-active))]"
+            )} 
           />
-          {isOpen && (
-            <circle cx={x} cy={y - 18} r="4" fill="none" stroke="currentColor" strokeWidth="1.5" />
+          <line 
+            x1={x + 7} 
+            y1={y} 
+            x2={x + 7} 
+            y2={y - 30} 
+            stroke="currentColor" 
+            strokeWidth="2" 
+            className={cn(
+              "transition-all duration-200",
+              isCurrentStep ? "text-[hsl(var(--playhead))]" : "text-[hsl(var(--note-active))]"
+            )} 
+          />
+          {/* Ghost note parentheses */}
+          {noteType === 'ghost' && (
+            <g opacity="0.5">
+              <text 
+                x={x - 10} 
+                y={y + 3} 
+                fontSize="16" 
+                fill="currentColor"
+                className={cn(
+                  "transition-all duration-200",
+                  isCurrentStep ? "text-[hsl(var(--playhead))]" : "text-[hsl(var(--note-active))]"
+                )}
+              >
+                (
+              </text>
+              <text 
+                x={x + 6} 
+                y={y + 3} 
+                fontSize="16" 
+                fill="currentColor"
+                className={cn(
+                  "transition-all duration-200",
+                  isCurrentStep ? "text-[hsl(var(--playhead))]" : "text-[hsl(var(--note-active))]"
+                )}
+              >
+                )
+              </text>
+            </g>
+          )}
+          {/* Accent mark */}
+          {noteType === 'accent' && (
+            <text 
+              x={x} 
+              y={y - 35} 
+              fontSize="14" 
+              fontWeight="bold" 
+              textAnchor="middle" 
+              fill="currentColor"
+              className={cn(
+                "transition-all duration-200",
+                isCurrentStep ? "text-[hsl(var(--playhead))]" : "text-[hsl(var(--note-active))]"
+              )}
+            >
+              {'>'}
+            </text>
           )}
         </g>
       );
     }
-
-    return (
-      <g key={`${drum}-${step}`}>
-        {/* Stem */}
-        <line 
-          x1={x} 
-          y1={y} 
-          x2={x} 
-          y2={y - 30} 
-          stroke="currentColor" 
-          strokeWidth="1.5"
-          className={cn(
-            "transition-all duration-200",
-            isCurrentStep ? "text-[hsl(var(--playhead))]" : "text-[hsl(var(--note-active))]"
-          )}
-        />
-        
-        {/* Note head */}
-        {noteSymbol}
-        
-        {/* Ghost note parentheses */}
-        {noteType === 'ghost' && (
-          <g opacity="0.5" className={cn(
-            "transition-all duration-200",
-            isCurrentStep ? "text-[hsl(var(--playhead))]" : "text-[hsl(var(--note-active))]"
-          )}>
-            <text x={x - 10} y={y + 3} fontSize="16" fill="currentColor">(</text>
-            <text x={x + 6} y={y + 3} fontSize="16" fill="currentColor">)</text>
-          </g>
-        )}
-        
-        {/* Accent mark */}
-        {noteType === 'accent' && (
-          <text 
-            x={x} 
-            y={y - 35} 
-            fontSize="14" 
-            fontWeight="bold" 
-            textAnchor="middle" 
-            fill="currentColor"
-            className={cn(
-              "transition-all duration-200",
-              isCurrentStep ? "text-[hsl(var(--playhead))]" : "text-[hsl(var(--note-active))]"
-            )}
-          >
-            {'>'}
-          </text>
-        )}
-      </g>
-    );
   };
 
   return (
@@ -269,13 +324,13 @@ export const NotationView = ({ pattern, currentStep, complexity }: NotationViewP
           )}
 
           {/* Notes for each drum */}
-          {Object.entries(drumStaffPositions).map(([drum, position]) => (
+          {Object.entries(drumStaffPositions).map(([drum, drumInfo]) => (
             <g key={drum}>
               {Array.from({ length: visibleSteps }).map((_, i) => {
                 const step = startStep + i;
                 if (step >= complexity.maxSteps) return null;
                 const x = 60 + (i * 920) / visibleSteps;
-                const y = position;
+                const y = drumInfo.y;
                 return renderNote(drum, step, x, y);
               })}
             </g>
