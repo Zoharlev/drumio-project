@@ -16,6 +16,7 @@ export interface DrumPattern {
   hihat: HiHatNote[];
   openhat: HiHatNote[];
   tom: DrumNote[];
+  crash: DrumNote[];
   length: number;
   subdivisions?: string[];
   offsets?: number[];
@@ -37,6 +38,7 @@ export const createEmptyPattern = (steps: number = 16): DrumPattern => ({
   hihat: Array(steps).fill(null).map(() => ({ active: false, velocity: 0.7, type: 'normal', open: false })),
   openhat: Array(steps).fill(null).map(() => ({ active: false, velocity: 0.7, type: 'normal', open: true })),
   tom: Array(steps).fill(null).map(() => ({ active: false, velocity: 0.7, type: 'normal' })),
+  crash: Array(steps).fill(null).map(() => ({ active: false, velocity: 0.9, type: 'accent' })),
   length: steps,
   subdivisions: [],
   offsets: [],

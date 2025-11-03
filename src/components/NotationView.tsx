@@ -11,6 +11,7 @@ const drumStaffPositions = {
   kick: 40,      // Bottom space
   snare: 20,     // Middle line
   tom: 10,       // Above snare
+  crash: 0,      // Above tom
   hihat: -5,     // Top space
   openhat: -5,   // Same as hihat
 };
@@ -50,6 +51,16 @@ export const NotationView = ({ pattern, currentStep, complexity }: NotationViewP
           d={`M ${x},${y - 6} L ${x + 6},${y} L ${x},${y + 6} L ${x - 6},${y} Z`}
           fill="currentColor"
         />
+      );
+    } else if (drum === 'crash') {
+      // Star/X note head for crash
+      noteSymbol = (
+        <g>
+          <line x1={x - 6} y1={y - 6} x2={x + 6} y2={y + 6} stroke="currentColor" strokeWidth="2" />
+          <line x1={x - 6} y1={y + 6} x2={x + 6} y2={y - 6} stroke="currentColor" strokeWidth="2" />
+          <line x1={x} y1={y - 7} x2={x} y2={y + 7} stroke="currentColor" strokeWidth="2" />
+          <line x1={x - 7} y1={y} x2={x + 7} y2={y} stroke="currentColor" strokeWidth="2" />
+        </g>
       );
     } else {
       // Circle note head for hi-hat
@@ -208,6 +219,10 @@ export const NotationView = ({ pattern, currentStep, complexity }: NotationViewP
           <div className="flex items-center gap-2">
             <span className="text-lg">◆</span>
             <span>Tom</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-lg">☆</span>
+            <span>Crash Cymbal</span>
           </div>
         </div>
       </div>

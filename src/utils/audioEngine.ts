@@ -97,6 +97,8 @@ export class AudioEngine {
       this.playKick(adjustedVelocity);
     } else if (drum === 'tom') {
       this.playTom(adjustedVelocity);
+    } else if (drum === 'crash') {
+      this.playCrash(adjustedVelocity);
     }
   }
 
@@ -357,6 +359,51 @@ export class AudioEngine {
     
     tomOsc.start(currentTime);
     tomOsc.stop(currentTime + duration);
+  }
+
+  private playCrash(velocity: number) {
+    const currentTime = this.context.currentTime;
+    const duration = 2.0;
+    
+    // Create white noise for cymbal body
+    const bufferSize = this.context.sampleRate * duration;
+    const buffer = this.context.createBuffer(1, bufferSize, this.context.sampleRate);
+    const data = buffer.getChannelData(0);
+    
+    for (let i = 0; i < bufferSize; i++) {
+      data[i] = Math.random() * 2 - 1;
+    }
+    
+    const noise = this.context.createBufferSource();
+    noise.buffer = buffer;
+    
+    // High-pass filter for bright cymbal sound
+    const highpassFilter = this.context.createBiquadFilter();
+    highpassFilter.type = 'highpass';
+    highpassFilter.frequency.setValueAtTime(3000, currentTime);
+    highpassFilter.Q.setValueAtTime(0.5, currentTime);
+    
+    // Band-pass filter for body
+    const bandpassFilter = this.context.createBiquadFilter();
+    bandpassFilter.type = 'bandpass';
+    bandpassFilter.frequency.setValueAtTime(8000, currentTime);
+    bandpassFilter.Q.setValueAtTime(2, currentTime);
+    
+    const gainNode = this.context.createGain();
+    
+    noise.connect(highpassFilter);
+    highpassFilter.connect(bandpassFilter);
+    bandpassFilter.connect(gainNode);
+    gainNode.connect(this.drumGain);
+    
+    // Long decay envelope
+    gainNode.gain.setValueAtTime(0, currentTime);
+    gainNode.gain.linearRampToValueAtTime(1.0 * velocity, currentTime + 0.01);
+    gainNode.gain.exponentialRampToValueAtTime(0.3 * velocity, currentTime + 0.1);
+    gainNode.gain.exponentialRampToValueAtTime(0.001, currentTime + duration);
+    
+    noise.start(currentTime);
+    noise.stop(currentTime + duration);
   }
 
   playMetronome() {

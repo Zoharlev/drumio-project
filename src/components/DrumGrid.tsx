@@ -25,6 +25,7 @@ const drumLabels: { [key: string]: { name: string; symbol: string } } = {
   hihat: { name: "Hi-Hat", symbol: "○" },
   openhat: { name: "Open Hat", symbol: "◎" },
   tom: { name: "Tom", symbol: "◆" },
+  crash: { name: "Crash", symbol: "☆" },
   "HH Closed": { name: "Hi-Hat", symbol: "○" },
   "HH Open": { name: "Open Hat", symbol: "◎" },
   Kick: { name: "Kick", symbol: "●" },
