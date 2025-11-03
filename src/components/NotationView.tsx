@@ -27,6 +27,7 @@ export const NotationView = ({ pattern, currentStep, complexity }: NotationViewP
     const x = 80 + (step % stepsPerMeasure) * 40;
     const noteType = note.type || 'normal';
     const isOpen = (note as any)?.open;
+    const isCurrentStep = step === currentStep;
 
     // Note head based on drum type
     let noteSymbol: JSX.Element;
@@ -34,12 +35,25 @@ export const NotationView = ({ pattern, currentStep, complexity }: NotationViewP
     if (drum === 'kick') {
       // Filled note head
       noteSymbol = (
-        <ellipse cx={x} cy={y} rx="6" ry="5" fill="currentColor" />
+        <ellipse 
+          cx={x} 
+          cy={y} 
+          rx="6" 
+          ry="5" 
+          fill="currentColor"
+          className={cn(
+            "transition-all duration-200",
+            isCurrentStep ? "text-[hsl(var(--playhead))]" : "text-[hsl(var(--note-active))]"
+          )}
+        />
       );
     } else if (drum === 'snare') {
       // X note head
       noteSymbol = (
-        <g>
+        <g className={cn(
+          "transition-all duration-200",
+          isCurrentStep ? "text-[hsl(var(--playhead))]" : "text-[hsl(var(--note-active))]"
+        )}>
           <line x1={x - 5} y1={y - 5} x2={x + 5} y2={y + 5} stroke="currentColor" strokeWidth="2" />
           <line x1={x - 5} y1={y + 5} x2={x + 5} y2={y - 5} stroke="currentColor" strokeWidth="2" />
         </g>
@@ -50,12 +64,19 @@ export const NotationView = ({ pattern, currentStep, complexity }: NotationViewP
         <path
           d={`M ${x},${y - 6} L ${x + 6},${y} L ${x},${y + 6} L ${x - 6},${y} Z`}
           fill="currentColor"
+          className={cn(
+            "transition-all duration-200",
+            isCurrentStep ? "text-[hsl(var(--playhead))]" : "text-[hsl(var(--note-active))]"
+          )}
         />
       );
     } else if (drum === 'crash') {
       // Star/X note head for crash
       noteSymbol = (
-        <g>
+        <g className={cn(
+          "transition-all duration-200",
+          isCurrentStep ? "text-[hsl(var(--playhead))]" : "text-[hsl(var(--note-active))]"
+        )}>
           <line x1={x - 6} y1={y - 6} x2={x + 6} y2={y + 6} stroke="currentColor" strokeWidth="2" />
           <line x1={x - 6} y1={y + 6} x2={x + 6} y2={y - 6} stroke="currentColor" strokeWidth="2" />
           <line x1={x} y1={y - 7} x2={x} y2={y + 7} stroke="currentColor" strokeWidth="2" />
@@ -65,10 +86,20 @@ export const NotationView = ({ pattern, currentStep, complexity }: NotationViewP
     } else {
       // Circle note head for hi-hat
       noteSymbol = (
-        <g>
-          <circle cx={x} cy={y} r="5" stroke="currentColor" strokeWidth="1.5" fill={isOpen ? "none" : "currentColor"} />
+        <g className={cn(
+          "transition-all duration-200",
+          isCurrentStep ? "text-[hsl(var(--playhead))]" : "text-[hsl(var(--note-active))]"
+        )}>
+          <circle 
+            cx={x} 
+            cy={y} 
+            r="5" 
+            stroke="currentColor" 
+            strokeWidth="1.5" 
+            fill={isOpen ? "none" : "currentColor"} 
+          />
           {isOpen && (
-            <text x={x} y={y - 10} fontSize="12" textAnchor="middle" fill="currentColor">o</text>
+            <circle cx={x} cy={y - 18} r="4" fill="none" stroke="currentColor" strokeWidth="1.5" />
           )}
         </g>
       );
@@ -77,14 +108,28 @@ export const NotationView = ({ pattern, currentStep, complexity }: NotationViewP
     return (
       <g key={`${drum}-${step}`}>
         {/* Stem */}
-        <line x1={x} y1={y} x2={x} y2={y - 30} stroke="currentColor" strokeWidth="1.5" />
+        <line 
+          x1={x} 
+          y1={y} 
+          x2={x} 
+          y2={y - 30} 
+          stroke="currentColor" 
+          strokeWidth="1.5"
+          className={cn(
+            "transition-all duration-200",
+            isCurrentStep ? "text-[hsl(var(--playhead))]" : "text-[hsl(var(--note-active))]"
+          )}
+        />
         
         {/* Note head */}
         {noteSymbol}
         
         {/* Ghost note parentheses */}
         {noteType === 'ghost' && (
-          <g opacity="0.5">
+          <g opacity="0.5" className={cn(
+            "transition-all duration-200",
+            isCurrentStep ? "text-[hsl(var(--playhead))]" : "text-[hsl(var(--note-active))]"
+          )}>
             <text x={x - 10} y={y + 3} fontSize="16" fill="currentColor">(</text>
             <text x={x + 6} y={y + 3} fontSize="16" fill="currentColor">)</text>
           </g>
@@ -92,20 +137,20 @@ export const NotationView = ({ pattern, currentStep, complexity }: NotationViewP
         
         {/* Accent mark */}
         {noteType === 'accent' && (
-          <text x={x} y={y - 35} fontSize="14" fontWeight="bold" textAnchor="middle" fill="currentColor">{'>'}</text>
-        )}
-        
-        {/* Current step highlight */}
-        {step === currentStep && (
-          <rect
-            x={x - 8}
-            y={y - 35}
-            width="16"
-            height="50"
-            fill="hsl(var(--primary))"
-            opacity="0.2"
-            rx="4"
-          />
+          <text 
+            x={x} 
+            y={y - 35} 
+            fontSize="14" 
+            fontWeight="bold" 
+            textAnchor="middle" 
+            fill="currentColor"
+            className={cn(
+              "transition-all duration-200",
+              isCurrentStep ? "text-[hsl(var(--playhead))]" : "text-[hsl(var(--note-active))]"
+            )}
+          >
+            {'>'}
+          </text>
         )}
       </g>
     );
@@ -144,12 +189,30 @@ export const NotationView = ({ pattern, currentStep, complexity }: NotationViewP
                     stroke="currentColor"
                     strokeWidth="1"
                     opacity="0.3"
+                    className="text-[hsl(var(--grid-line))]"
                   />
                 ))}
                 
                 {/* Measure lines */}
-                <line x1="50" y1="35" x2="50" y2="85" stroke="currentColor" strokeWidth="2" />
-                <line x1="750" y1="35" x2="750" y2="85" stroke="currentColor" strokeWidth="2" />
+                <line x1="50" y1="35" x2="50" y2="85" stroke="currentColor" strokeWidth="2" className="text-foreground" />
+                <line x1="750" y1="35" x2="750" y2="85" stroke="currentColor" strokeWidth="2" className="text-foreground" />
+                
+                {/* Animated playhead with glow effect */}
+                {currentStep >= measureStart && currentStep < measureEnd && (
+                  <line
+                    x1={80 + (currentStep - measureStart) * 40}
+                    y1="20"
+                    x2={80 + (currentStep - measureStart) * 40}
+                    y2="85"
+                    stroke="currentColor"
+                    strokeWidth="3"
+                    className="text-[hsl(var(--playhead))] transition-all duration-100"
+                    style={{ 
+                      filter: "drop-shadow(0 0 8px hsl(var(--playhead) / 0.6))",
+                      opacity: 0.9
+                    }}
+                  />
+                )}
                 
                 {/* Beat subdivisions */}
                 {Array.from({ length: stepsPerMeasure / 4 }).map((_, beatIndex) => {
