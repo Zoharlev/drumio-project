@@ -74,7 +74,7 @@
     --playhead: 60 95% 65%; /* Bright yellow/gold for the playhead */
     --note-active: 270 95% 75%; /* Vibrant purple for active notes */
     --note-inactive: 220 13% 25%; /* Dark gray for inactive notes */
-    --grid-line: 220 13% 18%; /* Subtle dark gray for grid lines */
+    --grid-line: 220 13% 35%; /* Visible gray for grid lines */
     --tempo-accent: 250 95% 70%; /* Blue-purple for tempo accents */
 
     /* Gradients */
