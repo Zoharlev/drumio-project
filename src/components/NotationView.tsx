@@ -252,11 +252,11 @@ export const NotationView = ({ pattern, currentStep, complexity }: NotationViewP
       {/* Notation Container */}
       <div className="relative bg-card rounded-lg p-8 shadow-elevated overflow-x-auto">
         <svg width="100%" height="200" className="overflow-visible min-w-[800px]" viewBox="0 0 1000 200">
-          {/* Staff lines */}
+          {/* Staff lines (5 horizontal lines for drum notation) */}
           {[0, 1, 2, 3, 4].map((line) => (
             <line
               key={line}
-              x1="40"
+              x1="0"
               x2="1000"
               y1={40 + line * 20}
               y2={40 + line * 20}
