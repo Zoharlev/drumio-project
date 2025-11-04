@@ -229,6 +229,14 @@ export const DrumGrid = ({
         {Object.entries(pattern)
           .filter(([key]) => key !== 'length' && key !== 'subdivisions' && key !== 'offsets' && key !== 'sections')
           .filter(([_, steps]) => Array.isArray(steps))
+          .filter(([drumKey, steps]) => {
+            // Basic instruments always appear
+            const basicInstruments = ['kick', 'snare', 'hihat', 'openhat'];
+            if (basicInstruments.includes(drumKey)) return true;
+            
+            // Additional instruments only appear if they have active notes
+            return Array.isArray(steps) && steps.some(note => note?.active === true);
+          })
           .map(([drumKey, steps]) => {
             const drumInfo = drumLabels[drumKey] || {
               name: drumKey,
