@@ -128,7 +128,8 @@ const parseSubdivisionFormat = (rows: CSVRow[], headers: string[]): { pattern: D
     kickNotes: pattern.kick.filter(n => n.active).length,
     snareNotes: pattern.snare.filter(n => n.active).length,
     hihatNotes: pattern.hihat.filter(n => n.active).length,
-    openhatNotes: pattern.openhat.filter(n => n.active).length
+    openhatNotes: pattern.openhat.filter(n => n.active).length,
+    rideNotes: pattern.ride.filter(n => n.active).length
   });
 
   return { pattern, complexity, bpm };
@@ -158,6 +159,9 @@ const processInstrument = (instrumentName: string, pattern: DrumPattern, stepInd
     patternKey = 'crash';
     velocity = 0.9;
     type = 'accent';
+  } else if (inst.includes('ride')) {
+    patternKey = 'ride';
+    velocity = 0.7;
   } else if (inst.includes('hi-hat') || inst.includes('hihat')) {
     if (inst.includes('open')) {
       patternKey = 'openhat';
@@ -234,6 +238,12 @@ const parseColumnFormat = (rows: CSVRow[], headers: string[]): { pattern: DrumPa
       patternKey = 'kick';
     } else if (instrument.includes('snare')) {
       patternKey = 'snare';
+    } else if (instrument.includes('ride')) {
+      patternKey = 'ride';
+    } else if (instrument.includes('crash')) {
+      patternKey = 'crash';
+    } else if (instrument.includes('tom')) {
+      patternKey = 'tom';
     } else if (instrument.includes('hat') || instrument.includes('hi-hat') || instrument.includes('hihat')) {
       patternKey = instrument.includes('open') ? 'openhat' : 'hihat';
     }
