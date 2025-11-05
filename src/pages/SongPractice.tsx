@@ -3,7 +3,15 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, Play, Pause, RotateCcw } from "lucide-react";
+import { ChevronLeft, Play, Pause, RotateCcw, ArrowRight } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { DrumGrid } from "@/components/DrumGrid";
 import { AudioEngine } from "@/utils/audioEngine";
 import { DrumPattern, PatternComplexity, createEmptyPattern } from "@/types/drumPatterns";
@@ -12,6 +20,7 @@ import { BottomToolbar } from "@/components/BottomToolbar";
 import { ViewToggle, ViewMode } from "@/components/ViewToggle";
 import { NotationView } from "@/components/NotationView";
 import { SongTimeDisplay } from "@/components/SongTimeDisplay";
+import { useSongPractices } from "@/hooks/useSongPractices";
 
 const SongPractice = () => {
   const { songId, practiceId } = useParams();
@@ -35,6 +44,8 @@ const SongPractice = () => {
     hasVelocityVariation: false,
     maxSteps: 16
   });
+  const [showCompletionDialog, setShowCompletionDialog] = useState(false);
+  const hasCompletedRef = useRef(false);
 
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const audioEngineRef = useRef<AudioEngine | null>(null);
@@ -71,6 +82,9 @@ const SongPractice = () => {
     },
     enabled: !!practiceId,
   });
+
+  // Fetch all practices for this song to enable navigation
+  const { data: songPractices } = useSongPractices(songId || "");
 
   // Initialize audio engine
   useEffect(() => {
@@ -132,7 +146,19 @@ const SongPractice = () => {
       const stepDuration = 60000 / bpm / (complexity.hasSixteenthNotes ? 4 : 2);
       
       intervalRef.current = setInterval(() => {
-        setCurrentStep((prev) => (prev + 1) % complexity.maxSteps);
+        setCurrentStep((prev) => {
+          const next = prev + 1;
+          
+          // If on practice page and pattern completed, stop and show dialog
+          if (practiceId && next >= complexity.maxSteps && !hasCompletedRef.current) {
+            hasCompletedRef.current = true;
+            setIsPlaying(false);
+            setShowCompletionDialog(true);
+            return 0; // Reset to start
+          }
+          
+          return next % complexity.maxSteps;
+        });
       }, stepDuration);
     } else {
       if (intervalRef.current) {
@@ -145,7 +171,7 @@ const SongPractice = () => {
         clearInterval(intervalRef.current);
       }
     };
-  }, [isPlaying, bpm, complexity.maxSteps]);
+  }, [isPlaying, bpm, complexity.maxSteps, practiceId]);
 
   // Update volume controls
   useEffect(() => {
@@ -205,8 +231,30 @@ const SongPractice = () => {
     setIsPlaying(false);
     setCurrentStep(0);
     startTimeRef.current = 0;
+    hasCompletedRef.current = false;
     if (audioEngineRef.current) {
       audioEngineRef.current.stopBackingTrack();
+    }
+  };
+
+  const handleRepeatSection = () => {
+    setShowCompletionDialog(false);
+    hasCompletedRef.current = false;
+    setCurrentStep(0);
+    setIsPlaying(true);
+  };
+
+  const handleNextSection = () => {
+    if (!songPractices || !practiceId) return;
+    
+    const currentIndex = songPractices.practices.findIndex(p => p.id === practiceId);
+    const nextPractice = songPractices.practices[currentIndex + 1];
+    
+    if (nextPractice) {
+      navigate(`/song/${songId}/practice/${nextPractice.id}`);
+      setShowCompletionDialog(false);
+      hasCompletedRef.current = false;
+      setCurrentStep(0);
     }
   };
 
@@ -415,6 +463,37 @@ const SongPractice = () => {
         onAudioVolumeChange={setAudioVolume}
         showAudioControl={!practiceId}
       />
+
+      {/* Completion Dialog */}
+      <AlertDialog open={showCompletionDialog} onOpenChange={setShowCompletionDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Practice Complete!</AlertDialogTitle>
+            <AlertDialogDescription>
+              Great job! What would you like to do next?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+            <Button
+              variant="outline"
+              onClick={handleRepeatSection}
+              className="w-full sm:w-auto"
+            >
+              <RotateCcw className="h-4 w-4 mr-2" />
+              Repeat Section
+            </Button>
+            <Button
+              onClick={handleNextSection}
+              className="w-full sm:w-auto"
+              disabled={!songPractices || !practiceId || 
+                songPractices.practices.findIndex(p => p.id === practiceId) === songPractices.practices.length - 1}
+            >
+              Next Section
+              <ArrowRight className="h-4 w-4 ml-2" />
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
