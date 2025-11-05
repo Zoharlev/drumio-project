@@ -14,6 +14,7 @@ import NotFound from "./pages/NotFound";
 import { AuthCallback } from "@/components/AuthCallback";
 import { PracticeSession } from "@/components/PracticeSession";
 import SongPractice from "./pages/SongPractice";
+import SongDetails from "./pages/SongDetails";
 
 const queryClient = new QueryClient();
 
@@ -30,7 +31,9 @@ const App = () => (
           <Route path="/lesson/:lessonId/practices" element={<LessonPractices />} />
           <Route path="/lesson/:lessonId/practice/:practiceId" element={<PracticeDetails />} />
           <Route path="/lesson/:lessonId/practice/:practiceId/session" element={<PracticeSession />} />
+          <Route path="/song/:songId" element={<SongDetails />} />
           <Route path="/song/:songId/practice" element={<SongPractice />} />
+          <Route path="/song/:songId/practice/:practiceId" element={<SongPractice />} />
           <Route path="/onboarding" element={<Onboarding />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />

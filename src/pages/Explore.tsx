@@ -65,7 +65,7 @@ const Explore = () => {
   };
 
   const handleStartPractice = (songId: string) => {
-    navigate(`/song/${songId}/practice`);
+    navigate(`/song/${songId}`);
   };
   return <div className="min-h-screen bg-background px-6 py-8">
       {/* Header */}
