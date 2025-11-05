@@ -33,6 +33,7 @@ export class AudioEngine {
     this.loadDrumSample('snare', '/sounds/snare-acoustic-raw-2.wav');
     this.loadDrumSample('ghostsnare', '/sounds/snare-ghost_C_minor.wav');
     this.loadDrumSample('kick', '/sounds/bass-kick-drum-hit_D_minor.wav');
+    this.loadDrumSample('ride', '/sounds/ride-cymbal.wav');
   }
 
   private async loadDrumSample(drumName: string, url: string) {
