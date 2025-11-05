@@ -14,6 +14,7 @@ const drumStaffPositions: {
   snare: { y: 80, noteType: 'note' },
   tom: { y: 100, noteType: 'note' },
   crash: { y: 20, noteType: 'x' },
+  ride: { y: 30, noteType: 'x' },
   hihat: { y: 40, noteType: 'x' },
   openhat: { y: 40, noteType: 'open' },
   ghostsnare: { y: 80, noteType: 'note' },
@@ -231,7 +232,7 @@ export const NotationView = ({ pattern, currentStep, complexity }: NotationViewP
               <line x1="4" y1="4" x2="16" y2="16" stroke="currentColor" strokeWidth="2" className="text-[hsl(var(--note-active))]" />
               <line x1="4" y1="16" x2="16" y2="4" stroke="currentColor" strokeWidth="2" className="text-[hsl(var(--note-active))]" />
             </svg>
-            <span>Crash</span>
+            <span>Crash / Ride</span>
           </div>
           <div className="flex items-center gap-2">
             <svg width="20" height="20" viewBox="0 0 20 20">

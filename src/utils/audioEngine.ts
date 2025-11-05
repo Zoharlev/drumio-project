@@ -99,6 +99,8 @@ export class AudioEngine {
       this.playTom(adjustedVelocity);
     } else if (drum === 'crash') {
       this.playCrash(adjustedVelocity);
+    } else if (drum === 'ride') {
+      this.playRide(adjustedVelocity);
     }
   }
 
@@ -405,6 +407,52 @@ export class AudioEngine {
     noise.start(currentTime);
     noise.stop(currentTime + duration);
   }
+
+  private playRide(velocity: number = 0.7) {
+    const currentTime = this.context.currentTime;
+    const duration = 1.5;
+    
+    // Create noise for ride cymbal
+    const bufferSize = this.context.sampleRate * duration;
+    const buffer = this.context.createBuffer(1, bufferSize, this.context.sampleRate);
+    const data = buffer.getChannelData(0);
+    
+    for (let i = 0; i < bufferSize; i++) {
+      data[i] = (Math.random() * 2 - 1);
+    }
+    
+    const noise = this.context.createBufferSource();
+    noise.buffer = buffer;
+    
+    // Band-pass filter for bell-like ride sound
+    const bandpassFilter = this.context.createBiquadFilter();
+    bandpassFilter.type = 'bandpass';
+    bandpassFilter.frequency.setValueAtTime(5000, currentTime);
+    bandpassFilter.Q.setValueAtTime(3, currentTime);
+    
+    // Additional high-pass for shimmer
+    const highpassFilter = this.context.createBiquadFilter();
+    highpassFilter.type = 'highpass';
+    highpassFilter.frequency.setValueAtTime(2500, currentTime);
+    highpassFilter.Q.setValueAtTime(0.7, currentTime);
+    
+    const gainNode = this.context.createGain();
+    
+    noise.connect(bandpassFilter);
+    bandpassFilter.connect(highpassFilter);
+    highpassFilter.connect(gainNode);
+    gainNode.connect(this.drumGain);
+    
+    // Sustained envelope with longer decay than crash
+    gainNode.gain.setValueAtTime(0, currentTime);
+    gainNode.gain.linearRampToValueAtTime(0.8 * velocity, currentTime + 0.01);
+    gainNode.gain.exponentialRampToValueAtTime(0.5 * velocity, currentTime + 0.15);
+    gainNode.gain.exponentialRampToValueAtTime(0.001, currentTime + duration);
+    
+    noise.start(currentTime);
+    noise.stop(currentTime + duration);
+  }
+
 
   playMetronome() {
     const oscillator = this.context.createOscillator();
