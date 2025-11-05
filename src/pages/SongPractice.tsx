@@ -413,6 +413,7 @@ const SongPractice = () => {
         onMetronomeVolumeChange={setMetronomeVolume}
         onDrumVolumeChange={setDrumVolume}
         onAudioVolumeChange={setAudioVolume}
+        showAudioControl={!practiceId}
       />
     </div>
   );
