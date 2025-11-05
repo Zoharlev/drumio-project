@@ -14,7 +14,7 @@ import { NotationView } from "@/components/NotationView";
 import { SongTimeDisplay } from "@/components/SongTimeDisplay";
 
 const SongPractice = () => {
-  const { songId } = useParams();
+  const { songId, practiceId } = useParams();
   const navigate = useNavigate();
   
   const [isPlaying, setIsPlaying] = useState(false);
@@ -54,6 +54,22 @@ const SongPractice = () => {
       return data;
     },
     enabled: !!songId,
+  });
+
+  // Fetch practice data
+  const { data: practice } = useQuery({
+    queryKey: ["practice", practiceId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("practices")
+        .select("*")
+        .eq("id", practiceId)
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!practiceId,
   });
 
   // Initialize audio engine
@@ -293,7 +309,7 @@ const SongPractice = () => {
           
           <div className="flex-1 text-center">
             <h1 className="text-lg font-semibold text-foreground font-poppins">
-              {song.title}
+              {song.title}{practice ? ` (${practice.title})` : ""}
             </h1>
           </div>
           
