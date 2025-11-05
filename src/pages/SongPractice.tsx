@@ -99,10 +99,13 @@ const SongPractice = () => {
   // Load drum pattern from CSV
   useEffect(() => {
     const loadPattern = async () => {
-      if (!song?.notation_file_url) return;
+      // Use practice CSV if on practice page, otherwise use song CSV
+      const csvUrl = practiceId ? practice?.chords_file_url : song?.notation_file_url;
+      
+      if (!csvUrl) return;
 
       try {
-        const { pattern, complexity: patternComplexity, bpm: csvBpm } = await parseCSVNotation(song.notation_file_url);
+        const { pattern, complexity: patternComplexity, bpm: csvBpm } = await parseCSVNotation(csvUrl);
         setDrumPattern(pattern);
         setComplexity(patternComplexity);
         if (csvBpm) setBpm(csvBpm);
@@ -112,7 +115,7 @@ const SongPractice = () => {
     };
 
     loadPattern();
-  }, [song?.notation_file_url]);
+  }, [song?.notation_file_url, practice?.chords_file_url, practiceId]);
 
   // Load audio file (only for song preview, not for practice pages)
   useEffect(() => {
