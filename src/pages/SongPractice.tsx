@@ -285,7 +285,7 @@ const SongPractice = () => {
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => navigate("/explore")}
+            onClick={() => navigate(`/song/${songId}`)}
             className="text-muted-foreground hover:text-foreground"
           >
             <ChevronLeft className="h-6 w-6" />
