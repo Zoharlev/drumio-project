@@ -100,10 +100,10 @@ const SongPractice = () => {
     loadPattern();
   }, [song?.notation_file_url]);
 
-  // Load audio file
+  // Load audio file (only for song preview, not for practice pages)
   useEffect(() => {
     const loadAudio = async () => {
-      if (!song?.audio_file_url || !audioEngineRef.current) return;
+      if (!song?.audio_file_url || !audioEngineRef.current || practiceId) return;
 
       try {
         await audioEngineRef.current.loadAudioFile(song.audio_file_url);
@@ -113,7 +113,7 @@ const SongPractice = () => {
     };
 
     loadAudio();
-  }, [song?.audio_file_url]);
+  }, [song?.audio_file_url, practiceId]);
 
   // Set BPM from song
   useEffect(() => {
@@ -266,16 +266,16 @@ const SongPractice = () => {
     ? (audioEngineRef.current.getBackingTrackDuration() * 1000) || (complexity.maxSteps * stepDuration)
     : complexity.maxSteps * stepDuration;
 
-  // Toggle audio playback
+  // Toggle audio playback (disabled for practice pages)
   useEffect(() => {
-    if (!audioEngineRef.current) return;
+    if (!audioEngineRef.current || practiceId) return;
     
     if (isPlaying && audioEnabled) {
       audioEngineRef.current.playBackingTrack();
     } else {
       audioEngineRef.current.pauseBackingTrack();
     }
-  }, [audioEnabled, isPlaying]);
+  }, [audioEnabled, isPlaying, practiceId]);
 
   if (isLoading) {
     return (
