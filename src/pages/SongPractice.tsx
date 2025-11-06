@@ -45,7 +45,9 @@ const SongPractice = () => {
     maxSteps: 16
   });
   const [showCompletionDialog, setShowCompletionDialog] = useState(false);
+  const [countdown, setCountdown] = useState<number | string | null>(null);
   const hasCompletedRef = useRef(false);
+  const countdownTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const audioEngineRef = useRef<AudioEngine | null>(null);
@@ -214,23 +216,62 @@ const SongPractice = () => {
     playDrums();
   }, [currentStep, isPlaying, drumPattern, metronomeEnabled, drumSoundEnabled, complexity.hasSixteenthNotes]);
 
+  const startCountdown = () => {
+    setCountdown(3);
+    
+    const countdownSequence = [3, 2, 1, "Go!"];
+    let currentIndex = 0;
+    
+    const runCountdown = () => {
+      if (currentIndex < countdownSequence.length) {
+        setCountdown(countdownSequence[currentIndex]);
+        currentIndex++;
+        countdownTimeoutRef.current = setTimeout(runCountdown, 1000);
+      } else {
+        setCountdown(null);
+        actuallyStartPlayback();
+      }
+    };
+    
+    runCountdown();
+  };
+
+  const actuallyStartPlayback = async () => {
+    if (audioEngineRef.current) {
+      await audioEngineRef.current.resumeContext();
+      startTimeRef.current = Date.now();
+      if (audioEnabled) {
+        audioEngineRef.current.playBackingTrack();
+      }
+    }
+    setIsPlaying(true);
+  };
+
   const togglePlayback = async () => {
+    // Clear any existing countdown
+    if (countdownTimeoutRef.current) {
+      clearTimeout(countdownTimeoutRef.current);
+      setCountdown(null);
+    }
+
     if (audioEngineRef.current) {
       await audioEngineRef.current.resumeContext();
       
       if (!isPlaying) {
-        startTimeRef.current = Date.now();
-        if (audioEnabled) {
-          audioEngineRef.current.playBackingTrack();
-        }
+        // Start countdown instead of immediately playing
+        startCountdown();
       } else {
         audioEngineRef.current.pauseBackingTrack();
+        setIsPlaying(false);
       }
     }
-    setIsPlaying(!isPlaying);
   };
 
   const handleReset = () => {
+    if (countdownTimeoutRef.current) {
+      clearTimeout(countdownTimeoutRef.current);
+    }
+    setCountdown(null);
     setIsPlaying(false);
     setCurrentStep(0);
     startTimeRef.current = 0;
@@ -429,25 +470,41 @@ const SongPractice = () => {
         </div>
 
         {/* View: Grid or Notation */}
-        {viewMode === 'grid' ? (
-          <DrumGrid
-            pattern={drumPattern}
-            currentStep={currentStep}
-            onStepToggle={handleStepToggle}
-            onClearPattern={handleClearPattern}
-            onMetronomeToggle={() => setMetronomeEnabled(!metronomeEnabled)}
-            metronomeEnabled={metronomeEnabled}
-            onTogglePlay={togglePlayback}
-            isPlaying={isPlaying}
-            complexity={complexity}
-          />
-        ) : (
-          <NotationView
-            pattern={drumPattern}
-            currentStep={currentStep}
-            complexity={complexity}
-          />
-        )}
+        <div className="relative">
+          {viewMode === 'grid' ? (
+            <DrumGrid
+              pattern={drumPattern}
+              currentStep={currentStep}
+              onStepToggle={handleStepToggle}
+              onClearPattern={handleClearPattern}
+              onMetronomeToggle={() => setMetronomeEnabled(!metronomeEnabled)}
+              metronomeEnabled={metronomeEnabled}
+              onTogglePlay={togglePlayback}
+              isPlaying={isPlaying}
+              complexity={complexity}
+            />
+          ) : (
+            <NotationView
+              pattern={drumPattern}
+              currentStep={currentStep}
+              complexity={complexity}
+            />
+          )}
+
+          {/* Countdown Overlay */}
+          {countdown !== null && (
+            <div className="absolute inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm z-50 rounded-lg">
+              <div className="relative w-48 h-48 flex items-center justify-center">
+                <div className="absolute inset-0 rounded-full bg-primary/20 animate-pulse" />
+                <div className="relative w-40 h-40 rounded-full bg-primary flex items-center justify-center shadow-2xl">
+                  <span className="text-7xl font-bold text-white">
+                    {countdown}
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Bottom Toolbar */}
