@@ -285,7 +285,7 @@ const SongPractice = () => {
     setShowCompletionDialog(false);
     hasCompletedRef.current = false;
     setCurrentStep(0);
-    setIsPlaying(true);
+    startCountdown();
   };
 
   const handleNextSection = () => {
