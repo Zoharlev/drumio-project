@@ -74,6 +74,7 @@ const parseSubdivisionFormat = (rows: CSVRow[], headers: string[]): { pattern: D
   let bpm: number | undefined;
   let stepIndex = 0;
   let notesProcessed = 0;
+  let lastNoteStep = 0;
   
   // Store subdivisions and sections
   const subdivisions: string[] = [];
@@ -94,6 +95,7 @@ const parseSubdivisionFormat = (rows: CSVRow[], headers: string[]): { pattern: D
       console.log(`  Step ${stepIndex}: Instrument 1 = "${instrument1}"`);
       processInstrument(instrument1, pattern, stepIndex, complexity);
       notesProcessed++;
+      lastNoteStep = stepIndex;
     }
 
     // Process Instrument 2
@@ -102,18 +104,34 @@ const parseSubdivisionFormat = (rows: CSVRow[], headers: string[]): { pattern: D
       console.log(`  Step ${stepIndex}: Instrument 2 = "${instrument2}"`);
       processInstrument(instrument2, pattern, stepIndex, complexity);
       notesProcessed++;
+      lastNoteStep = stepIndex;
     }
 
     stepIndex++;
   });
   
-  // Add subdivisions and sections to pattern
-  pattern.subdivisions = subdivisions;
-  pattern.sections = sections;
-  pattern.length = stepIndex;
+  // Trim pattern to actual length (last note + 1)
+  const actualMaxSteps = lastNoteStep + 1;
+  complexity.maxSteps = actualMaxSteps;
+  complexity.hasEighthNotes = actualMaxSteps >= 16;
+  complexity.hasSixteenthNotes = actualMaxSteps >= 32;
+  
+  // Trim all drum arrays to actual length
+  Object.keys(pattern).forEach(key => {
+    if (Array.isArray(pattern[key as keyof DrumPattern])) {
+      (pattern[key as keyof DrumPattern] as any) = (pattern[key as keyof DrumPattern] as any).slice(0, actualMaxSteps);
+    }
+  });
+  
+  // Add subdivisions and sections to pattern (trimmed)
+  pattern.subdivisions = subdivisions.slice(0, actualMaxSteps);
+  pattern.sections = sections.slice(0, actualMaxSteps);
+  pattern.length = actualMaxSteps;
 
   console.log('✅ parseSubdivisionFormat complete:', {
-    totalSteps: stepIndex,
+    totalRowsInCSV: stepIndex,
+    actualMaxSteps,
+    lastNoteStep,
     notesProcessed,
     kickNotes: pattern.kick.filter(n => n.active).length,
     snareNotes: pattern.snare.filter(n => n.active).length,
