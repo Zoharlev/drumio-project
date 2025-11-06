@@ -493,7 +493,7 @@ const SongPractice = () => {
 
           {/* Countdown Overlay */}
           {countdown !== null && (
-            <div className="absolute inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm z-50 rounded-lg">
+            <div className="absolute inset-0 flex items-center justify-center bg-background/40 backdrop-blur-sm z-50 rounded-lg">
               <div className="relative w-48 h-48 flex items-center justify-center">
                 <div className="absolute inset-0 rounded-full bg-primary/20 animate-pulse" />
                 <div className="relative w-40 h-40 rounded-full bg-primary flex items-center justify-center shadow-2xl">
