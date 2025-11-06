@@ -127,7 +127,7 @@ export const DrumGrid = ({
           <div
             className="absolute top-0 bottom-0 w-1 bg-playhead transition-all duration-75 z-10"
             style={{
-              left: `${88 + ((currentStep - startStep) * (100 - 88 / visibleSteps)) / visibleSteps}%`,
+              left: `calc(5rem + ((${currentStep - startStep} + 0.5) * (100% - 5rem) / ${visibleSteps}))`,
               boxShadow: "0 0 20px hsl(var(--playhead) / 0.6)"
             }}
           />
