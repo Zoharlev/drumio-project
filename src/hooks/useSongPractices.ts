@@ -9,6 +9,7 @@ export interface SongWithPractices {
     level: string;
     background_image_url: string | null;
     category: string | null;
+    bpm: number | null;
   };
   practices: Array<{
     id: string;
@@ -37,7 +38,8 @@ export const useSongPractices = (songId: string) => {
           description,
           level,
           background_image_url,
-          category
+          category,
+          bpm
         `)
         .eq("id", songId)
         .single();
