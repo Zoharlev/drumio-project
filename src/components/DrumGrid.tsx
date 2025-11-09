@@ -282,16 +282,19 @@ export const DrumGrid = ({
                           {isActive && (
                             <div
                               className={cn(
-                                "w-6 h-6 rounded-full bg-gradient-to-br from-note-active to-accent",
-                                "shadow-note transition-transform duration-200 hover:scale-110",
-                                "flex items-center justify-center text-xs font-bold text-background",
+                                "w-6 h-6 rounded-full transition-transform duration-200 hover:scale-110",
+                                "flex items-center justify-center text-xs font-bold",
                                 isCurrentStep && isActive && "animate-bounce",
-                                noteType === 'ghost' && "w-4 h-4 bg-note-active/40",
-                                noteType === 'accent' && "w-7 h-7"
+                                // Ghost note style - hollow circle with lighter border
+                                noteType === 'ghost' && "w-5 h-5 border-2 border-note-active/50 bg-transparent text-note-active/50",
+                                // Normal note style
+                                noteType === 'normal' && "bg-gradient-to-br from-note-active to-accent shadow-note text-background",
+                                // Accent note style - larger and brighter
+                                noteType === 'accent' && "w-7 h-7 bg-gradient-to-br from-note-active to-accent shadow-note text-background"
                               )}
                             >
                               {noteType === 'ghost' ? (
-                                <div className="w-2 h-2 bg-current rounded-full opacity-60" />
+                                <span className="text-[10px]">{drumInfo.symbol}</span>
                               ) : isOpen && (drumKey === 'hihat' || drumKey === 'openhat') ? (
                                 <div className="w-3 h-3 border-2 border-current rounded-full" />
                               ) : (
