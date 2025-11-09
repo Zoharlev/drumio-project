@@ -17,6 +17,7 @@ export const PracticeSession = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [bpm, setBpm] = useState(90);
+  const [maxBpm, setMaxBpm] = useState<number | null>(null);
   const [metronomeEnabled, setMetronomeEnabled] = useState(true);
   const [pattern, setPattern] = useState<DrumPattern>(createEmptyPattern(16));
   const [complexity, setComplexity] = useState<PatternComplexity>({
@@ -243,19 +244,23 @@ export const PracticeSession = () => {
   useEffect(() => {
     // If practiceId exists, this is a Practice session - start at 60 BPM
     if (practiceId) {
-      // Parse tempo from practice.tempo field if available
+      // Always start at 60 BPM for practice
+      setBpm(60);
+      
+      // Set max BPM from practice.tempo or song.bpm
+      let maxBpmValue = 200; // Default max
       if (practice?.tempo) {
         const tempoMatch = practice.tempo.match(/\d+/);
         if (tempoMatch) {
           const parsedTempo = parseInt(tempoMatch[0], 10);
           if (parsedTempo >= 60 && parsedTempo <= 200) {
-            setBpm(parsedTempo);
-            return;
+            maxBpmValue = parsedTempo;
           }
         }
+      } else if (songData?.bpm) {
+        maxBpmValue = songData.bpm;
       }
-      // Default to 60 BPM for practice sessions
-      setBpm(60);
+      setMaxBpm(maxBpmValue);
       return;
     }
 
@@ -263,6 +268,7 @@ export const PracticeSession = () => {
     if (songData?.bpm) {
       setBpm(songData.bpm);
     }
+    setMaxBpm(null); // No max limit for preview mode
   }, [practice, songData, practiceId]);
 
   // Step timing based on BPM and complexity
@@ -341,7 +347,8 @@ export const PracticeSession = () => {
   };
 
   const changeBpm = (delta: number) => {
-    setBpm(prev => Math.max(60, Math.min(200, prev + delta)));
+    const effectiveMax = maxBpm ?? 200;
+    setBpm(prev => Math.max(60, Math.min(effectiveMax, prev + delta)));
   };
 
   const toggleStep = (drum: string, step: number) => {
@@ -455,15 +462,23 @@ export const PracticeSession = () => {
                   size="icon"
                   onClick={() => changeBpm(-5)}
                   className="h-8 w-8"
+                  disabled={bpm <= 60}
                 >
                   <Minus className="h-4 w-4" />
                 </Button>
 
                 <div className="flex items-center gap-2 px-3">
                   <div className="w-3 h-3 rounded-full bg-primary"></div>
-                  <span className="text-2xl font-bold text-foreground mx-3">
-                    {bpm}
-                  </span>
+                  <div className="text-center mx-3">
+                    <span className="text-2xl font-bold text-foreground block">
+                      {bpm}
+                    </span>
+                    {maxBpm && (
+                      <span className="text-xs text-muted-foreground">
+                        / {maxBpm} BPM
+                      </span>
+                    )}
+                  </div>
                 </div>
 
                 <Button
@@ -471,6 +486,7 @@ export const PracticeSession = () => {
                   size="icon"
                   onClick={() => changeBpm(5)}
                   className="h-8 w-8"
+                  disabled={bpm >= (maxBpm ?? 200)}
                 >
                   <Plus className="h-4 w-4" />
                 </Button>
