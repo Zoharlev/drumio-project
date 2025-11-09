@@ -432,8 +432,19 @@ export const PracticeSession = () => {
             <ArrowLeft className="h-6 w-6" />
           </Button>
           <div>
-            <h1 className="text-2xl font-bold">{songId ? songData?.title : practice?.title}</h1>
-            <p className="text-muted-foreground">{songId ? songData?.level : practice?.practice_type?.title}</p>
+            <div className="flex items-center gap-3">
+              <h1 className="text-2xl font-bold">{songId ? songData?.title : practice?.title}</h1>
+              {!practiceId ? (
+                <span className="px-3 py-1 text-xs font-semibold rounded-full bg-primary/10 text-primary border border-primary/20">
+                  Preview Mode
+                </span>
+              ) : (
+                <span className="px-3 py-1 text-xs font-semibold rounded-full bg-secondary/50 text-secondary-foreground border border-border">
+                  Practice Mode
+                </span>
+              )}
+            </div>
+            <p className="text-muted-foreground mt-1">{songId ? songData?.level : practice?.practice_type?.title}</p>
           </div>
         </div>
         
