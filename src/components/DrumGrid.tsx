@@ -239,8 +239,8 @@ export const DrumGrid = ({
             return Array.isArray(steps) && steps.some(note => note?.active === true);
           })
           .sort(([keyA], [keyB]) => {
-            // Sort order: crash, ride, tom, hihat, openhat, snare, ghostsnare, kick (kick at bottom)
-            const order = ['crash', 'ride', 'tom', 'hihat', 'openhat', 'snare', 'ghostsnare', 'kick'];
+            // Sort order: hihat at top, kick at bottom
+            const order = ['hihat', 'openhat', 'snare', 'ghostsnare', 'crash', 'ride', 'tom', 'kick'];
             const indexA = order.indexOf(keyA);
             const indexB = order.indexOf(keyB);
             if (indexA === -1 && indexB === -1) return 0;
