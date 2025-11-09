@@ -135,9 +135,9 @@ const SongPractice = () => {
     loadAudio();
   }, [song?.audio_file_url, practiceId]);
 
-  // Set target BPM from practice or song
+  // Set target BPM and initial BPM
   useEffect(() => {
-    // Priority 1: Practice tempo
+    // Priority 1: Practice tempo determines target BPM
     if (practice?.tempo) {
       const tempoMatch = practice.tempo.match(/\d+/);
       if (tempoMatch) {
@@ -147,13 +147,22 @@ const SongPractice = () => {
         }
       }
     } 
-    // Priority 2: Song BPM
+    // Priority 2: Song BPM determines target BPM
     else if (song?.bpm) {
       setTargetBpm(song.bpm);
     }
-    // Always start at 60 BPM
-    setBpm(60);
-  }, [song?.bpm, practice?.tempo]);
+
+    // Initialize current BPM:
+    // - Practice pages start at 60 BPM
+    // - Song preview starts at song BPM (if available)
+    if (practiceId) {
+      setBpm(60);
+    } else if (song?.bpm) {
+      setBpm(song.bpm);
+    } else {
+      setBpm(60);
+    }
+  }, [song?.bpm, practice?.tempo, practiceId]);
 
   // Playback interval
   useEffect(() => {
