@@ -245,10 +245,7 @@ export const PracticeSession = () => {
     // Priority 1: BPM from song data
     if (songData?.bpm) {
       setTargetBpm(songData.bpm);
-      // Check if 'Song' level or preview mode (no practiceId): use song BPM
-      // Otherwise start at 60 for practice levels
-      const isSongLevel = practice?.practice_type?.title?.toLowerCase() === 'song';
-      setBpm(!practiceId || isSongLevel ? songData.bpm : 60);
+      setBpm(60); // Always start at 60
       return;
     }
 
@@ -259,11 +256,11 @@ export const PracticeSession = () => {
         const parsedTempo = parseInt(tempoMatch[0], 10);
         if (parsedTempo >= 60 && parsedTempo <= 200) {
           setTargetBpm(parsedTempo);
-          setBpm(60); // Always start at 60 for practice sessions
+          setBpm(60); // Always start at 60
         }
       }
     }
-  }, [practice, songData, practiceId]);
+  }, [practice, songData]);
 
   // Step timing based on BPM and complexity
   // At 120 BPM: 1 quarter note = 500ms
@@ -432,19 +429,8 @@ export const PracticeSession = () => {
             <ArrowLeft className="h-6 w-6" />
           </Button>
           <div>
-            <div className="flex items-center gap-3">
-              <h1 className="text-2xl font-bold">{songId ? songData?.title : practice?.title}</h1>
-              {!practiceId ? (
-                <span className="px-3 py-1 text-xs font-semibold rounded-full bg-primary/10 text-primary border border-primary/20">
-                  Preview Mode
-                </span>
-              ) : (
-                <span className="px-3 py-1 text-xs font-semibold rounded-full bg-secondary/50 text-secondary-foreground border border-border">
-                  Practice Mode
-                </span>
-              )}
-            </div>
-            <p className="text-muted-foreground mt-1">{songId ? songData?.level : practice?.practice_type?.title}</p>
+            <h1 className="text-2xl font-bold">{songId ? songData?.title : practice?.title}</h1>
+            <p className="text-muted-foreground">{songId ? songData?.level : practice?.practice_type?.title}</p>
           </div>
         </div>
         
