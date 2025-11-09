@@ -98,6 +98,8 @@ export class AudioEngine {
       this.playKick(adjustedVelocity);
     } else if (drum === 'tom') {
       this.playTom(adjustedVelocity);
+    } else if (drum === 'lowtom') {
+      this.playLowTom(adjustedVelocity);
     } else if (drum === 'crash') {
       this.playCrash(adjustedVelocity);
     } else if (drum === 'ride') {
@@ -358,6 +360,30 @@ export class AudioEngine {
     
     tomGain.gain.setValueAtTime(0, currentTime);
     tomGain.gain.linearRampToValueAtTime(1.2 * velocity, currentTime + 0.005);
+    tomGain.gain.exponentialRampToValueAtTime(0.001, currentTime + duration);
+    
+    tomOsc.start(currentTime);
+    tomOsc.stop(currentTime + duration);
+  }
+
+  private playLowTom(velocity: number) {
+    const currentTime = this.context.currentTime;
+    
+    // Low tom body - lower frequency than regular tom
+    const tomOsc = this.context.createOscillator();
+    const tomGain = this.context.createGain();
+    
+    tomOsc.frequency.setValueAtTime(100, currentTime);
+    tomOsc.frequency.exponentialRampToValueAtTime(50, currentTime + 0.25);
+    tomOsc.type = 'sine';
+    
+    tomOsc.connect(tomGain);
+    tomGain.connect(this.drumGain); // Connect to drum gain
+    
+    const duration = 0.4;
+    
+    tomGain.gain.setValueAtTime(0, currentTime);
+    tomGain.gain.linearRampToValueAtTime(1.3 * velocity, currentTime + 0.005);
     tomGain.gain.exponentialRampToValueAtTime(0.001, currentTime + duration);
     
     tomOsc.start(currentTime);
