@@ -28,8 +28,7 @@ const SongPractice = () => {
   
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
-  const [bpm, setBpm] = useState(60);
-  const [targetBpm, setTargetBpm] = useState(120);
+  const [bpm, setBpm] = useState(120);
   const [metronomeEnabled, setMetronomeEnabled] = useState(true);
   const [drumSoundEnabled, setDrumSoundEnabled] = useState(true);
   const [audioEnabled, setAudioEnabled] = useState(true);
@@ -135,25 +134,12 @@ const SongPractice = () => {
     loadAudio();
   }, [song?.audio_file_url, practiceId]);
 
-  // Set target BPM from practice or song
+  // Set BPM from song
   useEffect(() => {
-    // Priority 1: Practice tempo
-    if (practice?.tempo) {
-      const tempoMatch = practice.tempo.match(/\d+/);
-      if (tempoMatch) {
-        const parsedTempo = parseInt(tempoMatch[0], 10);
-        if (parsedTempo >= 60 && parsedTempo <= 240) {
-          setTargetBpm(parsedTempo);
-        }
-      }
-    } 
-    // Priority 2: Song BPM
-    else if (song?.bpm) {
-      setTargetBpm(song.bpm);
+    if (song?.bpm) {
+      setBpm(song.bpm);
     }
-    // Always start at 60 BPM
-    setBpm(60);
-  }, [song?.bpm, practice?.tempo]);
+  }, [song?.bpm]);
 
   // Playback interval
   useEffect(() => {
@@ -442,19 +428,17 @@ const SongPractice = () => {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setBpm(Math.max(60, bpm - 5))}
-              disabled={bpm <= 60}
+              onClick={() => setBpm(Math.max(40, bpm - 5))}
             >
               -
             </Button>
-            <span className="text-2xl font-bold text-foreground w-20 text-center">
-              {bpm}/{targetBpm}
+            <span className="text-2xl font-bold text-foreground w-16 text-center">
+              {bpm}
             </span>
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setBpm(Math.min(targetBpm, bpm + 5))}
-              disabled={bpm >= targetBpm}
+              onClick={() => setBpm(Math.min(240, bpm + 5))}
             >
               +
             </Button>

@@ -160,9 +160,6 @@ const processInstrument = (instrumentName: string, pattern: DrumPattern, stepInd
     patternKey = 'kick';
   } else if (inst.includes('snare')) {
     patternKey = 'snare';
-  } else if (inst.includes('low tom')) {
-    patternKey = 'lowtom';
-    velocity = 0.8;
   } else if (inst.includes('tom')) {
     patternKey = 'tom';
     velocity = 0.8;

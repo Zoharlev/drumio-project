@@ -16,8 +16,7 @@ export const PracticeSession = () => {
   const { practiceId, lessonId, songId } = useParams<{ practiceId: string; lessonId: string; songId: string }>();
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
-  const [bpm, setBpm] = useState(60);
-  const [targetBpm, setTargetBpm] = useState(120);
+  const [bpm, setBpm] = useState(90);
   const [metronomeEnabled, setMetronomeEnabled] = useState(true);
   const [pattern, setPattern] = useState<DrumPattern>(createEmptyPattern(16));
   const [complexity, setComplexity] = useState<PatternComplexity>({
@@ -240,12 +239,11 @@ export const PracticeSession = () => {
     loadAudio();
   }, [songData, toast]);
 
-  // Set target BPM from song or practice tempo
+  // Set initial BPM from song or practice tempo
   useEffect(() => {
     // Priority 1: BPM from song data
     if (songData?.bpm) {
-      setTargetBpm(songData.bpm);
-      setBpm(60); // Always start at 60
+      setBpm(songData.bpm);
       return;
     }
 
@@ -255,8 +253,7 @@ export const PracticeSession = () => {
       if (tempoMatch) {
         const parsedTempo = parseInt(tempoMatch[0], 10);
         if (parsedTempo >= 60 && parsedTempo <= 200) {
-          setTargetBpm(parsedTempo);
-          setBpm(60); // Always start at 60
+          setBpm(parsedTempo);
         }
       }
     }
@@ -338,7 +335,7 @@ export const PracticeSession = () => {
   };
 
   const changeBpm = (delta: number) => {
-    setBpm(prev => Math.max(60, Math.min(targetBpm, prev + delta)));
+    setBpm(prev => Math.max(60, Math.min(200, prev + delta)));
   };
 
   const toggleStep = (drum: string, step: number) => {
@@ -451,7 +448,6 @@ export const PracticeSession = () => {
                   variant="ghost"
                   size="icon"
                   onClick={() => changeBpm(-5)}
-                  disabled={bpm <= 60}
                   className="h-8 w-8"
                 >
                   <Minus className="h-4 w-4" />
@@ -460,7 +456,7 @@ export const PracticeSession = () => {
                 <div className="flex items-center gap-2 px-3">
                   <div className="w-3 h-3 rounded-full bg-primary"></div>
                   <span className="text-2xl font-bold text-foreground mx-3">
-                    {bpm}/{targetBpm}
+                    {bpm}
                   </span>
                 </div>
 
@@ -468,7 +464,6 @@ export const PracticeSession = () => {
                   variant="ghost"
                   size="icon"
                   onClick={() => changeBpm(5)}
-                  disabled={bpm >= targetBpm}
                   className="h-8 w-8"
                 >
                   <Plus className="h-4 w-4" />
