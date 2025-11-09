@@ -245,8 +245,10 @@ export const PracticeSession = () => {
     // Priority 1: BPM from song data
     if (songData?.bpm) {
       setTargetBpm(songData.bpm);
-      // Preview mode (no practiceId): use song BPM, Practice mode: start at 60
-      setBpm(practiceId ? 60 : songData.bpm);
+      // Check if 'Song' level or preview mode (no practiceId): use song BPM
+      // Otherwise start at 60 for practice levels
+      const isSongLevel = practice?.practice_type?.title?.toLowerCase() === 'song';
+      setBpm(!practiceId || isSongLevel ? songData.bpm : 60);
       return;
     }
 
