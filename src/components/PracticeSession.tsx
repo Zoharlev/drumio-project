@@ -242,8 +242,11 @@ export const PracticeSession = () => {
 
   // Set initial BPM - different logic for Preview vs Practice modes
   useEffect(() => {
+    console.log('🎵 BPM Init - practiceId:', practiceId, 'practice:', practice, 'songData:', songData);
+    
     // If practiceId exists, this is a Practice session - start at 60 BPM
     if (practiceId) {
+      console.log('✅ Practice mode detected - setting BPM to 60');
       // Always start at 60 BPM for practice
       setBpm(60);
       
@@ -255,17 +258,22 @@ export const PracticeSession = () => {
           const parsedTempo = parseInt(tempoMatch[0], 10);
           if (parsedTempo >= 60 && parsedTempo <= 200) {
             maxBpmValue = parsedTempo;
+            console.log('📊 Max BPM from practice.tempo:', maxBpmValue);
           }
         }
       } else if (songData?.bpm) {
         maxBpmValue = songData.bpm;
+        console.log('📊 Max BPM from song.bpm:', maxBpmValue);
       }
       setMaxBpm(maxBpmValue);
+      console.log('🎯 Final BPM state - current: 60, max:', maxBpmValue);
       return;
     }
 
     // If no practiceId, this is Preview mode - use song's BPM
+    console.log('🎬 Preview mode detected');
     if (songData?.bpm) {
+      console.log('📊 Setting BPM to song BPM:', songData.bpm);
       setBpm(songData.bpm);
     }
     setMaxBpm(null); // No max limit for preview mode
