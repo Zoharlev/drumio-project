@@ -25,6 +25,7 @@ const drumLabels: { [key: string]: { name: string; symbol: string } } = {
   hihat: { name: "Hi-Hat", symbol: "○" },
   openhat: { name: "Open Hat", symbol: "◎" },
   tom: { name: "Tom", symbol: "◆" },
+  lowtom: { name: "Low Tom", symbol: "◇" },
   crash: { name: "Crash", symbol: "☆" },
   ride: { name: "Ride", symbol: "◉" },
   "HH Closed": { name: "Hi-Hat", symbol: "○" },
@@ -239,8 +240,8 @@ export const DrumGrid = ({
             return Array.isArray(steps) && steps.some(note => note?.active === true);
           })
           .sort(([keyA], [keyB]) => {
-            // Sort order: kick, snare, ghostsnare, hihat, openhat, then others
-            const order = ['kick', 'snare', 'ghostsnare', 'hihat', 'openhat', 'tom', 'crash', 'ride'];
+            // Sort order: hihat at top, kick at bottom
+            const order = ['hihat', 'openhat', 'snare', 'ghostsnare', 'crash', 'ride', 'tom', 'lowtom', 'kick'];
             const indexA = order.indexOf(keyA);
             const indexB = order.indexOf(keyB);
             if (indexA === -1 && indexB === -1) return 0;

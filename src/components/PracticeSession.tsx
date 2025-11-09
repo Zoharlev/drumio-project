@@ -16,8 +16,8 @@ export const PracticeSession = () => {
   const { practiceId, lessonId, songId } = useParams<{ practiceId: string; lessonId: string; songId: string }>();
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
-  const [bpm, setBpm] = useState(90);
-  const [maxBpm, setMaxBpm] = useState<number | null>(null);
+  const [bpm, setBpm] = useState(60);
+  const [targetBpm, setTargetBpm] = useState(120);
   const [metronomeEnabled, setMetronomeEnabled] = useState(true);
   const [pattern, setPattern] = useState<DrumPattern>(createEmptyPattern(16));
   const [complexity, setComplexity] = useState<PatternComplexity>({
@@ -240,43 +240,27 @@ export const PracticeSession = () => {
     loadAudio();
   }, [songData, toast]);
 
-  // Set initial BPM - different logic for Preview vs Practice modes
+  // Set target BPM from song or practice tempo
   useEffect(() => {
-    console.log('🎵 BPM Init - practiceId:', practiceId, 'practice:', practice, 'songData:', songData);
-    
-    // If practiceId exists, this is a Practice session - start at 60 BPM
-    if (practiceId) {
-      console.log('✅ Practice mode detected - setting BPM to 60');
-      // Always start at 60 BPM for practice
-      setBpm(60);
-      
-      // Set max BPM from practice.tempo or song.bpm
-      let maxBpmValue = 200; // Default max
-      if (practice?.tempo) {
-        const tempoMatch = practice.tempo.match(/\d+/);
-        if (tempoMatch) {
-          const parsedTempo = parseInt(tempoMatch[0], 10);
-          if (parsedTempo >= 60 && parsedTempo <= 200) {
-            maxBpmValue = parsedTempo;
-            console.log('📊 Max BPM from practice.tempo:', maxBpmValue);
-          }
-        }
-      } else if (songData?.bpm) {
-        maxBpmValue = songData.bpm;
-        console.log('📊 Max BPM from song.bpm:', maxBpmValue);
-      }
-      setMaxBpm(maxBpmValue);
-      console.log('🎯 Final BPM state - current: 60, max:', maxBpmValue);
+    // Priority 1: BPM from song data
+    if (songData?.bpm) {
+      setTargetBpm(songData.bpm);
+      // Preview mode (no practiceId): use song BPM, Practice mode: start at 60
+      setBpm(practiceId ? 60 : songData.bpm);
       return;
     }
 
-    // If no practiceId, this is Preview mode - use song's BPM
-    console.log('🎬 Preview mode detected');
-    if (songData?.bpm) {
-      console.log('📊 Setting BPM to song BPM:', songData.bpm);
-      setBpm(songData.bpm);
+    // Priority 2: Parse tempo from practice
+    if (practice?.tempo) {
+      const tempoMatch = practice.tempo.match(/\d+/);
+      if (tempoMatch) {
+        const parsedTempo = parseInt(tempoMatch[0], 10);
+        if (parsedTempo >= 60 && parsedTempo <= 200) {
+          setTargetBpm(parsedTempo);
+          setBpm(60); // Always start at 60 for practice sessions
+        }
+      }
     }
-    setMaxBpm(null); // No max limit for preview mode
   }, [practice, songData, practiceId]);
 
   // Step timing based on BPM and complexity
@@ -355,8 +339,7 @@ export const PracticeSession = () => {
   };
 
   const changeBpm = (delta: number) => {
-    const effectiveMax = maxBpm ?? 200;
-    setBpm(prev => Math.max(60, Math.min(effectiveMax, prev + delta)));
+    setBpm(prev => Math.max(60, Math.min(targetBpm, prev + delta)));
   };
 
   const toggleStep = (drum: string, step: number) => {
@@ -469,32 +452,25 @@ export const PracticeSession = () => {
                   variant="ghost"
                   size="icon"
                   onClick={() => changeBpm(-5)}
-                  className="h-8 w-8"
                   disabled={bpm <= 60}
+                  className="h-8 w-8"
                 >
                   <Minus className="h-4 w-4" />
                 </Button>
 
                 <div className="flex items-center gap-2 px-3">
                   <div className="w-3 h-3 rounded-full bg-primary"></div>
-                  <div className="text-center mx-3">
-                    <span className="text-2xl font-bold text-foreground block">
-                      {bpm}
-                    </span>
-                    {maxBpm && (
-                      <span className="text-xs text-muted-foreground">
-                        / {maxBpm} BPM
-                      </span>
-                    )}
-                  </div>
+                  <span className="text-2xl font-bold text-foreground mx-3">
+                    {bpm}/{targetBpm}
+                  </span>
                 </div>
 
                 <Button
                   variant="ghost"
                   size="icon"
                   onClick={() => changeBpm(5)}
+                  disabled={bpm >= targetBpm}
                   className="h-8 w-8"
-                  disabled={bpm >= (maxBpm ?? 200)}
                 >
                   <Plus className="h-4 w-4" />
                 </Button>
