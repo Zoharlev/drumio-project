@@ -245,7 +245,8 @@ export const PracticeSession = () => {
     // Priority 1: BPM from song data
     if (songData?.bpm) {
       setTargetBpm(songData.bpm);
-      setBpm(60); // Always start at 60
+      // Preview mode (no practiceId): use song BPM, Practice mode: start at 60
+      setBpm(practiceId ? 60 : songData.bpm);
       return;
     }
 
@@ -256,11 +257,11 @@ export const PracticeSession = () => {
         const parsedTempo = parseInt(tempoMatch[0], 10);
         if (parsedTempo >= 60 && parsedTempo <= 200) {
           setTargetBpm(parsedTempo);
-          setBpm(60); // Always start at 60
+          setBpm(60); // Always start at 60 for practice sessions
         }
       }
     }
-  }, [practice, songData]);
+  }, [practice, songData, practiceId]);
 
   // Step timing based on BPM and complexity
   // At 120 BPM: 1 quarter note = 500ms
