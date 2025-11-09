@@ -238,6 +238,16 @@ export const DrumGrid = ({
             // Additional instruments only appear if they have active notes
             return Array.isArray(steps) && steps.some(note => note?.active === true);
           })
+          .sort(([keyA], [keyB]) => {
+            // Sort order: kick, snare, ghostsnare, hihat, openhat, then others
+            const order = ['kick', 'snare', 'ghostsnare', 'hihat', 'openhat', 'tom', 'crash', 'ride'];
+            const indexA = order.indexOf(keyA);
+            const indexB = order.indexOf(keyB);
+            if (indexA === -1 && indexB === -1) return 0;
+            if (indexA === -1) return 1;
+            if (indexB === -1) return -1;
+            return indexA - indexB;
+          })
           .map(([drumKey, steps]) => {
             const drumInfo = drumLabels[drumKey] || {
               name: drumKey,

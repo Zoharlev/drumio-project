@@ -186,8 +186,10 @@ const processInstrument = (instrumentName: string, pattern: DrumPattern, stepInd
     velocity = 0.3;
     type = 'ghost';
     complexity.hasVelocityVariation = true;
-    // Ghost notes typically on snare
-    if (!patternKey) patternKey = 'snare';
+    // Map ghost notes to ghostsnare track
+    if (inst.includes('snare') || !patternKey) {
+      patternKey = 'ghostsnare';
+    }
   }
 
   if (!patternKey) {
