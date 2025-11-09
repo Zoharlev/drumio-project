@@ -239,25 +239,31 @@ export const PracticeSession = () => {
     loadAudio();
   }, [songData, toast]);
 
-  // Set initial BPM from song or practice tempo
+  // Set initial BPM - different logic for Preview vs Practice modes
   useEffect(() => {
-    // Priority 1: BPM from song data
-    if (songData?.bpm) {
-      setBpm(songData.bpm);
+    // If practiceId exists, this is a Practice session - start at 60 BPM
+    if (practiceId) {
+      // Parse tempo from practice.tempo field if available
+      if (practice?.tempo) {
+        const tempoMatch = practice.tempo.match(/\d+/);
+        if (tempoMatch) {
+          const parsedTempo = parseInt(tempoMatch[0], 10);
+          if (parsedTempo >= 60 && parsedTempo <= 200) {
+            setBpm(parsedTempo);
+            return;
+          }
+        }
+      }
+      // Default to 60 BPM for practice sessions
+      setBpm(60);
       return;
     }
 
-    // Priority 2: Parse tempo from practice
-    if (practice?.tempo) {
-      const tempoMatch = practice.tempo.match(/\d+/);
-      if (tempoMatch) {
-        const parsedTempo = parseInt(tempoMatch[0], 10);
-        if (parsedTempo >= 60 && parsedTempo <= 200) {
-          setBpm(parsedTempo);
-        }
-      }
+    // If no practiceId, this is Preview mode - use song's BPM
+    if (songData?.bpm) {
+      setBpm(songData.bpm);
     }
-  }, [practice, songData]);
+  }, [practice, songData, practiceId]);
 
   // Step timing based on BPM and complexity
   // At 120 BPM: 1 quarter note = 500ms
