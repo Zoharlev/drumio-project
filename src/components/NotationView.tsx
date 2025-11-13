@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 interface NotationViewProps {
   pattern: DrumPattern;
   currentStep: number;
+  scrollOffset: number;
   complexity: PatternComplexity;
 }
 
@@ -20,14 +21,22 @@ const drumStaffPositions: {
   ghostsnare: { y: 80, noteType: 'note' },
 };
 
-export const NotationView = ({ pattern, currentStep, complexity }: NotationViewProps) => {
-  const stepsPerMeasure = complexity.hasSixteenthNotes ? 16 : 8;
-  const totalMeasures = Math.ceil(complexity.maxSteps / stepsPerMeasure);
-  const stepsPerView = stepsPerMeasure;
-  const currentView = Math.floor(currentStep / stepsPerView);
-  const startStep = currentView * stepsPerView;
-  const endStep = Math.min(startStep + stepsPerView, complexity.maxSteps);
+export const NotationView = ({ pattern, currentStep, scrollOffset, complexity }: NotationViewProps) => {
+  const STEP_WIDTH = 46; // Width per step in pixels
+  const visibleStepsCount = 20; // Show 20 steps at a time
+  const STAFF_LEFT_MARGIN = 40;
+
+  // Calculate visible window based on scroll offset
+  const maxStart = Math.max(0, complexity.maxSteps - visibleStepsCount);
+  const startStep = Math.min(Math.max(0, scrollOffset), maxStart);
+  const endStep = Math.min(startStep + visibleStepsCount, complexity.maxSteps);
   const visibleSteps = endStep - startStep;
+
+  // Calculate scroll transform
+  const scrollTransform = `translateX(${-scrollOffset * STEP_WIDTH}px)`;
+
+  // Calculate playhead position (relative to visible window)
+  const playheadX = STAFF_LEFT_MARGIN + 20 + (currentStep - startStep) * STEP_WIDTH;
 
   const renderNote = (drum: string, step: number, x: number, y: number) => {
     const note = (pattern[drum as keyof DrumPattern] as any)[step];
@@ -251,13 +260,13 @@ export const NotationView = ({ pattern, currentStep, complexity }: NotationViewP
       </div>
 
       {/* Notation Container */}
-      <div className="relative bg-card rounded-lg p-8 shadow-elevated overflow-x-auto">
-        <svg width="100%" height="200" className="overflow-visible min-w-[800px]" viewBox="0 0 1000 200">
-          {/* Staff lines */}
+      <div className="relative bg-card rounded-lg p-8 shadow-elevated overflow-hidden">
+        <svg width="100%" height="200" className="overflow-visible min-w-[920px]" viewBox="0 0 1000 200">
+          {/* Layer 1: Fixed staff lines */}
           {[0, 1, 2, 3, 4].map((line) => (
             <line
               key={line}
-              x1="40"
+              x1={STAFF_LEFT_MARGIN}
               x2="1000"
               y1={40 + line * 20}
               y2={40 + line * 20}
@@ -267,75 +276,78 @@ export const NotationView = ({ pattern, currentStep, complexity }: NotationViewP
             />
           ))}
 
-          {/* Bar lines (every 4 steps = 1 beat) */}
-          {Array.from({ length: Math.ceil(visibleSteps / 4) + 1 }, (_, i) => {
-            const x = 40 + (i * 4 * 920) / visibleSteps;
-            return (
-              <line
-                key={i}
-                x1={x}
-                x2={x}
-                y1={40}
-                y2={120}
-                stroke="currentColor"
-                strokeWidth={i === 0 ? "3" : "1.5"}
-                className="text-primary/40"
-              />
-            );
-          })}
-
-          {/* Beat numbers (1, 2, 3, 4) */}
-          {Array.from({ length: visibleSteps }, (_, i) => {
-            const stepIndex = startStep + i;
-            const x = 60 + (i * 920) / visibleSteps;
-            const posInBar = stepIndex % (complexity.hasSixteenthNotes ? 16 : 8);
-            const stepsPerBeat = complexity.hasSixteenthNotes ? 4 : 2;
-            
-            if (posInBar % stepsPerBeat === 0) {
-              const beatNum = Math.floor(posInBar / stepsPerBeat) + 1;
+          {/* Layer 2: Scrolling bar lines and beat numbers */}
+          <g style={{ transform: scrollTransform, transition: 'transform 75ms linear' }}>
+            {/* Bar lines */}
+            {Array.from({ length: Math.ceil(complexity.maxSteps / 4) + 1 }, (_, i) => {
+              const x = STAFF_LEFT_MARGIN + 20 + (i * 4 * STEP_WIDTH);
               return (
-                <text
-                  key={i}
-                  x={x}
-                  y={25}
-                  textAnchor="middle"
-                  className="text-xs font-bold fill-primary"
-                >
-                  {beatNum}
-                </text>
+                <line
+                  key={`bar-${i}`}
+                  x1={x}
+                  x2={x}
+                  y1={40}
+                  y2={120}
+                  stroke="currentColor"
+                  strokeWidth={i === 0 ? "3" : "1.5"}
+                  className="text-primary/40"
+                />
               );
-            }
-            return null;
-          })}
+            })}
 
-          {/* Animated playhead with glow effect */}
+            {/* Beat numbers */}
+            {Array.from({ length: complexity.maxSteps }, (_, i) => {
+              const x = STAFF_LEFT_MARGIN + 20 + (i * STEP_WIDTH);
+              const posInBar = i % (complexity.hasSixteenthNotes ? 16 : 8);
+              const stepsPerBeat = complexity.hasSixteenthNotes ? 4 : 2;
+              
+              if (posInBar % stepsPerBeat === 0) {
+                const beatNum = Math.floor(posInBar / stepsPerBeat) + 1;
+                return (
+                  <text
+                    key={`beat-${i}`}
+                    x={x}
+                    y={25}
+                    textAnchor="middle"
+                    className="text-xs font-bold fill-primary"
+                  >
+                    {beatNum}
+                  </text>
+                );
+              }
+              return null;
+            })}
+          </g>
+
+          {/* Layer 3: Scrolling notes */}
+          <g style={{ transform: scrollTransform, transition: 'transform 75ms linear' }}>
+            {Object.entries(drumStaffPositions).map(([drum, drumInfo]) => (
+              <g key={drum}>
+                {Array.from({ length: complexity.maxSteps }).map((_, i) => {
+                  const x = STAFF_LEFT_MARGIN + 20 + (i * STEP_WIDTH);
+                  const y = drumInfo.y;
+                  return renderNote(drum, i, x, y);
+                })}
+              </g>
+            ))}
+          </g>
+
+          {/* Layer 4: Fixed playhead */}
           {currentStep >= startStep && currentStep < endStep && (
             <line
-              x1={60 + ((currentStep - startStep) * 920) / visibleSteps}
-              x2={60 + ((currentStep - startStep) * 920) / visibleSteps}
+              x1={playheadX}
+              x2={playheadX}
               y1={20}
               y2={140}
               stroke="currentColor"
               strokeWidth="3"
-              className="text-[hsl(var(--playhead))] transition-all duration-100"
+              className="text-[hsl(var(--playhead))]"
               style={{
                 filter: "drop-shadow(0 0 8px hsl(var(--playhead) / 0.6))",
+                transition: "x1 100ms ease-out, x2 100ms ease-out"
               }}
             />
           )}
-
-          {/* Notes for each drum */}
-          {Object.entries(drumStaffPositions).map(([drum, drumInfo]) => (
-            <g key={drum}>
-              {Array.from({ length: visibleSteps }).map((_, i) => {
-                const step = startStep + i;
-                if (step >= complexity.maxSteps) return null;
-                const x = 60 + (i * 920) / visibleSteps;
-                const y = drumInfo.y;
-                return renderNote(drum, step, x, y);
-              })}
-            </g>
-          ))}
         </svg>
       </div>
     </div>

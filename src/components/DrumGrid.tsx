@@ -1,14 +1,12 @@
 import { Button } from "@/components/ui/button";
-import { Trash2, Settings, ChevronLeft, ChevronRight } from "lucide-react";
+import { Trash2, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useState, useEffect } from "react";
 import { DrumPattern, PatternComplexity } from "@/types/drumPatterns";
 
 interface DrumGridProps {
   pattern: DrumPattern;
   currentStep: number;
-  currentView?: number;
-  stepsPerView?: number;
+  scrollOffset: number;
   onStepToggle: (drum: string, step: number) => void;
   onClearPattern: () => void;
   metronomeEnabled: boolean;
@@ -38,6 +36,7 @@ const drumLabels: { [key: string]: { name: string; symbol: string } } = {
 export const DrumGrid = ({
   pattern,
   currentStep,
+  scrollOffset,
   onStepToggle,
   onClearPattern,
   metronomeEnabled,
@@ -46,32 +45,16 @@ export const DrumGrid = ({
   isPlaying,
   complexity
 }: DrumGridProps) => {
-  const stepsPerView = 16;
-  const [currentView, setCurrentView] = useState(0);
+  const visibleStepsCount = 20; // Show 20 steps at a time
   
-  const stepsToShow = complexity.maxSteps;
-  const totalViews = Math.ceil(stepsToShow / stepsPerView);
-  const startStep = currentView * stepsPerView;
-  const endStep = Math.min(startStep + stepsPerView, stepsToShow);
+  // Calculate visible window based on scroll offset
+  const maxStart = Math.max(0, complexity.maxSteps - visibleStepsCount);
+  const startStep = Math.min(Math.max(0, scrollOffset), maxStart);
+  const endStep = Math.min(startStep + visibleStepsCount, complexity.maxSteps);
   const visibleSteps = endStep - startStep;
 
-  const handlePrevView = () => {
-    setCurrentView(prev => Math.max(0, prev - 1));
-  };
-
-  const handleNextView = () => {
-    setCurrentView(prev => Math.min(totalViews - 1, prev + 1));
-  };
-
-  // Auto-scroll during playback
-  useEffect(() => {
-    if (isPlaying) {
-      const newView = Math.floor(currentStep / stepsPerView);
-      if (newView !== currentView && newView < totalViews) {
-        setCurrentView(newView);
-      }
-    }
-  }, [currentStep, isPlaying, currentView, totalViews, stepsPerView]);
+  // Calculate playhead position within the current visible window
+  const playheadIndex = Math.min(Math.max(currentStep - startStep, 0), Math.max(visibleSteps - 1, 0));
 
   return (
     <div className="space-y-6">
@@ -93,29 +76,6 @@ export const DrumGrid = ({
           <Trash2 className="h-4 w-4" />
           Clear
         </Button>
-        {totalViews > 1 && (
-          <>
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={handlePrevView}
-              disabled={currentView === 0}
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <span className="text-xs text-muted-foreground px-2">
-              {currentView + 1} / {totalViews}
-            </span>
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={handleNextView}
-              disabled={currentView === totalViews - 1}
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </>
-        )}
         <Button variant="outline" size="icon">
           <Settings className="h-4 w-4" />
         </Button>
@@ -123,16 +83,15 @@ export const DrumGrid = ({
 
       {/* Grid Container */}
       <div className="relative bg-card rounded-lg p-6 shadow-elevated transition-opacity duration-300">
-        {/* Playhead */}
-        {currentStep >= startStep && currentStep < endStep && (
-          <div
-            className="absolute top-0 bottom-0 w-1 bg-playhead transition-all duration-75 z-10"
-            style={{
-              left: `calc(5rem + ((${currentStep - startStep} + 0.5) * (100% - 5rem) / ${visibleSteps}))`,
-              boxShadow: "0 0 20px hsl(var(--playhead) / 0.6)"
-            }}
-          />
-        )}
+        {/* Playhead - Fixed position */}
+        <div
+          className="absolute top-0 bottom-0 w-1 bg-playhead z-20 pointer-events-none"
+          style={{
+            left: `calc(5rem + 1.5rem + ((100% - 5rem - 3rem) * ${visibleSteps > 0 ? playheadIndex / visibleSteps : 0}))`,
+            boxShadow: "0 0 20px hsl(var(--playhead) / 0.6)",
+            transition: "left 75ms ease-out"
+          }}
+        />
 
         {/* Beat Numbers - Enhanced with Progress Indicators */}
         <div className="flex mb-4 flex-col gap-2 pb-2 border-b-2 border-primary/10">

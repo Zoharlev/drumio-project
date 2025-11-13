@@ -28,6 +28,7 @@ const SongPractice = () => {
   
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
+  const [scrollOffset, setScrollOffset] = useState(0);
   const [bpm, setBpm] = useState(60);
   const [targetBpm, setTargetBpm] = useState(120);
   const [metronomeEnabled, setMetronomeEnabled] = useState(true);
@@ -182,7 +183,15 @@ const SongPractice = () => {
             hasCompletedRef.current = true;
             setIsPlaying(false);
             setShowCompletionDialog(true);
+            setScrollOffset(0); // Reset scroll
             return 0; // Reset to start
+          }
+          
+          // Update scroll offset: playhead moves for steps 0-4, then grid scrolls continuously
+          if (next >= 5) {
+            setScrollOffset(next - 4); // Shows steps (currentStep-4) through (currentStep+15)
+          } else {
+            setScrollOffset(0); // Show steps 0-19
           }
           
           return next % complexity.maxSteps;
@@ -297,6 +306,7 @@ const SongPractice = () => {
     setCountdown(null);
     setIsPlaying(false);
     setCurrentStep(0);
+    setScrollOffset(0);
     startTimeRef.current = 0;
     hasCompletedRef.current = false;
     if (audioEngineRef.current) {
@@ -308,6 +318,7 @@ const SongPractice = () => {
     setShowCompletionDialog(false);
     hasCompletedRef.current = false;
     setCurrentStep(0);
+    setScrollOffset(0);
     startCountdown();
   };
 
@@ -322,6 +333,7 @@ const SongPractice = () => {
       setShowCompletionDialog(false);
       hasCompletedRef.current = false;
       setCurrentStep(0);
+      setScrollOffset(0);
     }
   };
 
@@ -500,6 +512,7 @@ const SongPractice = () => {
             <DrumGrid
               pattern={drumPattern}
               currentStep={currentStep}
+              scrollOffset={scrollOffset}
               onStepToggle={handleStepToggle}
               onClearPattern={handleClearPattern}
               onMetronomeToggle={() => setMetronomeEnabled(!metronomeEnabled)}
@@ -512,6 +525,7 @@ const SongPractice = () => {
             <NotationView
               pattern={drumPattern}
               currentStep={currentStep}
+              scrollOffset={scrollOffset}
               complexity={complexity}
             />
           )}

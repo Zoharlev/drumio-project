@@ -16,6 +16,7 @@ export const PracticeSession = () => {
   const { practiceId, lessonId, songId } = useParams<{ practiceId: string; lessonId: string; songId: string }>();
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
+  const [scrollOffset, setScrollOffset] = useState(0);
   const [bpm, setBpm] = useState(60);
   const [targetBpm, setTargetBpm] = useState(120);
   const [metronomeEnabled, setMetronomeEnabled] = useState(true);
@@ -274,6 +275,14 @@ export const PracticeSession = () => {
       intervalRef.current = setInterval(() => {
         setCurrentStep((prev) => {
           const nextStep = (prev + 1) % complexity.maxSteps;
+          
+          // Update scroll offset: playhead moves for steps 0-4, then grid scrolls continuously
+          if (nextStep >= 5) {
+            setScrollOffset(nextStep - 4); // Shows steps (currentStep-4) through (currentStep+15)
+          } else {
+            setScrollOffset(0); // Show steps 0-19
+          }
+          
           return nextStep;
         });
       }, stepDuration);
@@ -289,7 +298,7 @@ export const PracticeSession = () => {
         clearInterval(intervalRef.current);
       }
     };
-  }, [isPlaying, stepDuration]);
+  }, [isPlaying, stepDuration, complexity.maxSteps]);
 
   // Play sounds based on currentStep
   useEffect(() => {
@@ -332,6 +341,7 @@ export const PracticeSession = () => {
   const reset = () => {
     setIsPlaying(false);
     setCurrentStep(0);
+    setScrollOffset(0);
     toast({
       title: "Reset",
       description: "Practice session reset to beginning",
@@ -512,6 +522,7 @@ export const PracticeSession = () => {
           <DrumGrid
             pattern={pattern}
             currentStep={currentStep}
+            scrollOffset={scrollOffset}
             onStepToggle={toggleStep}
             onClearPattern={clearPattern}
             metronomeEnabled={metronomeEnabled}
