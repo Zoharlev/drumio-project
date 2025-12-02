@@ -495,18 +495,6 @@ const SongPractice = () => {
           ? "h-full px-2 py-1 flex flex-col" 
           : "container px-4 py-6 space-y-6"
       )}>
-        {/* Portrait: Song Time Display */}
-        {!isLandscape && (
-          <SongTimeDisplay
-            currentTime={currentTime}
-            totalTime={totalTime}
-            sections={sections}
-            currentStep={currentStep}
-            maxSteps={complexity.maxSteps}
-            onSeek={handleSeek}
-          />
-        )}
-
         {/* Portrait: Tempo Control */}
         {!isLandscape && (
           <div className="flex items-center justify-between bg-card rounded-lg p-4">
