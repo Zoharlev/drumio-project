@@ -516,7 +516,7 @@ const SongPractice = () => {
         {/* View: Grid or Notation */}
         <div className={cn(
           "relative",
-          isLandscape && "flex-1 mb-12"
+          isLandscape && "flex-1"
         )}>
           {viewMode === 'grid' ? (
             <DrumGrid
