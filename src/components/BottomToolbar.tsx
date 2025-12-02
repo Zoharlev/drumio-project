@@ -1,157 +1,221 @@
 import { Button } from "@/components/ui/button";
-import { Slider } from "@/components/ui/slider";
-import { Volume2, VolumeX, Music, Drum } from "lucide-react";
+import { Music, Drum, Grid3x3, Minus, Plus, Volume2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ViewMode } from "@/components/ViewToggle";
 
 interface BottomToolbarProps {
+  // View toggle
+  viewMode: ViewMode;
+  onViewModeChange: (mode: ViewMode) => void;
+  // Sound toggles
   metronomeEnabled: boolean;
   drumSoundEnabled: boolean;
   audioEnabled: boolean;
   onMetronomeToggle: () => void;
   onDrumSoundToggle: () => void;
   onAudioToggle: () => void;
-  metronomeVolume: number;
-  drumVolume: number;
-  audioVolume: number;
-  onMetronomeVolumeChange: (volume: number) => void;
-  onDrumVolumeChange: (volume: number) => void;
-  onAudioVolumeChange: (volume: number) => void;
-  showAudioControl?: boolean;
+  // Timer
+  currentTime: number;
+  totalTime: number;
+  // BPM
+  bpm: number;
+  targetBpm: number;
+  onBpmDecrease: () => void;
+  onBpmIncrease: () => void;
+  // Layout
   isLandscape?: boolean;
+  showAudioControl?: boolean;
 }
 
+const formatTime = (ms: number): string => {
+  const totalSeconds = Math.floor(ms / 1000);
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  const centiseconds = Math.floor((ms % 1000) / 10);
+  return `${minutes}:${seconds.toString().padStart(2, '0')}.${centiseconds.toString().padStart(2, '0')}`;
+};
+
 export const BottomToolbar = ({
+  viewMode,
+  onViewModeChange,
   metronomeEnabled,
   drumSoundEnabled,
   audioEnabled,
   onMetronomeToggle,
   onDrumSoundToggle,
   onAudioToggle,
-  metronomeVolume,
-  drumVolume,
-  audioVolume,
-  onMetronomeVolumeChange,
-  onDrumVolumeChange,
-  onAudioVolumeChange,
-  showAudioControl = true,
+  currentTime,
+  totalTime,
+  bpm,
+  targetBpm,
+  onBpmDecrease,
+  onBpmIncrease,
   isLandscape = false,
+  showAudioControl = true,
 }: BottomToolbarProps) => {
+  const iconSize = isLandscape ? "h-4 w-4" : "h-5 w-5";
+  const buttonSize = isLandscape ? "h-8 w-8" : "h-10 w-10";
+
   return (
-    <div className={cn(
-      "bg-card/95 backdrop-blur-sm border border-border rounded-3xl",
-      isLandscape ? "h-[40px] px-3 rounded-xl" : "h-[55px] px-6"
-    )}>
-      <div className={cn(
-        "flex items-center justify-around gap-4 h-full",
-        isLandscape ? "max-w-none" : "max-w-4xl mx-auto"
-      )}>
-        {/* Metronome Control */}
-        <div className="flex items-center gap-2 flex-1">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onMetronomeToggle}
-            className={cn(
-              "rounded-full transition-all duration-200",
-              isLandscape ? "h-7 w-7" : "h-10 w-10",
-              metronomeEnabled
-                ? "bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg"
-                : "bg-muted text-muted-foreground hover:bg-muted/80"
-            )}
-          >
-            {metronomeEnabled ? (
-              <Volume2 className={cn(isLandscape ? "h-3.5 w-3.5" : "h-4 w-4")} />
-            ) : (
-              <VolumeX className={cn(isLandscape ? "h-3.5 w-3.5" : "h-4 w-4")} />
-            )}
-          </Button>
-          {!isLandscape && (
-            <span className="text-xs text-muted-foreground font-medium hidden sm:block">Metro</span>
+    <div
+      className={cn(
+        "backdrop-blur-sm border border-border flex items-center justify-between",
+        isLandscape
+          ? "h-[40px] px-3 rounded-xl"
+          : "h-[55px] px-4 rounded-3xl"
+      )}
+      style={{ backgroundColor: "rgba(31, 39, 51, 0.4)" }}
+    >
+      {/* Left Side: View Toggle + Sound Controls */}
+      <div className="flex items-center gap-2">
+        {/* Notation View Toggle */}
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => onViewModeChange('notation')}
+          className={cn(
+            "rounded-full transition-all duration-200",
+            buttonSize,
+            viewMode === 'notation'
+              ? "bg-primary text-primary-foreground"
+              : "bg-transparent text-muted-foreground hover:text-foreground"
           )}
-          <div className={cn(
-            "flex-1",
-            isLandscape ? "max-w-[60px]" : "max-w-[80px]"
-          )}>
-            <Slider
-              value={[metronomeVolume * 100]}
-              onValueChange={([value]) => onMetronomeVolumeChange(value / 100)}
-              max={100}
-              step={1}
-              className="w-full"
-              disabled={!metronomeEnabled}
-            />
-          </div>
-        </div>
+        >
+          <Music className={iconSize} />
+        </Button>
 
-        {/* Drum Sound Control */}
-        <div className="flex items-center gap-2 flex-1">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onDrumSoundToggle}
-            className={cn(
-              "rounded-full transition-all duration-200",
-              isLandscape ? "h-7 w-7" : "h-10 w-10",
-              drumSoundEnabled
-                ? "bg-accent text-accent-foreground hover:bg-accent/90 shadow-lg"
-                : "bg-muted text-muted-foreground hover:bg-muted/80"
-            )}
-          >
-            <Drum className={cn(isLandscape ? "h-3.5 w-3.5" : "h-4 w-4")} />
-          </Button>
-          {!isLandscape && (
-            <span className="text-xs text-muted-foreground font-medium hidden sm:block">Drums</span>
+        {/* Grid View Toggle */}
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => onViewModeChange('grid')}
+          className={cn(
+            "rounded-full transition-all duration-200",
+            buttonSize,
+            viewMode === 'grid'
+              ? "bg-primary text-primary-foreground"
+              : "bg-transparent text-muted-foreground hover:text-foreground"
           )}
-          <div className={cn(
-            "flex-1",
-            isLandscape ? "max-w-[60px]" : "max-w-[80px]"
-          )}>
-            <Slider
-              value={[drumVolume * 100]}
-              onValueChange={([value]) => onDrumVolumeChange(value / 100)}
-              max={100}
-              step={1}
-              className="w-full"
-              disabled={!drumSoundEnabled}
-            />
-          </div>
-        </div>
+        >
+          <Grid3x3 className={iconSize} />
+        </Button>
 
-        {/* Audio Playback Control */}
+        {/* Vertical Separator */}
+        <div className={cn(
+          "w-px bg-muted-foreground/30 mx-1",
+          isLandscape ? "h-5" : "h-6"
+        )} />
+
+        {/* Drum Sound Toggle */}
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onDrumSoundToggle}
+          className={cn(
+            "rounded-full transition-all duration-200",
+            buttonSize,
+            drumSoundEnabled
+              ? "bg-primary text-primary-foreground"
+              : "bg-transparent text-muted-foreground hover:text-foreground"
+          )}
+        >
+          <Drum className={iconSize} />
+        </Button>
+
+        {/* Metronome Sound Toggle */}
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onMetronomeToggle}
+          className={cn(
+            "rounded-full transition-all duration-200",
+            buttonSize,
+            metronomeEnabled
+              ? "bg-primary text-primary-foreground"
+              : "bg-transparent text-muted-foreground hover:text-foreground"
+          )}
+        >
+          <Volume2 className={iconSize} />
+        </Button>
+
+        {/* Music Sound Toggle */}
         {showAudioControl && (
-          <div className="flex items-center gap-2 flex-1">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={onAudioToggle}
-              className={cn(
-                "rounded-full transition-all duration-200",
-                isLandscape ? "h-7 w-7" : "h-10 w-10",
-                audioEnabled
-                  ? "bg-secondary text-secondary-foreground hover:bg-secondary/90 shadow-lg"
-                  : "bg-muted text-muted-foreground hover:bg-muted/80"
-              )}
-            >
-              <Music className={cn(isLandscape ? "h-3.5 w-3.5" : "h-4 w-4")} />
-            </Button>
-            {!isLandscape && (
-              <span className="text-xs text-muted-foreground font-medium hidden sm:block">Audio</span>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onAudioToggle}
+            className={cn(
+              "rounded-full transition-all duration-200",
+              buttonSize,
+              audioEnabled
+                ? "bg-primary text-primary-foreground"
+                : "bg-transparent text-muted-foreground hover:text-foreground"
             )}
-            <div className={cn(
-              "flex-1",
-              isLandscape ? "max-w-[60px]" : "max-w-[80px]"
-            )}>
-              <Slider
-                value={[audioVolume * 100]}
-                onValueChange={([value]) => onAudioVolumeChange(value / 100)}
-                max={100}
-                step={1}
-                className="w-full"
-                disabled={!audioEnabled}
-              />
-            </div>
-          </div>
+          >
+            <svg
+              className={iconSize}
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M9 18V5l12-2v13" />
+              <circle cx="6" cy="18" r="3" />
+              <circle cx="18" cy="16" r="3" />
+            </svg>
+          </Button>
         )}
+      </div>
+
+      {/* Right Side: Timer + BPM Controller */}
+      <div className="flex items-center gap-4">
+        {/* Timer Display */}
+        <div className={cn(
+          "font-mono text-foreground",
+          isLandscape ? "text-sm" : "text-base"
+        )}>
+          <span className="font-bold">{formatTime(currentTime)}</span>
+          <span className="text-muted-foreground">/{formatTime(totalTime)}</span>
+        </div>
+
+        {/* BPM Controller */}
+        <div className={cn(
+          "flex items-center bg-background/80 rounded-lg",
+          isLandscape ? "h-7 px-1" : "h-9 px-2"
+        )}>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onBpmDecrease}
+            disabled={bpm <= 60}
+            className={cn(
+              "rounded text-foreground hover:bg-muted/50",
+              isLandscape ? "h-5 w-5" : "h-6 w-6"
+            )}
+          >
+            <Minus className={isLandscape ? "h-3 w-3" : "h-4 w-4"} />
+          </Button>
+          <span className={cn(
+            "font-bold text-foreground min-w-[50px] text-center",
+            isLandscape ? "text-xs" : "text-sm"
+          )}>
+            {bpm}<span className="text-muted-foreground">/{targetBpm}</span>
+          </span>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onBpmIncrease}
+            disabled={bpm >= targetBpm}
+            className={cn(
+              "rounded text-foreground hover:bg-muted/50",
+              isLandscape ? "h-5 w-5" : "h-6 w-6"
+            )}
+          >
+            <Plus className={isLandscape ? "h-3 w-3" : "h-4 w-4"} />
+          </Button>
+        </div>
       </div>
     </div>
   );
