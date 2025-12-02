@@ -64,7 +64,10 @@ export const TopToolbar = ({
           variant="secondary"
           onClick={onPlayPause}
           className={cn(
-            "rounded-full bg-muted/60 hover:bg-muted/80 text-muted-foreground",
+            "rounded-full",
+            isPlaying 
+              ? "bg-primary hover:bg-primary/90 text-primary-foreground" 
+              : "bg-muted/60 hover:bg-muted/80 text-muted-foreground",
             isLandscape ? "h-7 w-7" : "h-10 w-10"
           )}
         >
