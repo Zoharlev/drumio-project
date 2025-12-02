@@ -1,3 +1,4 @@
+import React, { memo } from "react";
 import { Button } from "@/components/ui/button";
 import { Trash2, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -14,26 +15,167 @@ interface DrumGridProps {
   onTogglePlay: () => void;
   isPlaying: boolean;
   complexity: PatternComplexity;
+  isLandscape?: boolean;
 }
 
 const drumLabels: { [key: string]: { name: string; symbol: string } } = {
   kick: { name: "Kick", symbol: "●" },
   snare: { name: "Snare", symbol: "×" },
-  ghostsnare: { name: "Ghost Snare", symbol: "⊗" },
-  hihat: { name: "Hi-Hat", symbol: "○" },
-  openhat: { name: "Open Hat", symbol: "◎" },
+  ghostsnare: { name: "Ghost", symbol: "⊗" },
+  hihat: { name: "HH", symbol: "○" },
+  openhat: { name: "Open", symbol: "◎" },
   tom: { name: "Tom", symbol: "◆" },
-  lowtom: { name: "Low Tom", symbol: "◇" },
+  lowtom: { name: "LTom", symbol: "◇" },
   crash: { name: "Crash", symbol: "☆" },
   ride: { name: "Ride", symbol: "◉" },
-  "HH Closed": { name: "Hi-Hat", symbol: "○" },
-  "HH Open": { name: "Open Hat", symbol: "◎" },
+  "HH Closed": { name: "HH", symbol: "○" },
+  "HH Open": { name: "Open", symbol: "◎" },
   Kick: { name: "Kick", symbol: "●" },
   Snare: { name: "Snare", symbol: "×" },
   Tom: { name: "Tom", symbol: "◆" }
 };
 
-export const DrumGrid = ({
+// Memoized step button for performance
+const StepButton = memo(({ 
+  stepIndex, 
+  note, 
+  drumKey, 
+  drumInfo, 
+  isCurrentStep, 
+  isMainBeat, 
+  onToggle,
+  isLandscape 
+}: {
+  stepIndex: number;
+  note: any;
+  drumKey: string;
+  drumInfo: { name: string; symbol: string };
+  isCurrentStep: boolean;
+  isMainBeat: boolean;
+  onToggle: () => void;
+  isLandscape: boolean;
+}) => {
+  const isActive = note?.active || note === true;
+  const noteType = note?.type || 'normal';
+  const isOpen = (note as any)?.open;
+
+  return (
+    <button
+      onClick={onToggle}
+      className={cn(
+        "flex-1 border-r border-grid-line last:border-r-0 transition-all duration-200",
+        "flex items-center justify-center group-hover:bg-muted/20",
+        isCurrentStep && "bg-playhead/10",
+        isMainBeat && "border-r-2 border-primary/30",
+        isLandscape ? "h-full min-w-[24px]" : "h-12"
+      )}
+    >
+      {isActive && (
+        <div
+          className={cn(
+            "rounded-full transition-transform duration-200 hover:scale-110",
+            "flex items-center justify-center font-bold",
+            isCurrentStep && isActive && "animate-bounce",
+            isLandscape ? "w-2 h-2 text-[6px]" : "w-6 h-6 text-xs",
+            noteType === 'ghost' && "border-2 border-note-active/50 bg-transparent text-note-active/50",
+            noteType === 'ghost' && (isLandscape ? "w-2 h-2" : "w-5 h-5"),
+            noteType === 'normal' && "bg-gradient-to-br from-note-active to-accent shadow-note text-background",
+            noteType === 'accent' && "bg-gradient-to-br from-note-active to-accent shadow-note text-background",
+            noteType === 'accent' && (isLandscape ? "w-3 h-3" : "w-7 h-7")
+          )}
+        >
+          {!isLandscape && (
+            noteType === 'ghost' ? (
+              <span className="text-[10px]">{drumInfo.symbol}</span>
+            ) : isOpen && (drumKey === 'hihat' || drumKey === 'openhat') ? (
+              <div className="w-3 h-3 border-2 border-current rounded-full" />
+            ) : (
+              drumInfo.symbol
+            )
+          )}
+        </div>
+      )}
+    </button>
+  );
+});
+
+StepButton.displayName = 'StepButton';
+
+// Memoized drum row
+const DrumRow = memo(({
+  drumKey,
+  steps,
+  drumInfo,
+  visibleSteps,
+  startStep,
+  currentStep,
+  onStepToggle,
+  isLandscape
+}: {
+  drumKey: string;
+  steps: any[];
+  drumInfo: { name: string; symbol: string };
+  visibleSteps: number;
+  startStep: number;
+  currentStep: number;
+  onStepToggle: (drum: string, step: number) => void;
+  isLandscape: boolean;
+}) => {
+  return (
+    <div className={cn(
+      "flex items-center group",
+      isLandscape ? "mb-0 flex-1" : "mb-3"
+    )}>
+      {/* Drum Label */}
+      <div className={cn(
+        "flex items-center gap-1 pr-2",
+        isLandscape ? "w-12" : "w-20 gap-2 pr-4"
+      )}>
+        <span className={cn(
+          "font-mono text-accent",
+          isLandscape ? "text-xs" : "text-lg"
+        )}>{drumInfo.symbol}</span>
+        <span className={cn(
+          "font-medium text-foreground truncate",
+          isLandscape ? "text-[8px]" : "text-sm"
+        )}>{drumInfo.name}</span>
+      </div>
+
+      {/* Grid Line */}
+      <div className="flex-1 relative h-full">
+        <div className="absolute inset-0 border-t border-grid-line"></div>
+
+        {/* Step Buttons */}
+        <div className="flex relative z-10 h-full">
+          {Array.from({ length: visibleSteps }, (_, i) => {
+            const stepIndex = startStep + i;
+            const note = steps[stepIndex];
+            const isCurrentStepActive = stepIndex === currentStep;
+            const isMainBeat = stepIndex % 2 === 0;
+            
+            return (
+              <StepButton
+                key={stepIndex}
+                stepIndex={stepIndex}
+                note={note}
+                drumKey={drumKey}
+                drumInfo={drumInfo}
+                isCurrentStep={isCurrentStepActive}
+                isMainBeat={isMainBeat}
+                onToggle={() => onStepToggle(drumKey, stepIndex)}
+                isLandscape={isLandscape}
+              />
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+});
+
+DrumRow.displayName = 'DrumRow';
+
+export const DrumGrid = memo(({
   pattern,
   currentStep,
   scrollOffset,
@@ -43,247 +185,203 @@ export const DrumGrid = ({
   onMetronomeToggle,
   onTogglePlay,
   isPlaying,
-  complexity
+  complexity,
+  isLandscape = false
 }: DrumGridProps) => {
-  const visibleStepsCount = 20; // Show 20 steps at a time
+  const visibleStepsCount = 20;
   
-  // Calculate visible window based on scroll offset
   const maxStart = Math.max(0, complexity.maxSteps - visibleStepsCount);
   const startStep = Math.min(Math.max(0, scrollOffset), maxStart);
   const endStep = Math.min(startStep + visibleStepsCount, complexity.maxSteps);
   const visibleSteps = endStep - startStep;
 
-  // Calculate playhead position within the current visible window
   const playheadIndex = Math.min(Math.max(currentStep - startStep, 0), Math.max(visibleSteps - 1, 0));
 
+  const drumRows = Object.entries(pattern)
+    .filter(([key]) => key !== 'length' && key !== 'subdivisions' && key !== 'offsets' && key !== 'sections')
+    .filter(([_, steps]) => Array.isArray(steps))
+    .filter(([drumKey, steps]) => {
+      const basicInstruments = ['kick', 'snare', 'hihat', 'openhat'];
+      if (basicInstruments.includes(drumKey)) return true;
+      return Array.isArray(steps) && steps.some(note => note?.active === true);
+    })
+    .sort(([keyA], [keyB]) => {
+      const order = ['hihat', 'openhat', 'snare', 'ghostsnare', 'crash', 'ride', 'tom', 'lowtom', 'kick'];
+      const indexA = order.indexOf(keyA);
+      const indexB = order.indexOf(keyB);
+      if (indexA === -1 && indexB === -1) return 0;
+      if (indexA === -1) return 1;
+      if (indexB === -1) return -1;
+      return indexA - indexB;
+    });
+
   return (
-    <div className="space-y-6">
-      {/* Controls */}
-      <div className="flex items-center justify-end gap-2">
-        <Button
-          variant={isPlaying ? "default" : "ghost"}
-          onClick={onTogglePlay}
-          className={cn(
-            "h-12 px-6 rounded-[20px] text-xs",
-            isPlaying
-              ? "bg-primary text-primary-foreground hover:bg-primary/90"
-              : "bg-primary/10 hover:bg-primary/20"
-          )}
-        >
-          {isPlaying ? "STOP" : "PREVIEW"}
-        </Button>
-        <Button variant="outline" onClick={onClearPattern} className="flex items-center gap-2">
-          <Trash2 className="h-4 w-4" />
-          Clear
-        </Button>
-        <Button variant="outline" size="icon">
-          <Settings className="h-4 w-4" />
-        </Button>
-      </div>
+    <div className={cn(
+      isLandscape ? "h-full flex flex-col space-y-0" : "space-y-6"
+    )}>
+      {/* Controls - hidden in landscape */}
+      {!isLandscape && (
+        <div className="flex items-center justify-end gap-2">
+          <Button
+            variant={isPlaying ? "default" : "ghost"}
+            onClick={onTogglePlay}
+            className={cn(
+              "h-12 px-6 rounded-[20px] text-xs",
+              isPlaying
+                ? "bg-primary text-primary-foreground hover:bg-primary/90"
+                : "bg-primary/10 hover:bg-primary/20"
+            )}
+          >
+            {isPlaying ? "STOP" : "PREVIEW"}
+          </Button>
+          <Button variant="outline" onClick={onClearPattern} className="flex items-center gap-2">
+            <Trash2 className="h-4 w-4" />
+            Clear
+          </Button>
+          <Button variant="outline" size="icon">
+            <Settings className="h-4 w-4" />
+          </Button>
+        </div>
+      )}
 
       {/* Grid Container */}
-      <div className="relative bg-card rounded-lg p-6 shadow-elevated transition-opacity duration-300">
+      <div className={cn(
+        "relative bg-card rounded-lg shadow-elevated transition-opacity duration-300",
+        isLandscape ? "flex-1 p-2 flex flex-col" : "p-6"
+      )}>
         {/* Playhead - Fixed position */}
         <div
           className="absolute top-0 bottom-0 w-1 bg-playhead z-20 pointer-events-none"
           style={{
-            left: `calc(5rem + 1.5rem + ((100% - 5rem - 3rem) * ${visibleSteps > 0 ? playheadIndex / visibleSteps : 0}))`,
+            left: `calc(${isLandscape ? '3rem' : '5rem'} + ${isLandscape ? '0.5rem' : '1.5rem'} + ((100% - ${isLandscape ? '3rem' : '5rem'} - ${isLandscape ? '1rem' : '3rem'}) * ${visibleSteps > 0 ? playheadIndex / visibleSteps : 0}))`,
             boxShadow: "0 0 20px hsl(var(--playhead) / 0.6)",
             transition: "left 75ms ease-out"
           }}
         />
 
-        {/* Beat Numbers - Enhanced with Progress Indicators */}
-        <div className="flex mb-4 flex-col gap-2 pb-2 border-b-2 border-primary/10">
-          <div className="flex">
-            <div className="w-20 text-xs font-semibold text-primary/70">Step#</div>
-            {Array.from({ length: visibleSteps }, (_, i) => {
-              const stepIndex = startStep + i;
-              const isCurrent = stepIndex === currentStep;
-              return (
-                <div 
-                  key={`step-${stepIndex}`} 
-                  className={cn(
-                    "flex-1 text-center text-[11px] font-mono transition-all duration-150",
-                    isCurrent 
-                      ? "text-playhead font-bold scale-125 bg-playhead/10 rounded" 
-                      : "text-muted-foreground/50"
-                  )}
-                >
-                  {stepIndex}
-                </div>
-              );
-            })}
-          </div>
-          
-          <div className="flex">
-            <div className="w-20 text-xs font-semibold text-primary/70">Count</div>
-            {Array.from({ length: visibleSteps }, (_, i) => {
-              const stepIndex = startStep + i;
-              const isCurrent = stepIndex === currentStep;
-              let displayText = "";
-              let textStyle = "text-muted-foreground/60";
+        {/* Beat Numbers - Compact in landscape */}
+        {!isLandscape && (
+          <div className="flex mb-4 flex-col gap-2 pb-2 border-b-2 border-primary/10">
+            <div className="flex">
+              <div className="w-20 text-xs font-semibold text-primary/70">Step#</div>
+              {Array.from({ length: visibleSteps }, (_, i) => {
+                const stepIndex = startStep + i;
+                const isCurrent = stepIndex === currentStep;
+                return (
+                  <div 
+                    key={`step-${stepIndex}`} 
+                    className={cn(
+                      "flex-1 text-center text-[11px] font-mono transition-all duration-150",
+                      isCurrent 
+                        ? "text-playhead font-bold scale-125 bg-playhead/10 rounded" 
+                        : "text-muted-foreground/50"
+                    )}
+                  >
+                    {stepIndex}
+                  </div>
+                );
+              })}
+            </div>
+            
+            <div className="flex">
+              <div className="w-20 text-xs font-semibold text-primary/70">Count</div>
+              {Array.from({ length: visibleSteps }, (_, i) => {
+                const stepIndex = startStep + i;
+                const isCurrent = stepIndex === currentStep;
+                let displayText = "";
+                let textStyle = "text-muted-foreground/60";
 
-              // If we have subdivision data from the CSV, use it
-              if (pattern.subdivisions && pattern.subdivisions[stepIndex]) {
-                const count = pattern.subdivisions[stepIndex];
-                displayText = count;
+                if (pattern.subdivisions && pattern.subdivisions[stepIndex]) {
+                  const count = pattern.subdivisions[stepIndex];
+                  displayText = count;
 
-                // Style based on count type
-                if (count === '1' || count === '2' || count === '3' || count === '4') {
-                  textStyle = "text-primary font-bold";
-                } else if (count === '&') {
-                  textStyle = "text-accent font-medium";
-                } else if (count === 'e' || count === 'a') {
-                  textStyle = "text-muted-foreground/70 font-medium";
+                  if (count === '1' || count === '2' || count === '3' || count === '4') {
+                    textStyle = "text-primary font-bold";
+                  } else if (count === '&') {
+                    textStyle = "text-accent font-medium";
+                  } else if (count === 'e' || count === 'a') {
+                    textStyle = "text-muted-foreground/70 font-medium";
+                  }
+                } else {
+                  const posInBar = stepIndex % 16;
+                  const beatPosition = posInBar % 4;
+
+                  if (beatPosition === 0) {
+                    displayText = String(Math.floor(posInBar / 4) + 1);
+                    textStyle = "text-primary font-bold";
+                  } else if (beatPosition === 1) {
+                    displayText = "e";
+                    textStyle = "text-muted-foreground/70 font-medium";
+                  } else if (beatPosition === 2) {
+                    displayText = "&";
+                    textStyle = "text-accent font-medium";
+                  } else if (beatPosition === 3) {
+                    displayText = "a";
+                    textStyle = "text-muted-foreground/70 font-medium";
+                  }
                 }
-              } else {
-                // Fallback to 16-step bar: 1 e & a 2 e & a 3 e & a 4 e & a
-                const posInBar = stepIndex % 16;
-                const beatPosition = posInBar % 4;
-
-                if (beatPosition === 0) {
-                  displayText = String(Math.floor(posInBar / 4) + 1);
-                  textStyle = "text-primary font-bold";
-                } else if (beatPosition === 1) {
-                  displayText = "e";
-                  textStyle = "text-muted-foreground/70 font-medium";
-                } else if (beatPosition === 2) {
-                  displayText = "&";
-                  textStyle = "text-accent font-medium";
-                } else if (beatPosition === 3) {
-                  displayText = "a";
-                  textStyle = "text-muted-foreground/70 font-medium";
-                }
-              }
-              
-              return (
+                
+                return (
+                  <div 
+                    key={stepIndex} 
+                    className={cn(
+                      "flex-1 text-center text-base font-mono transition-all duration-150",
+                      textStyle,
+                      isCurrent && "scale-125 text-playhead font-extrabold animate-pulse"
+                    )}
+                  >
+                    {displayText}
+                  </div>
+                );
+              })}
+            </div>
+            
+            {/* Progress Bar */}
+            <div className="flex mt-1">
+              <div className="w-20"></div>
+              <div className="flex-1 h-1 bg-muted/30 rounded-full overflow-hidden">
                 <div 
-                  key={stepIndex} 
-                  className={cn(
-                    "flex-1 text-center text-base font-mono transition-all duration-150",
-                    textStyle,
-                    isCurrent && "scale-125 text-playhead font-extrabold animate-pulse"
-                  )}
-                >
-                  {displayText}
-                </div>
-              );
-            })}
-          </div>
-          
-          {/* Progress Bar */}
-          <div className="flex mt-1">
-            <div className="w-20"></div>
-            <div className="flex-1 h-1 bg-muted/30 rounded-full overflow-hidden">
-              <div 
-                className="h-full bg-gradient-to-r from-primary via-accent to-playhead transition-all duration-75"
-                style={{ 
-                  width: `${((currentStep - startStep + 1) / visibleSteps) * 100}%` 
-                }}
-              />
+                  className="h-full bg-gradient-to-r from-primary via-accent to-playhead transition-all duration-75"
+                  style={{ 
+                    width: `${((currentStep - startStep + 1) / visibleSteps) * 100}%` 
+                  }}
+                />
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
         {/* Drum Rows */}
-        {Object.entries(pattern)
-          .filter(([key]) => key !== 'length' && key !== 'subdivisions' && key !== 'offsets' && key !== 'sections')
-          .filter(([_, steps]) => Array.isArray(steps))
-          .filter(([drumKey, steps]) => {
-            // Basic instruments always appear
-            const basicInstruments = ['kick', 'snare', 'hihat', 'openhat'];
-            if (basicInstruments.includes(drumKey)) return true;
-            
-            // Additional instruments only appear if they have active notes
-            return Array.isArray(steps) && steps.some(note => note?.active === true);
-          })
-          .sort(([keyA], [keyB]) => {
-            // Sort order: hihat at top, kick at bottom
-            const order = ['hihat', 'openhat', 'snare', 'ghostsnare', 'crash', 'ride', 'tom', 'lowtom', 'kick'];
-            const indexA = order.indexOf(keyA);
-            const indexB = order.indexOf(keyB);
-            if (indexA === -1 && indexB === -1) return 0;
-            if (indexA === -1) return 1;
-            if (indexB === -1) return -1;
-            return indexA - indexB;
-          })
-          .map(([drumKey, steps]) => {
+        <div className={cn(
+          isLandscape ? "flex-1 flex flex-col" : ""
+        )}>
+          {drumRows.map(([drumKey, steps]) => {
             const drumInfo = drumLabels[drumKey] || {
               name: drumKey,
               symbol: drumKey === 'Kick' ? '●' : drumKey === 'Snare' ? '×' : drumKey === 'Hi-Hat' ? '○' : drumKey === 'Tom' ? '◆' : '●'
             };
             
             return (
-              <div key={drumKey} className="flex items-center mb-3 group">
-                {/* Drum Label */}
-                <div className="w-20 flex items-center gap-2 pr-4">
-                  <span className="text-lg font-mono text-accent">{drumInfo.symbol}</span>
-                  <span className="text-sm font-medium text-foreground">{drumInfo.name}</span>
-                </div>
-
-                {/* Grid Line */}
-                <div className="flex-1 relative">
-                  <div className="absolute inset-0 border-t border-grid-line"></div>
-
-                  {/* Step Buttons */}
-                  <div className="flex relative z-10">
-                    {Array.from({ length: visibleSteps }, (_, i) => {
-                      const stepIndex = startStep + i;
-                      const note = steps[stepIndex];
-                      const isActive = note?.active || note === true;
-                      const velocity = note?.velocity || 0.7;
-                      const isOpen = (note as any)?.open;
-                      const noteType = note?.type || 'normal';
-                      const isCurrentStep = stepIndex === currentStep;
-                      const isMainBeat = stepIndex % 2 === 0;
-                      
-                      return (
-                        <button
-                          key={stepIndex}
-                          onClick={() => onStepToggle(drumKey, stepIndex)}
-                          className={cn(
-                            "flex-1 h-12 border-r border-grid-line last:border-r-0 transition-all duration-200",
-                            "flex items-center justify-center group-hover:bg-muted/20",
-                            isCurrentStep && "bg-playhead/10",
-                            isMainBeat && "border-r-2 border-primary/30"
-                          )}
-                        >
-                          {isActive && (
-                            <div
-                              className={cn(
-                                "w-6 h-6 rounded-full transition-transform duration-200 hover:scale-110",
-                                "flex items-center justify-center text-xs font-bold",
-                                isCurrentStep && isActive && "animate-bounce",
-                                // Ghost note style - hollow circle with lighter border
-                                noteType === 'ghost' && "w-5 h-5 border-2 border-note-active/50 bg-transparent text-note-active/50",
-                                // Normal note style
-                                noteType === 'normal' && "bg-gradient-to-br from-note-active to-accent shadow-note text-background",
-                                // Accent note style - larger and brighter
-                                noteType === 'accent' && "w-7 h-7 bg-gradient-to-br from-note-active to-accent shadow-note text-background"
-                              )}
-                            >
-                              {noteType === 'ghost' ? (
-                                <span className="text-[10px]">{drumInfo.symbol}</span>
-                              ) : isOpen && (drumKey === 'hihat' || drumKey === 'openhat') ? (
-                                <div className="w-3 h-3 border-2 border-current rounded-full" />
-                              ) : (
-                                drumInfo.symbol
-                              )}
-                            </div>
-                          )}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
+              <DrumRow
+                key={drumKey}
+                drumKey={drumKey}
+                steps={steps as any[]}
+                drumInfo={drumInfo}
+                visibleSteps={visibleSteps}
+                startStep={startStep}
+                currentStep={currentStep}
+                onStepToggle={onStepToggle}
+                isLandscape={isLandscape}
+              />
             );
           })}
+        </div>
 
         {/* Grid Enhancement */}
-        <div className="absolute inset-6 pointer-events-none">
-          {/* Vertical beat lines */}
+        <div className={cn(
+          "absolute pointer-events-none",
+          isLandscape ? "inset-2" : "inset-6"
+        )}>
           {Array.from({ length: Math.ceil(visibleSteps / 2) }, (_, i) => (
             <div
               key={i}
@@ -294,8 +392,8 @@ export const DrumGrid = ({
         </div>
       </div>
 
-      {/* Pattern Info */}
-      {pattern.subdivisions && (
+      {/* Pattern Info - hidden in landscape */}
+      {!isLandscape && pattern.subdivisions && (
         <div className="mt-4 p-4 bg-muted/30 rounded-lg text-sm">
           <div className="font-medium mb-2">CSV Pattern Loaded:</div>
           <div className="grid grid-cols-2 gap-4 text-muted-foreground">
@@ -313,4 +411,6 @@ export const DrumGrid = ({
       )}
     </div>
   );
-};
+});
+
+DrumGrid.displayName = 'DrumGrid';
