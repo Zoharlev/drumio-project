@@ -3,7 +3,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, Play, Pause, RotateCcw, ArrowRight } from "lucide-react";
+import { Play, Pause, RotateCcw, ArrowRight } from "lucide-react";
+import { TopToolbar } from "@/components/TopToolbar";
 import {
   AlertDialog,
   AlertDialogContent,
@@ -478,89 +479,17 @@ const SongPractice = () => {
         "transition-transform duration-300 ease-out z-50",
         isLandscape && "fixed top-1 left-1 right-1",
         isLandscape && !showControls && "-translate-y-[calc(100%+8px)]",
-        !isLandscape && "sticky top-0 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b"
+        !isLandscape && "sticky top-0 z-10 p-2"
       )}>
-        <div className={cn(
-          "flex items-center justify-between px-4",
-          isLandscape 
-            ? "h-[40px] bg-card/95 backdrop-blur-sm border border-border rounded-xl" 
-            : "container h-16"
-        )}>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => navigate(`/song/${songId}`)}
-            className={cn(
-              "text-muted-foreground hover:text-foreground",
-              isLandscape && "h-7 w-7"
-            )}
-          >
-            <ChevronLeft className={cn(isLandscape ? "h-4 w-4" : "h-6 w-6")} />
-          </Button>
-          
-          <div className="flex-1 text-center">
-            <h1 className={cn(
-              "font-semibold text-foreground font-poppins truncate",
-              isLandscape ? "text-sm" : "text-lg"
-            )}>
-              {song.title}{practice ? ` (${practice.title})` : ""}
-            </h1>
-          </div>
-
-          {/* Landscape: inline controls */}
-          {isLandscape ? (
-            <div className="flex items-center gap-2">
-              <div className="flex items-center gap-1 bg-muted/50 rounded-lg px-2 py-1">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-6 w-6"
-                  onClick={() => setBpm(Math.max(60, bpm - 5))}
-                  disabled={bpm <= 60}
-                >
-                  <span className="text-xs">-</span>
-                </Button>
-                <span className="text-xs font-bold text-foreground w-12 text-center">
-                  {bpm}/{targetBpm}
-                </span>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-6 w-6"
-                  onClick={() => setBpm(Math.min(targetBpm, bpm + 5))}
-                  disabled={bpm >= targetBpm}
-                >
-                  <span className="text-xs">+</span>
-                </Button>
-              </div>
-              
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={handleReset}
-                className="h-7 w-7"
-              >
-                <RotateCcw className="h-3.5 w-3.5" />
-              </Button>
-              
-              <Button
-                size="icon"
-                onClick={togglePlayback}
-                className="h-7 w-7 rounded-full bg-primary hover:bg-primary/90"
-              >
-                {isPlaying ? (
-                  <Pause className="h-3.5 w-3.5" fill="currentColor" />
-                ) : (
-                  <Play className="h-3.5 w-3.5" fill="currentColor" />
-                )}
-              </Button>
-              
-              <ViewToggle currentView={viewMode} onViewChange={setViewMode} />
-            </div>
-          ) : (
-            <ViewToggle currentView={viewMode} onViewChange={setViewMode} />
-          )}
-        </div>
+        <TopToolbar
+          title={practice ? practice.title : song.title}
+          currentSection={drumPattern.sections?.[currentStep] || practice?.title || "Section"}
+          isPlaying={isPlaying}
+          isLandscape={isLandscape}
+          onPlayPause={togglePlayback}
+          onRestart={handleReset}
+          onExit={() => navigate(`/song/${songId}`)}
+        />
       </div>
 
       {/* Main Content */}
