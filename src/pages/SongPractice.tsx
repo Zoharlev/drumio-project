@@ -495,11 +495,11 @@ const SongPractice = () => {
           ? "h-full px-2 pt-1 pb-1 flex flex-col" 
           : "container px-4 py-6 space-y-6"
       )}>
-        {/* Landscape: Top toolbar above grid */}
+        {/* Landscape: Top toolbar as overlay above grid */}
         {isLandscape && (
           <div className={cn(
-            "transition-transform duration-300 ease-out z-50 px-1 mb-2",
-            !showControls && "-translate-y-[calc(100%+8px)] absolute top-0 left-0 right-0"
+            "transition-transform duration-300 ease-out z-50 px-1 absolute top-1 left-0 right-0",
+            !showControls && "-translate-y-[calc(100%+8px)]"
           )}>
             <TopToolbar
               title={practice ? practice.title : song.title}
