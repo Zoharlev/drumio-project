@@ -493,7 +493,7 @@ const SongPractice = () => {
       <div className={cn(
         isLandscape 
           ? "h-full px-2 py-1 flex flex-col" 
-          : "container px-4 py-6 pb-24 space-y-6"
+          : "container px-4 py-6 space-y-6"
       )}>
         {/* Landscape: Top toolbar above grid */}
         {isLandscape && (
@@ -566,12 +566,12 @@ const SongPractice = () => {
         </div>
       </div>
 
-      {/* Bottom Toolbar - slides down when hidden in landscape */}
+      {/* Bottom Toolbar - below grid with max 16px spacing */}
       <div className={cn(
-        "transition-transform duration-300 ease-out",
+        "transition-transform duration-300 ease-out mt-4",
         isLandscape && "fixed bottom-1 left-1 right-1 z-50",
         isLandscape && !showControls && "translate-y-[calc(100%+8px)]",
-        !isLandscape && "fixed bottom-0 left-0 right-0 z-20"
+        !isLandscape && "px-4 pb-4"
       )}>
         <BottomToolbar
           viewMode={viewMode}
