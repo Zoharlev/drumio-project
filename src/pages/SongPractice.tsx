@@ -495,60 +495,6 @@ const SongPractice = () => {
           ? "h-full px-2 py-1 flex flex-col" 
           : "container px-4 py-6 space-y-6"
       )}>
-        {/* Portrait: Tempo Control */}
-        {!isLandscape && (
-          <div className="flex items-center justify-between bg-card rounded-lg p-4">
-            <span className="text-sm font-medium text-muted-foreground">Tempo</span>
-            <div className="flex items-center gap-4">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setBpm(Math.max(60, bpm - 5))}
-                disabled={bpm <= 60}
-              >
-                -
-              </Button>
-              <span className="text-2xl font-bold text-foreground w-20 text-center">
-                {bpm}/{targetBpm}
-              </span>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setBpm(Math.min(targetBpm, bpm + 5))}
-                disabled={bpm >= targetBpm}
-              >
-                +
-              </Button>
-            </div>
-          </div>
-        )}
-
-        {/* Portrait: Playback Controls */}
-        {!isLandscape && (
-          <div className="flex items-center justify-center gap-4">
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={handleReset}
-              className="h-12 w-12"
-            >
-              <RotateCcw className="h-5 w-5" />
-            </Button>
-            
-            <Button
-              size="lg"
-              onClick={togglePlayback}
-              className="h-16 w-16 rounded-full bg-primary hover:bg-primary/90 animate-pulse-slow"
-            >
-              {isPlaying ? (
-                <Pause className="h-8 w-8" fill="currentColor" />
-              ) : (
-                <Play className="h-8 w-8" fill="currentColor" />
-              )}
-            </Button>
-          </div>
-        )}
-
         {/* Landscape: Top toolbar above grid */}
         {isLandscape && (
           <div className={cn(
@@ -628,18 +574,20 @@ const SongPractice = () => {
         !isLandscape && "fixed bottom-0 left-0 right-0 z-20"
       )}>
         <BottomToolbar
+          viewMode={viewMode}
+          onViewModeChange={setViewMode}
           metronomeEnabled={metronomeEnabled}
           drumSoundEnabled={drumSoundEnabled}
           audioEnabled={audioEnabled}
           onMetronomeToggle={() => setMetronomeEnabled(!metronomeEnabled)}
           onDrumSoundToggle={() => setDrumSoundEnabled(!drumSoundEnabled)}
           onAudioToggle={() => setAudioEnabled(!audioEnabled)}
-          metronomeVolume={metronomeVolume}
-          drumVolume={drumVolume}
-          audioVolume={audioVolume}
-          onMetronomeVolumeChange={setMetronomeVolume}
-          onDrumVolumeChange={setDrumVolume}
-          onAudioVolumeChange={setAudioVolume}
+          currentTime={currentTime}
+          totalTime={totalTime}
+          bpm={bpm}
+          targetBpm={targetBpm}
+          onBpmDecrease={() => setBpm(Math.max(60, bpm - 5))}
+          onBpmIncrease={() => setBpm(Math.min(targetBpm, bpm + 5))}
           showAudioControl={!practiceId}
           isLandscape={isLandscape}
         />
