@@ -24,7 +24,7 @@ export const TopToolbar = ({
   return (
     <div
       className={cn(
-        "flex items-center justify-between bg-card border border-border backdrop-blur-sm",
+        "flex items-center justify-between bg-card border border-border backdrop-blur-sm relative",
         isLandscape
           ? "h-[40px] px-3 rounded-xl"
           : "h-[55px] px-6 rounded-3xl"
@@ -43,10 +43,10 @@ export const TopToolbar = ({
       </div>
 
       {/* Center: Current Section Pill */}
-      <div className="flex-shrink-0 mx-4">
+      <div className="absolute left-1/2 -translate-x-1/2">
         <div
           className={cn(
-            "bg-primary text-primary-foreground font-medium rounded-full flex items-center justify-center",
+            "bg-primary text-primary-foreground font-medium rounded-full flex items-center justify-center text-center",
             isLandscape
               ? "px-4 py-1 text-xs min-w-[80px]"
               : "px-6 py-2 text-sm min-w-[100px]"
