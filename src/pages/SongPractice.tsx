@@ -474,23 +474,20 @@ const SongPractice = () => {
       "bg-background",
       isLandscape ? "h-screen overflow-hidden" : "min-h-screen pb-32"
     )}>
-      {/* Top Toolbar - slides up when hidden in landscape */}
-      <div className={cn(
-        "transition-transform duration-300 ease-out z-50",
-        isLandscape && "fixed top-1 left-1 right-1",
-        isLandscape && !showControls && "-translate-y-[calc(100%+8px)]",
-        !isLandscape && "sticky top-0 z-10 p-2"
-      )}>
-        <TopToolbar
-          title={practice ? practice.title : song.title}
-          currentSection={drumPattern.sections?.[currentStep] || practice?.title || "Section"}
-          isPlaying={isPlaying}
-          isLandscape={isLandscape}
-          onPlayPause={togglePlayback}
-          onRestart={handleReset}
-          onExit={() => navigate(`/song/${songId}`)}
-        />
-      </div>
+      {/* Portrait: Sticky top toolbar */}
+      {!isLandscape && (
+        <div className="sticky top-0 z-10 p-2">
+          <TopToolbar
+            title={practice ? practice.title : song.title}
+            currentSection={drumPattern.sections?.[currentStep] || practice?.title || "Section"}
+            isPlaying={isPlaying}
+            isLandscape={isLandscape}
+            onPlayPause={togglePlayback}
+            onRestart={handleReset}
+            onExit={() => navigate(`/song/${songId}`)}
+          />
+        </div>
+      )}
 
       {/* Main Content */}
       <div className={cn(
@@ -564,10 +561,28 @@ const SongPractice = () => {
           </div>
         )}
 
+        {/* Landscape: Top toolbar above grid */}
+        {isLandscape && (
+          <div className={cn(
+            "transition-transform duration-300 ease-out z-50 px-1 mb-2",
+            !showControls && "-translate-y-[calc(100%+8px)] absolute top-0 left-0 right-0"
+          )}>
+            <TopToolbar
+              title={practice ? practice.title : song.title}
+              currentSection={drumPattern.sections?.[currentStep] || practice?.title || "Section"}
+              isPlaying={isPlaying}
+              isLandscape={isLandscape}
+              onPlayPause={togglePlayback}
+              onRestart={handleReset}
+              onExit={() => navigate(`/song/${songId}`)}
+            />
+          </div>
+        )}
+
         {/* View: Grid or Notation */}
         <div className={cn(
           "relative",
-          isLandscape && "flex-1 mt-12 mb-12"
+          isLandscape && "flex-1 mb-12"
         )}>
           {viewMode === 'grid' ? (
             <DrumGrid
