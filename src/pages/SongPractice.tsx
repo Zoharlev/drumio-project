@@ -492,7 +492,7 @@ const SongPractice = () => {
       {/* Main Content */}
       <div className={cn(
         isLandscape 
-          ? "h-full px-2 pt-1 pb-0 flex flex-col" 
+          ? "h-full px-2 pt-1 pb-1 flex flex-col" 
           : "container px-4 py-6 space-y-6"
       )}>
         {/* Landscape: Top toolbar above grid */}
