@@ -298,21 +298,6 @@ export const DrumGrid = memo(({
         </div>
       </div>
 
-      {/* Pattern Info - hidden in landscape */}
-      {!isLandscape && pattern.subdivisions && <div className="mt-4 p-4 bg-muted/30 rounded-lg text-sm">
-          <div className="font-medium mb-2">CSV Pattern Loaded:</div>
-          <div className="grid grid-cols-2 gap-4 text-muted-foreground">
-            <div>
-              <span className="font-mono">Subdivisions:</span> ✓ Loaded ({pattern.subdivisions.filter(Boolean).length} beats)
-            </div>
-            <div>
-              <span className="font-mono">Offsets:</span> {pattern.offsets ? `✓ Loaded (${pattern.offsets.length} steps)` : '✗ Not available'}
-            </div>
-            <div className="col-span-2">
-              <span className="font-mono">Pattern Length:</span> {complexity.maxSteps} steps
-            </div>
-          </div>
-        </div>}
     </div>;
 });
 DrumGrid.displayName = 'DrumGrid';
