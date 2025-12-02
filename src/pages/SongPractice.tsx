@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -21,10 +21,13 @@ import { ViewToggle, ViewMode } from "@/components/ViewToggle";
 import { NotationView } from "@/components/NotationView";
 import { SongTimeDisplay } from "@/components/SongTimeDisplay";
 import { useSongPractices } from "@/hooks/useSongPractices";
+import { useIsLandscape } from "@/hooks/useIsLandscape";
+import { cn } from "@/lib/utils";
 
 const SongPractice = () => {
   const { songId, practiceId } = useParams();
   const navigate = useNavigate();
+  const isLandscape = useIsLandscape();
   
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
@@ -48,12 +51,57 @@ const SongPractice = () => {
   });
   const [showCompletionDialog, setShowCompletionDialog] = useState(false);
   const [countdown, setCountdown] = useState<number | string | null>(null);
+  const [showControls, setShowControls] = useState(true);
   const hasCompletedRef = useRef(false);
   const countdownTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const audioEngineRef = useRef<AudioEngine | null>(null);
   const startTimeRef = useRef<number>(0);
+
+  // Auto-hide controls in landscape mode after 3 seconds of inactivity
+  const resetControlsTimeout = useCallback(() => {
+    if (!isLandscape) return;
+    
+    setShowControls(true);
+    
+    if (controlsTimeoutRef.current) {
+      clearTimeout(controlsTimeoutRef.current);
+    }
+    
+    controlsTimeoutRef.current = setTimeout(() => {
+      setShowControls(false);
+    }, 3000);
+  }, [isLandscape]);
+
+  // Set up touch/click listeners for showing controls
+  useEffect(() => {
+    if (!isLandscape) {
+      setShowControls(true);
+      return;
+    }
+
+    const handleInteraction = () => {
+      resetControlsTimeout();
+    };
+
+    window.addEventListener('touchstart', handleInteraction);
+    window.addEventListener('touchmove', handleInteraction);
+    window.addEventListener('click', handleInteraction);
+
+    // Initial timeout
+    resetControlsTimeout();
+
+    return () => {
+      window.removeEventListener('touchstart', handleInteraction);
+      window.removeEventListener('touchmove', handleInteraction);
+      window.removeEventListener('click', handleInteraction);
+      if (controlsTimeoutRef.current) {
+        clearTimeout(controlsTimeoutRef.current);
+      }
+    };
+  }, [isLandscape, resetControlsTimeout]);
 
   // Fetch song data
   const { data: song, isLoading } = useQuery({
@@ -421,93 +469,177 @@ const SongPractice = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-32">
-      {/* Header */}
-      <div className="sticky top-0 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
-        <div className="container flex items-center justify-between h-16 px-4">
+    <div className={cn(
+      "bg-background",
+      isLandscape ? "h-screen overflow-hidden" : "min-h-screen pb-32"
+    )}>
+      {/* Top Toolbar - slides up when hidden in landscape */}
+      <div className={cn(
+        "transition-transform duration-300 ease-out z-50",
+        isLandscape && "fixed top-1 left-1 right-1",
+        isLandscape && !showControls && "-translate-y-[calc(100%+8px)]",
+        !isLandscape && "sticky top-0 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b"
+      )}>
+        <div className={cn(
+          "flex items-center justify-between px-4",
+          isLandscape 
+            ? "h-[40px] bg-card/95 backdrop-blur-sm border border-border rounded-xl" 
+            : "container h-16"
+        )}>
           <Button
             variant="ghost"
             size="icon"
             onClick={() => navigate(`/song/${songId}`)}
-            className="text-muted-foreground hover:text-foreground"
+            className={cn(
+              "text-muted-foreground hover:text-foreground",
+              isLandscape && "h-7 w-7"
+            )}
           >
-            <ChevronLeft className="h-6 w-6" />
+            <ChevronLeft className={cn(isLandscape ? "h-4 w-4" : "h-6 w-6")} />
           </Button>
           
           <div className="flex-1 text-center">
-            <h1 className="text-lg font-semibold text-foreground font-poppins">
+            <h1 className={cn(
+              "font-semibold text-foreground font-poppins truncate",
+              isLandscape ? "text-sm" : "text-lg"
+            )}>
               {song.title}{practice ? ` (${practice.title})` : ""}
             </h1>
           </div>
-          
-          <ViewToggle currentView={viewMode} onViewChange={setViewMode} />
+
+          {/* Landscape: inline controls */}
+          {isLandscape ? (
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1 bg-muted/50 rounded-lg px-2 py-1">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6"
+                  onClick={() => setBpm(Math.max(60, bpm - 5))}
+                  disabled={bpm <= 60}
+                >
+                  <span className="text-xs">-</span>
+                </Button>
+                <span className="text-xs font-bold text-foreground w-12 text-center">
+                  {bpm}/{targetBpm}
+                </span>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6"
+                  onClick={() => setBpm(Math.min(targetBpm, bpm + 5))}
+                  disabled={bpm >= targetBpm}
+                >
+                  <span className="text-xs">+</span>
+                </Button>
+              </div>
+              
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleReset}
+                className="h-7 w-7"
+              >
+                <RotateCcw className="h-3.5 w-3.5" />
+              </Button>
+              
+              <Button
+                size="icon"
+                onClick={togglePlayback}
+                className="h-7 w-7 rounded-full bg-primary hover:bg-primary/90"
+              >
+                {isPlaying ? (
+                  <Pause className="h-3.5 w-3.5" fill="currentColor" />
+                ) : (
+                  <Play className="h-3.5 w-3.5" fill="currentColor" />
+                )}
+              </Button>
+              
+              <ViewToggle currentView={viewMode} onViewChange={setViewMode} />
+            </div>
+          ) : (
+            <ViewToggle currentView={viewMode} onViewChange={setViewMode} />
+          )}
         </div>
       </div>
 
-      {/* Controls */}
-      <div className="container px-4 py-6 space-y-6">
-        {/* Song Time Display */}
-        <SongTimeDisplay
-          currentTime={currentTime}
-          totalTime={totalTime}
-          sections={sections}
-          currentStep={currentStep}
-          maxSteps={complexity.maxSteps}
-          onSeek={handleSeek}
-        />
+      {/* Main Content */}
+      <div className={cn(
+        isLandscape 
+          ? "h-full px-2 py-1 flex flex-col" 
+          : "container px-4 py-6 space-y-6"
+      )}>
+        {/* Portrait: Song Time Display */}
+        {!isLandscape && (
+          <SongTimeDisplay
+            currentTime={currentTime}
+            totalTime={totalTime}
+            sections={sections}
+            currentStep={currentStep}
+            maxSteps={complexity.maxSteps}
+            onSeek={handleSeek}
+          />
+        )}
 
-        {/* Tempo Control */}
-        <div className="flex items-center justify-between bg-card rounded-lg p-4">
-          <span className="text-sm font-medium text-muted-foreground">Tempo</span>
-          <div className="flex items-center gap-4">
+        {/* Portrait: Tempo Control */}
+        {!isLandscape && (
+          <div className="flex items-center justify-between bg-card rounded-lg p-4">
+            <span className="text-sm font-medium text-muted-foreground">Tempo</span>
+            <div className="flex items-center gap-4">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setBpm(Math.max(60, bpm - 5))}
+                disabled={bpm <= 60}
+              >
+                -
+              </Button>
+              <span className="text-2xl font-bold text-foreground w-20 text-center">
+                {bpm}/{targetBpm}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setBpm(Math.min(targetBpm, bpm + 5))}
+                disabled={bpm >= targetBpm}
+              >
+                +
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {/* Portrait: Playback Controls */}
+        {!isLandscape && (
+          <div className="flex items-center justify-center gap-4">
             <Button
               variant="outline"
-              size="sm"
-              onClick={() => setBpm(Math.max(60, bpm - 5))}
-              disabled={bpm <= 60}
+              size="icon"
+              onClick={handleReset}
+              className="h-12 w-12"
             >
-              -
+              <RotateCcw className="h-5 w-5" />
             </Button>
-            <span className="text-2xl font-bold text-foreground w-20 text-center">
-              {bpm}/{targetBpm}
-            </span>
+            
             <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setBpm(Math.min(targetBpm, bpm + 5))}
-              disabled={bpm >= targetBpm}
+              size="lg"
+              onClick={togglePlayback}
+              className="h-16 w-16 rounded-full bg-primary hover:bg-primary/90 animate-pulse-slow"
             >
-              +
+              {isPlaying ? (
+                <Pause className="h-8 w-8" fill="currentColor" />
+              ) : (
+                <Play className="h-8 w-8" fill="currentColor" />
+              )}
             </Button>
           </div>
-        </div>
-
-        {/* Playback Controls */}
-        <div className="flex items-center justify-center gap-4">
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={handleReset}
-            className="h-12 w-12"
-          >
-            <RotateCcw className="h-5 w-5" />
-          </Button>
-          
-          <Button
-            size="lg"
-            onClick={togglePlayback}
-            className="h-16 w-16 rounded-full bg-primary hover:bg-primary/90 animate-pulse-slow"
-          >
-            {isPlaying ? (
-              <Pause className="h-8 w-8" fill="currentColor" />
-            ) : (
-              <Play className="h-8 w-8" fill="currentColor" />
-            )}
-          </Button>
-        </div>
+        )}
 
         {/* View: Grid or Notation */}
-        <div className="relative">
+        <div className={cn(
+          "relative",
+          isLandscape && "flex-1 mt-12 mb-12"
+        )}>
           {viewMode === 'grid' ? (
             <DrumGrid
               pattern={drumPattern}
@@ -520,6 +652,7 @@ const SongPractice = () => {
               onTogglePlay={togglePlayback}
               isPlaying={isPlaying}
               complexity={complexity}
+              isLandscape={isLandscape}
             />
           ) : (
             <NotationView
@@ -533,10 +666,19 @@ const SongPractice = () => {
           {/* Countdown Overlay */}
           {countdown !== null && (
             <div className="absolute inset-0 flex items-center justify-center bg-background/40 backdrop-blur-sm z-50 rounded-lg">
-              <div className="relative w-48 h-48 flex items-center justify-center">
+              <div className={cn(
+                "relative flex items-center justify-center",
+                isLandscape ? "w-24 h-24" : "w-48 h-48"
+              )}>
                 <div className="absolute inset-0 rounded-full bg-primary/20 animate-pulse" />
-                <div className="relative w-40 h-40 rounded-full bg-primary flex items-center justify-center shadow-2xl">
-                  <span className="text-7xl font-bold text-white">
+                <div className={cn(
+                  "relative rounded-full bg-primary flex items-center justify-center shadow-2xl",
+                  isLandscape ? "w-20 h-20" : "w-40 h-40"
+                )}>
+                  <span className={cn(
+                    "font-bold text-white",
+                    isLandscape ? "text-4xl" : "text-7xl"
+                  )}>
                     {countdown}
                   </span>
                 </div>
@@ -546,22 +688,30 @@ const SongPractice = () => {
         </div>
       </div>
 
-      {/* Bottom Toolbar */}
-      <BottomToolbar
-        metronomeEnabled={metronomeEnabled}
-        drumSoundEnabled={drumSoundEnabled}
-        audioEnabled={audioEnabled}
-        onMetronomeToggle={() => setMetronomeEnabled(!metronomeEnabled)}
-        onDrumSoundToggle={() => setDrumSoundEnabled(!drumSoundEnabled)}
-        onAudioToggle={() => setAudioEnabled(!audioEnabled)}
-        metronomeVolume={metronomeVolume}
-        drumVolume={drumVolume}
-        audioVolume={audioVolume}
-        onMetronomeVolumeChange={setMetronomeVolume}
-        onDrumVolumeChange={setDrumVolume}
-        onAudioVolumeChange={setAudioVolume}
-        showAudioControl={!practiceId}
-      />
+      {/* Bottom Toolbar - slides down when hidden in landscape */}
+      <div className={cn(
+        "transition-transform duration-300 ease-out",
+        isLandscape && "fixed bottom-1 left-1 right-1 z-50",
+        isLandscape && !showControls && "translate-y-[calc(100%+8px)]",
+        !isLandscape && "fixed bottom-0 left-0 right-0 z-20"
+      )}>
+        <BottomToolbar
+          metronomeEnabled={metronomeEnabled}
+          drumSoundEnabled={drumSoundEnabled}
+          audioEnabled={audioEnabled}
+          onMetronomeToggle={() => setMetronomeEnabled(!metronomeEnabled)}
+          onDrumSoundToggle={() => setDrumSoundEnabled(!drumSoundEnabled)}
+          onAudioToggle={() => setAudioEnabled(!audioEnabled)}
+          metronomeVolume={metronomeVolume}
+          drumVolume={drumVolume}
+          audioVolume={audioVolume}
+          onMetronomeVolumeChange={setMetronomeVolume}
+          onDrumVolumeChange={setDrumVolume}
+          onAudioVolumeChange={setAudioVolume}
+          showAudioControl={!practiceId}
+          isLandscape={isLandscape}
+        />
+      </div>
 
       {/* Completion Dialog */}
       <AlertDialog open={showCompletionDialog} onOpenChange={setShowCompletionDialog}>
