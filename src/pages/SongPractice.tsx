@@ -493,7 +493,7 @@ const SongPractice = () => {
       <div className={cn(
         isLandscape 
           ? "h-full px-2 py-1 flex flex-col" 
-          : "container px-4 py-6 space-y-6"
+          : "container px-4 py-6 pb-24 space-y-6"
       )}>
         {/* Landscape: Top toolbar above grid */}
         {isLandscape && (
