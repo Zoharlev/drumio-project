@@ -24,11 +24,12 @@ export const TopToolbar = ({
   return (
     <div
       className={cn(
-        "flex items-center justify-between bg-card border border-border backdrop-blur-sm relative",
+        "flex items-center justify-between border border-border backdrop-blur-sm relative",
         isLandscape
           ? "h-[40px] px-3 rounded-xl"
           : "h-[55px] px-6 rounded-3xl"
       )}
+      style={{ backgroundColor: "rgba(31, 39, 51, 0.4)" }}
     >
       {/* Left: Song/Practice Name */}
       <div className="flex-1 min-w-0">
