@@ -566,9 +566,9 @@ const SongPractice = () => {
         </div>
       </div>
 
-      {/* Bottom Toolbar - below grid with max 16px spacing */}
+      {/* Bottom Toolbar - below grid with max 8px spacing */}
       <div className={cn(
-        "transition-transform duration-300 ease-out mt-4",
+        "transition-transform duration-300 ease-out mt-2",
         isLandscape && "fixed bottom-1 left-1 right-1 z-50",
         isLandscape && !showControls && "translate-y-[calc(100%+8px)]",
         !isLandscape && "px-4 pb-4"
