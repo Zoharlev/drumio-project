@@ -23,6 +23,7 @@ import { NotationView } from "@/components/NotationView";
 import { SongTimeDisplay } from "@/components/SongTimeDisplay";
 import { useSongPractices } from "@/hooks/useSongPractices";
 import { useIsLandscape } from "@/hooks/useIsLandscape";
+import { RotationPrompt } from "@/components/RotationPrompt";
 import { cn } from "@/lib/utils";
 
 const SongPractice = () => {
@@ -470,10 +471,12 @@ const SongPractice = () => {
   }
 
   return (
-    <div className={cn(
-      "bg-background",
-      isLandscape ? "h-screen overflow-hidden" : "min-h-screen pb-32"
-    )}>
+    <>
+      <RotationPrompt />
+      <div className={cn(
+        "bg-background",
+        isLandscape ? "h-screen overflow-hidden" : "min-h-screen pb-32"
+      )}>
       {/* Portrait: Sticky top toolbar */}
       {!isLandscape && (
         <div className="sticky top-0 z-10 p-2">
@@ -624,6 +627,7 @@ const SongPractice = () => {
         </AlertDialogContent>
       </AlertDialog>
     </div>
+    </>
   );
 };
 
