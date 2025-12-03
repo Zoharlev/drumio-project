@@ -7,7 +7,8 @@ export function useIsLandscape() {
 
   React.useEffect(() => {
     const checkLandscape = () => {
-      setIsLandscape(window.innerHeight <= LANDSCAPE_HEIGHT_BREAKPOINT);
+      const isLandscapeMode = window.innerWidth > window.innerHeight && window.innerHeight <= LANDSCAPE_HEIGHT_BREAKPOINT;
+      setIsLandscape(isLandscapeMode);
     };
 
     checkLandscape();
