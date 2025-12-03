@@ -7,12 +7,12 @@ interface DrumGridProps {
   pattern: DrumPattern;
   currentStep: number;
   scrollOffset: number;
-  onStepToggle: (drum: string, step: number) => void;
-  onClearPattern: () => void;
-  metronomeEnabled: boolean;
-  onMetronomeToggle: () => void;
-  onTogglePlay: () => void;
-  isPlaying: boolean;
+  onStepToggle?: (drum: string, step: number) => void;
+  onClearPattern?: () => void;
+  metronomeEnabled?: boolean;
+  onMetronomeToggle?: () => void;
+  onTogglePlay?: () => void;
+  isPlaying?: boolean;
   complexity: PatternComplexity;
   isLandscape?: boolean;
 }
@@ -89,7 +89,8 @@ const StepButton = memo(({
   isCurrentStep,
   isMainBeat,
   onToggle,
-  isLandscape
+  isLandscape,
+  isEditable
 }: {
   stepIndex: number;
   note: any;
@@ -100,14 +101,26 @@ const StepButton = memo(({
   };
   isCurrentStep: boolean;
   isMainBeat: boolean;
-  onToggle: () => void;
+  onToggle?: () => void;
   isLandscape: boolean;
+  isEditable: boolean;
 }) => {
   const isActive = note?.active || note === true;
   const noteType = note?.type || 'normal';
   const isOpen = (note as any)?.open;
-  return <button onClick={onToggle} className={cn("flex-1 border-r border-grid-line last:border-r-0 transition-all duration-200", "flex items-center justify-center group-hover:bg-muted/20", isCurrentStep && "bg-playhead/10", isMainBeat && "border-r-2 border-primary/30", isLandscape ? "h-full min-w-[24px]" : "h-12")}>
-      {isActive && <div className={cn("rounded-full transition-transform duration-200 hover:scale-110", "flex items-center justify-center font-bold", isCurrentStep && isActive && "animate-bounce", isLandscape ? "w-2 h-2 text-[6px]" : "w-6 h-6 text-xs", noteType === 'ghost' && "border-2 border-note-active/50 bg-transparent text-note-active/50", noteType === 'ghost' && (isLandscape ? "w-2 h-2" : "w-5 h-5"), noteType === 'normal' && "bg-gradient-to-br from-note-active to-accent shadow-note text-background", noteType === 'accent' && "bg-gradient-to-br from-note-active to-accent shadow-note text-background", noteType === 'accent' && (isLandscape ? "w-3 h-3" : "w-7 h-7"))}>
+  return <button 
+    onClick={isEditable ? onToggle : undefined} 
+    disabled={!isEditable}
+    className={cn(
+      "flex-1 border-r border-grid-line last:border-r-0 transition-all duration-200", 
+      "flex items-center justify-center",
+      isEditable && "group-hover:bg-muted/20 cursor-pointer",
+      !isEditable && "cursor-default",
+      isCurrentStep && "bg-playhead/10", 
+      isMainBeat && "border-r-2 border-primary/30", 
+      isLandscape ? "h-full min-w-[24px]" : "h-12"
+    )}>
+      {isActive && <div className={cn("rounded-full transition-transform duration-200", isEditable && "hover:scale-110", "flex items-center justify-center font-bold", isCurrentStep && isActive && "animate-bounce", isLandscape ? "w-2 h-2 text-[6px]" : "w-6 h-6 text-xs", noteType === 'ghost' && "border-2 border-note-active/50 bg-transparent text-note-active/50", noteType === 'ghost' && (isLandscape ? "w-2 h-2" : "w-5 h-5"), noteType === 'normal' && "bg-gradient-to-br from-note-active to-accent shadow-note text-background", noteType === 'accent' && "bg-gradient-to-br from-note-active to-accent shadow-note text-background", noteType === 'accent' && (isLandscape ? "w-3 h-3" : "w-7 h-7"))}>
           {!isLandscape && (noteType === 'ghost' ? <span className="text-[10px]">{drumInfo.symbol}</span> : isOpen && (drumKey === 'hihat' || drumKey === 'openhat') ? <div className="w-3 h-3 border-2 border-current rounded-full" /> : drumInfo.symbol)}
         </div>}
     </button>;
@@ -123,7 +136,8 @@ const DrumRow = memo(({
   startStep,
   currentStep,
   onStepToggle,
-  isLandscape
+  isLandscape,
+  isEditable
 }: {
   drumKey: string;
   steps: any[];
@@ -134,8 +148,9 @@ const DrumRow = memo(({
   visibleSteps: number;
   startStep: number;
   currentStep: number;
-  onStepToggle: (drum: string, step: number) => void;
+  onStepToggle?: (drum: string, step: number) => void;
   isLandscape: boolean;
+  isEditable: boolean;
 }) => {
   return <div className={cn("flex items-center group", isLandscape ? "mb-0 flex-1" : "mb-3")}>
       {/* Drum Label */}
@@ -157,7 +172,7 @@ const DrumRow = memo(({
           const note = steps[stepIndex];
           const isCurrentStepActive = stepIndex === currentStep;
           const isMainBeat = stepIndex % 2 === 0;
-          return <StepButton key={stepIndex} stepIndex={stepIndex} note={note} drumKey={drumKey} drumInfo={drumInfo} isCurrentStep={isCurrentStepActive} isMainBeat={isMainBeat} onToggle={() => onStepToggle(drumKey, stepIndex)} isLandscape={isLandscape} />;
+          return <StepButton key={stepIndex} stepIndex={stepIndex} note={note} drumKey={drumKey} drumInfo={drumInfo} isCurrentStep={isCurrentStepActive} isMainBeat={isMainBeat} onToggle={onStepToggle ? () => onStepToggle(drumKey, stepIndex) : undefined} isLandscape={isLandscape} isEditable={isEditable} />;
         })}
         </div>
       </div>
@@ -284,7 +299,7 @@ export const DrumGrid = memo(({
             name: drumKey,
             symbol: drumKey === 'Kick' ? '●' : drumKey === 'Snare' ? '×' : drumKey === 'Hi-Hat' ? '○' : drumKey === 'Tom' ? '◆' : '●'
           };
-          return <DrumRow key={drumKey} drumKey={drumKey} steps={steps as any[]} drumInfo={drumInfo} visibleSteps={visibleSteps} startStep={startStep} currentStep={currentStep} onStepToggle={onStepToggle} isLandscape={isLandscape} />;
+          return <DrumRow key={drumKey} drumKey={drumKey} steps={steps as any[]} drumInfo={drumInfo} visibleSteps={visibleSteps} startStep={startStep} currentStep={currentStep} onStepToggle={onStepToggle} isLandscape={isLandscape} isEditable={!!onStepToggle} />;
         })}
         </div>
 

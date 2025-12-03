@@ -526,12 +526,6 @@ const SongPractice = () => {
               pattern={drumPattern}
               currentStep={currentStep}
               scrollOffset={scrollOffset}
-              onStepToggle={handleStepToggle}
-              onClearPattern={handleClearPattern}
-              onMetronomeToggle={() => setMetronomeEnabled(!metronomeEnabled)}
-              metronomeEnabled={metronomeEnabled}
-              onTogglePlay={togglePlayback}
-              isPlaying={isPlaying}
               complexity={complexity}
               isLandscape={isLandscape}
             />
