@@ -50,7 +50,7 @@ const SongDetails = () => {
         <Button 
           variant="ghost" 
           size="icon" 
-          onClick={() => navigate(-1)} 
+          onClick={() => navigate('/explore')} 
           className="text-white hover:bg-white/10"
         >
           <ArrowLeft className="h-5 w-5" />
