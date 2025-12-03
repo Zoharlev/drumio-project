@@ -104,11 +104,23 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'device-rotate': {
+					'0%, 10%': {
+						transform: 'rotate(0deg)'
+					},
+					'40%, 60%': {
+						transform: 'rotate(-90deg)'
+					},
+					'90%, 100%': {
+						transform: 'rotate(0deg)'
+					}
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'device-rotate': 'device-rotate 2.5s ease-in-out infinite'
 			}
 		}
 	},
