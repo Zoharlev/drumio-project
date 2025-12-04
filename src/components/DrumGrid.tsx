@@ -154,7 +154,7 @@ const DrumRow = memo(({
 }) => {
   return <div className={cn("flex items-center group", isLandscape ? "mb-0 flex-1 min-h-0" : "mb-3")}>
       {/* Drum Label */}
-      <div className={cn("flex items-center", isLandscape ? "flex-col w-8 justify-center px-[1px] gap-0" : "w-20 gap-2 pr-4")}>
+      <div className={cn("flex items-center", isLandscape ? "flex-col w-8 justify-center px-[1px] py-0 gap-0" : "w-20 gap-2 pr-4")}>
         <span className={cn("font-mono text-accent", isLandscape ? "text-sm leading-none" : "text-lg")}>{drumInfo.symbol}</span>
         <span className={cn("font-medium text-foreground truncate", isLandscape ? "text-[12px] leading-none" : "text-sm")}>{drumInfo.name}</span>
       </div>
