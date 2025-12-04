@@ -532,10 +532,10 @@ const SongPractice = () => {
           ? "h-full px-1 py-0 flex flex-col" 
           : "container px-4 py-6 space-y-6"
       )}>
-        {/* Landscape: Top toolbar as fixed overlay */}
+        {/* Landscape: Top toolbar as overlay above grid */}
         {isLandscape && (
           <div className={cn(
-            "transition-transform duration-300 ease-out z-50 px-1 fixed top-1 left-0 right-0",
+            "transition-transform duration-300 ease-out z-50 px-1 absolute top-1 left-0 right-0",
             !showControls && "-translate-y-[calc(100%+8px)]"
           )}>
             <TopToolbar
