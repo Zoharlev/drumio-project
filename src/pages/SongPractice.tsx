@@ -495,7 +495,7 @@ const SongPractice = () => {
       {/* Main Content */}
       <div className={cn(
         isLandscape 
-          ? "h-full px-2 pt-1 pb-1 flex flex-col" 
+          ? "h-full px-1 py-0 flex flex-col" 
           : "container px-4 py-6 space-y-6"
       )}>
         {/* Landscape: Top toolbar as overlay above grid */}
@@ -565,10 +565,10 @@ const SongPractice = () => {
 
       {/* Bottom Toolbar - below grid with max 8px spacing */}
       <div className={cn(
-        "transition-transform duration-300 ease-out mt-2",
-        isLandscape && "fixed bottom-1 left-1 right-1 z-50",
+        "transition-transform duration-300 ease-out",
+        isLandscape && "fixed bottom-0 left-1 right-1 z-50",
         isLandscape && !showControls && "translate-y-[calc(100%+8px)]",
-        !isLandscape && "px-4 pb-4"
+        !isLandscape && "px-4 pb-4 mt-2"
       )}>
         <BottomToolbar
           viewMode={viewMode}
