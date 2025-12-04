@@ -154,9 +154,9 @@ const DrumRow = memo(({
 }) => {
   return <div className={cn("flex items-center group", isLandscape ? "mb-0 flex-1 min-h-0" : "mb-3")}>
       {/* Drum Label */}
-      <div className={cn("flex items-center", isLandscape ? "w-6 justify-center px-[1px]" : "w-20 gap-2 pr-4")}>
-        <span className={cn("font-mono text-accent", isLandscape ? "text-sm" : "text-lg")}>{drumInfo.symbol}</span>
-        <span className={cn("font-medium text-foreground truncate", isLandscape ? "hidden" : "text-sm")}>{drumInfo.name}</span>
+      <div className={cn("flex items-center", isLandscape ? "flex-col w-8 justify-center px-[1px] gap-0" : "w-20 gap-2 pr-4")}>
+        <span className={cn("font-mono text-accent", isLandscape ? "text-sm leading-none" : "text-lg")}>{drumInfo.symbol}</span>
+        <span className={cn("font-medium text-foreground truncate", isLandscape ? "text-[12px] leading-none" : "text-sm")}>{drumInfo.name}</span>
       </div>
 
       {/* Grid Line */}
@@ -219,7 +219,7 @@ export const DrumGrid = memo(({
       <div className={cn("relative bg-card rounded-lg shadow-elevated transition-opacity duration-300", isLandscape ? "flex-1 p-1 px-2 flex flex-col min-h-0" : "p-6")}>
         {/* Playhead - Fixed position */}
         <div className="absolute top-0 bottom-0 w-1 bg-playhead z-20 pointer-events-none" style={{
-        left: `calc(${isLandscape ? '1.5rem' : '5rem'} + ${isLandscape ? '0.5rem' : '1.5rem'} + ((100% - ${isLandscape ? '1.5rem' : '5rem'} - ${isLandscape ? '1rem' : '3rem'}) * ${visibleSteps > 0 ? playheadIndex / visibleSteps : 0}))`,
+        left: `calc(${isLandscape ? '2rem' : '5rem'} + ${isLandscape ? '0.5rem' : '1.5rem'} + ((100% - ${isLandscape ? '2rem' : '5rem'} - ${isLandscape ? '1rem' : '3rem'}) * ${visibleSteps > 0 ? playheadIndex / visibleSteps : 0}))`,
         boxShadow: "0 0 20px hsl(var(--playhead) / 0.6)",
         transition: "left 75ms ease-out"
       }} />
