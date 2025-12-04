@@ -535,7 +535,7 @@ const SongPractice = () => {
         {/* Landscape: Top toolbar as overlay above grid */}
         {isLandscape && (
           <div className={cn(
-            "transition-transform duration-300 ease-out z-50 px-1 absolute top-1 left-0 right-0",
+            "transition-transform duration-300 ease-out z-50 px-1 fixed top-0 left-1 right-1",
             !showControls && "-translate-y-[calc(100%+8px)]"
           )}>
             <TopToolbar
