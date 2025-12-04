@@ -105,7 +105,41 @@ const SongPractice = () => {
     };
   }, [isLandscape, resetControlsTimeout]);
 
-  // Fetch song data
+  // Fullscreen mode in landscape when playing
+  useEffect(() => {
+    if (!isLandscape) return;
+    
+    const enterFullscreen = async () => {
+      try {
+        if (document.documentElement.requestFullscreen) {
+          await document.documentElement.requestFullscreen();
+        } else if ((document.documentElement as any).webkitRequestFullscreen) {
+          await (document.documentElement as any).webkitRequestFullscreen();
+        }
+      } catch (error) {
+        console.log("Fullscreen not supported or denied");
+      }
+    };
+    
+    const exitFullscreen = async () => {
+      try {
+        if (document.fullscreenElement) {
+          await document.exitFullscreen();
+        } else if ((document as any).webkitFullscreenElement) {
+          await (document as any).webkitExitFullscreen();
+        }
+      } catch (error) {
+        console.log("Exit fullscreen error");
+      }
+    };
+    
+    if (isPlaying) {
+      enterFullscreen();
+    } else {
+      exitFullscreen();
+    }
+  }, [isPlaying, isLandscape]);
+
   const { data: song, isLoading } = useQuery({
     queryKey: ["song", songId],
     queryFn: async () => {
