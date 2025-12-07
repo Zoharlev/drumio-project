@@ -59,6 +59,8 @@
     /* Drumio-specific colors */
     --drumio-purple: 244 64% 61%; /* #6764DB */
     --drumio-yellow: 51 91% 76%; /* #F7E88A */
+    --progress-session: 47 100% 51%; /* #ffcc03 */
+    --progress-completed: 88 56% 46%; /* #7cb235 */
     --drumio-intro-bg: 227 50% 2%; /* #060607 */
     
     /* Gradient colors */
