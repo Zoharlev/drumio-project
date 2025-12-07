@@ -63,8 +63,10 @@ export default {
 					ring: 'hsl(var(--sidebar-ring))'
 				},
 				// Drumio-specific colors
-				'drumio-purple': 'hsl(var(--drumio-purple))',
-				'drumio-yellow': 'hsl(var(--drumio-yellow))',
+        'drumio-purple': 'hsl(var(--drumio-purple))',
+        'drumio-yellow': 'hsl(var(--drumio-yellow))',
+        'progress-session': 'hsl(var(--progress-session))',
+        'progress-completed': 'hsl(var(--progress-completed))',
 				'drumio-intro-bg': 'hsl(var(--drumio-intro-bg))',
 				'text-secondary': 'hsl(var(--text-secondary))',
 				'text-tertiary': 'hsl(var(--text-tertiary))',

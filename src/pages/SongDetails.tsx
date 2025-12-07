@@ -85,7 +85,7 @@ const SongDetails = () => {
 
       {/* Song Progress Bar */}
       <div className="mb-8">
-        <Progress value={songProgress} className="h-3 bg-muted/30" />
+        <Progress value={songProgress} variant="completed" className="h-3 bg-muted/30" />
         <div className="flex justify-end mt-2">
           <span className="text-white text-sm font-medium">{Math.round(songProgress)} %</span>
         </div>
@@ -122,6 +122,7 @@ const SongDetails = () => {
                       {/* Practice Progress Bar */}
                       <Progress 
                         value={progressMap.get(practice.id) || 0} 
+                        variant="session"
                         className="h-2 bg-white/20" 
                       />
                     </div>
