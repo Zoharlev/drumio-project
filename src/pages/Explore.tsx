@@ -48,7 +48,7 @@ const Explore = () => {
   const getLevelStars = (level: string) => {
     const levelMap: { [key: string]: number } = {
       'beginner': 1,
-      'intermediate': 3,
+      'intermediate': 2,
       'advanced': 2,
       'professional': 3,
       'professionals': 3
