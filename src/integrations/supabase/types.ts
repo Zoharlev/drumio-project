@@ -455,6 +455,57 @@ export type Database = {
           },
         ]
       }
+      user_practice_progress: {
+        Row: {
+          completed_at: string
+          completed_bpm: number
+          created_at: string
+          id: string
+          practice_id: string
+          progress_percentage: number | null
+          song_id: string
+          target_bpm: number
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string
+          completed_bpm: number
+          created_at?: string
+          id?: string
+          practice_id: string
+          progress_percentage?: number | null
+          song_id: string
+          target_bpm: number
+          user_id: string
+        }
+        Update: {
+          completed_at?: string
+          completed_bpm?: number
+          created_at?: string
+          id?: string
+          practice_id?: string
+          progress_percentage?: number | null
+          song_id?: string
+          target_bpm?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_practice_progress_practice_id_fkey"
+            columns: ["practice_id"]
+            isOneToOne: false
+            referencedRelation: "practices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_practice_progress_song_id_fkey"
+            columns: ["song_id"]
+            isOneToOne: false
+            referencedRelation: "songs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_songs_progress: {
         Row: {
           feedback: Json | null

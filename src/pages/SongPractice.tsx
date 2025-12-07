@@ -24,6 +24,7 @@ import { SongTimeDisplay } from "@/components/SongTimeDisplay";
 import { useSongPractices } from "@/hooks/useSongPractices";
 import { useIsLandscape } from "@/hooks/useIsLandscape";
 import { RotationPrompt } from "@/components/RotationPrompt";
+import { useSavePracticeProgress } from "@/hooks/useUserPracticeProgress";
 import { cn } from "@/lib/utils";
 
 const SongPractice = () => {
@@ -61,6 +62,8 @@ const SongPractice = () => {
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const audioEngineRef = useRef<AudioEngine | null>(null);
   const startTimeRef = useRef<number>(0);
+  
+  const { mutate: savePracticeProgress } = useSavePracticeProgress();
 
   // Auto-hide controls in landscape mode after 3 seconds of inactivity
   const resetControlsTimeout = useCallback(() => {
@@ -263,11 +266,20 @@ const SongPractice = () => {
           const next = prev + 1;
           
           // If on practice page and pattern completed, stop and show dialog
-          if (practiceId && next >= complexity.maxSteps && !hasCompletedRef.current) {
+          if (practiceId && songId && next >= complexity.maxSteps && !hasCompletedRef.current) {
             hasCompletedRef.current = true;
             setIsPlaying(false);
             setShowCompletionDialog(true);
             setScrollOffset(0); // Reset scroll
+            
+            // Save practice progress: completed_bpm / target_bpm = progress %
+            savePracticeProgress({
+              practiceId,
+              songId,
+              completedBpm: bpm,
+              targetBpm,
+            });
+            
             return 0; // Reset to start
           }
           
