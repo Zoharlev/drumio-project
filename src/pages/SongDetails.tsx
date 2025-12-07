@@ -4,11 +4,26 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { useSongPractices } from "@/hooks/useSongPractices";
+import { useUserPracticeProgress } from "@/hooks/useUserPracticeProgress";
 
 const SongDetails = () => {
   const navigate = useNavigate();
   const { songId } = useParams<{ songId: string }>();
   const { data, isLoading } = useSongPractices(songId || "");
+  const { data: progressData } = useUserPracticeProgress(songId);
+
+  // Create a map of practice_id -> progress_percentage
+  const progressMap = new Map<string, number>();
+  progressData?.forEach((p) => {
+    progressMap.set(p.practice_id, p.progress_percentage);
+  });
+
+  // Calculate overall song progress (average of all practice progress)
+  const songProgress = data?.practices.length
+    ? progressData?.length
+      ? progressData.reduce((sum, p) => sum + p.progress_percentage, 0) / data.practices.length
+      : 0
+    : 0;
 
   if (isLoading) {
     return (
@@ -70,9 +85,9 @@ const SongDetails = () => {
 
       {/* Song Progress Bar */}
       <div className="mb-8">
-        <Progress value={0} className="h-3 bg-muted/30" />
+        <Progress value={songProgress} className="h-3 bg-muted/30" />
         <div className="flex justify-end mt-2">
-          <span className="text-white text-sm font-medium">0 %</span>
+          <span className="text-white text-sm font-medium">{Math.round(songProgress)} %</span>
         </div>
       </div>
 
@@ -105,7 +120,10 @@ const SongDetails = () => {
                       )}
                       
                       {/* Practice Progress Bar */}
-                      <Progress value={0} className="h-2 bg-white/20" />
+                      <Progress 
+                        value={progressMap.get(practice.id) || 0} 
+                        className="h-2 bg-white/20" 
+                      />
                     </div>
 
                     {/* Play Button */}
