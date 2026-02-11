@@ -95,7 +95,7 @@ const translations = {
         { id: "beginner", label: "מתחיל לגמרי", desc: "אף פעם לא ניגנתי על תופים" },
         { id: "some", label: "קצת ניסיון", desc: "ניגנתי קצת, מכיר את הבסיס" },
         { id: "intermediate", label: "בינוני", desc: "יודע לנגן שירים, רוצה להשתפר" },
-        { id: "advanced", label: "מתקדם", desc: "מחפש אתגרים ושיפור" },
+        { id: "advanced", label: "מתקדם", desc: "מחפש אתגרים חדשים" },
       ],
     },
     step2: {
