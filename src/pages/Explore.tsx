@@ -74,7 +74,6 @@ const Explore = () => {
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-2">
-          <h1 className="text-2xl font-bold text-foreground font-poppins">Explore</h1>
           <div className="relative">
             <Button
               variant="ghost"
@@ -103,6 +102,7 @@ const Explore = () => {
               </>
             )}
           </div>
+          <h1 className="text-2xl font-bold text-foreground font-poppins">Explore</h1>
         </div>
         <Button 
           variant="ghost" 
