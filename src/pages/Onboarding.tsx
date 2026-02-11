@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import DrumLogo from "@/components/DrumLogo";
 import LanguageSelector from "@/components/LanguageSelector";
+import { supabase } from "@/integrations/supabase/client";
 
 type OnboardingStep = 1 | 2 | 3 | 4;
 
@@ -147,6 +148,12 @@ export default function Onboarding() {
     goal: "",
     source: "",
   });
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) navigate("/explore", { replace: true });
+    });
+  }, [navigate]);
 
   useEffect(() => {
     const interval = setInterval(() => {

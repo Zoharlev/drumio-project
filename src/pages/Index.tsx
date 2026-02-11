@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import LanguageSelector from "@/components/LanguageSelector";
+import { supabase } from "@/integrations/supabase/client";
 
 const translations = {
   en: {
@@ -20,9 +21,14 @@ const Index = () => {
   const isRtl = lang === "he";
 
   useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) navigate("/explore", { replace: true });
+    });
+  }, [navigate]);
+
+  useEffect(() => {
     const handler = () => setLang(localStorage.getItem("drumio-language") || "en");
     window.addEventListener("storage", handler);
-    // Also poll for same-tab changes
     const interval = setInterval(() => {
       const current = localStorage.getItem("drumio-language") || "en";
       setLang(prev => prev !== current ? current : prev);
