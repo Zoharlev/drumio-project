@@ -8,7 +8,7 @@ const translations = {
     cta: "Let's go!",
   },
   he: {
-    heading: "!לפני שנתחיל, בואו נכיר אתכם טוב יותר",
+    heading: "ברוכים הבאים לדרומיו!",
     cta: "!יאללה",
   },
 };
