@@ -1,10 +1,47 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Eye, EyeOff, Chrome, Facebook } from "lucide-react";
 import DrumLogo from "@/components/DrumLogo";
 import LanguageSelector from "@/components/LanguageSelector";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+
+const translations = {
+  en: {
+    welcome: "Welcome to Drumio!",
+    emailLabel: "Email address",
+    emailPlaceholder: "Your email",
+    passwordLabel: "Password",
+    passwordPlaceholder: "Your password",
+    forgotPassword: "Forgot password?",
+    loginButton: "Log In",
+    loggingIn: "Logging in...",
+    orContinueWith: "Or continue with",
+    signupPrompt: "Don't have an account?",
+    signupLink: "Sign up",
+    errorTitle: "Error logging in",
+    successTitle: "Welcome back!",
+    successDesc: "You've successfully logged in.",
+  },
+  he: {
+    welcome: "!ברוכים הבאים לדרומיו",
+    emailLabel: "כתובת דוא״ל",
+    emailPlaceholder: "דוא״ל שלך",
+    passwordLabel: "סיסמה",
+    passwordPlaceholder: "סיסמה שלך",
+    forgotPassword: "שכחת סיסמה?",
+    loginButton: "כניסה",
+    loggingIn: "...כניסה",
+    orContinueWith: "או המשך עם",
+    signupPrompt: "אין לך חשבון?",
+    signupLink: "הירשם",
+    errorTitle: "שגיאה בכניסה",
+    successTitle: "!ברוכים שובים",
+    successDesc: ".נכנסת בהצלחה",
+  },
+};
+
+type LangKey = keyof typeof translations;
 
 export default function Login() {
   const navigate = useNavigate();
@@ -14,6 +51,22 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [lang, setLang] = useState<LangKey>(() => {
+    const stored = localStorage.getItem("drumio-language") || "en";
+    return stored in translations ? (stored as LangKey) : "en";
+  });
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const current = localStorage.getItem("drumio-language") || "en";
+      const key = current in translations ? (current as LangKey) : "en";
+      setLang((prev) => (prev !== key ? key : prev));
+    }, 300);
+    return () => clearInterval(interval);
+  }, []);
+
+  const t = translations[lang];
+  const isRtl = lang === "he";
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,7 +77,7 @@ export default function Login() {
       
       if (error) {
         toast({
-          title: "Error logging in",
+          title: t.errorTitle,
           description: error.message,
           variant: "destructive",
         });
@@ -33,17 +86,16 @@ export default function Login() {
 
       if (data.user) {
         toast({
-          title: "Welcome back!",
-          description: "You've successfully logged in.",
+          title: t.successTitle,
+          description: t.successDesc,
         });
         
-        // Navigate to explore page
         navigate("/explore");
       }
     } catch (error) {
       toast({
-        title: "Error logging in",
-        description: "Something went wrong. Please try again.",
+        title: t.errorTitle,
+        description: lang === "he" ? "משהו השתבש. נא נסה שוב." : "Something went wrong. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -57,24 +109,24 @@ export default function Login() {
       
       if (error) {
         toast({
-          title: "Error logging in",
+          title: t.errorTitle,
           description: error.message,
           variant: "destructive",
         });
       }
     } catch (error) {
       toast({
-        title: "Error logging in",
-        description: "Something went wrong. Please try again.",
+        title: t.errorTitle,
+        description: lang === "he" ? "משהו השתבש. נא נסה שוב." : "Something went wrong. Please try again.",
         variant: "destructive",
       });
     }
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col px-6 py-8 max-w-md mx-auto">
+    <div className="min-h-screen bg-background flex flex-col px-6 py-8 max-w-md mx-auto" dir={isRtl ? "rtl" : "ltr"}>
       {/* Language selector */}
-      <div className="flex justify-end mb-2">
+      <div className={`flex ${isRtl ? "justify-start" : "justify-end"} mb-2`}>
         <LanguageSelector />
       </div>
 
@@ -92,7 +144,7 @@ export default function Login() {
       {/* Welcome message */}
       <div className="text-center mb-8">
         <h2 className="text-3xl font-bold text-white mb-4 font-poppins leading-tight">
-          Welcome to Drumio!
+          {t.welcome}
         </h2>
       </div>
 
@@ -101,14 +153,14 @@ export default function Login() {
         {/* Email field */}
         <div className="space-y-2">
           <label className="text-sm text-text-secondary font-poppins">
-            Email address
+            {t.emailLabel}
           </label>
           <div className="relative">
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="Your email"
+              placeholder={t.emailPlaceholder}
               className="w-full p-4 rounded-lg border-2 border-secondary bg-card text-white placeholder-text-tertiary font-poppins focus:border-drumio-purple focus:outline-none transition-colors"
               required
             />
@@ -118,21 +170,21 @@ export default function Login() {
         {/* Password field */}
         <div className="space-y-2">
           <label className="text-sm text-text-secondary font-poppins">
-            Password
+            {t.passwordLabel}
           </label>
           <div className="relative">
             <input
               type={showPassword ? "text" : "password"}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Your password"
-              className="w-full p-4 pr-12 rounded-lg border-2 border-secondary bg-card text-white placeholder-text-tertiary font-poppins focus:border-drumio-purple focus:outline-none transition-colors"
+              placeholder={t.passwordPlaceholder}
+              className={`w-full p-4 rounded-lg border-2 border-secondary bg-card text-white placeholder-text-tertiary font-poppins focus:border-drumio-purple focus:outline-none transition-colors ${isRtl ? "pr-12" : "pl-12"}`}
               required
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-4 top-1/2 transform -translate-y-1/2 text-text-secondary hover:text-foreground"
+              className={`absolute top-1/2 transform -translate-y-1/2 text-text-secondary hover:text-foreground ${isRtl ? "left-4" : "right-4"}`}
             >
               {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
             </button>
@@ -140,12 +192,12 @@ export default function Login() {
         </div>
 
         {/* Forgot password */}
-        <div className="text-right">
+        <div className={isRtl ? "text-left" : "text-right"}>
           <button
             type="button"
             className="text-drumio-purple hover:text-drumio-purple/80 text-sm font-poppins"
           >
-            Forgot password?
+            {t.forgotPassword}
           </button>
         </div>
 
@@ -155,7 +207,7 @@ export default function Login() {
           disabled={loading}
           className="w-full py-4 px-12 rounded-xl border-2 border-drumio-purple bg-gradient-to-r from-transparent via-white/10 to-transparent text-drumio-purple text-2xl font-semibold font-poppins hover:bg-white/5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {loading ? "Logging in..." : "Log In"}
+          {loading ? t.loggingIn : t.loginButton}
         </button>
       </form>
 
@@ -167,7 +219,7 @@ export default function Login() {
           </div>
           <div className="relative flex justify-center text-sm">
             <span className="bg-background px-4 text-text-secondary font-poppins">
-              Or continue with
+              {t.orContinueWith}
             </span>
           </div>
         </div>
@@ -193,12 +245,12 @@ export default function Login() {
       {/* Sign up link */}
       <div className="mt-8 text-center">
         <p className="text-text-secondary font-poppins">
-          Don't have an account?{" "}
+          {t.signupPrompt}{" "}
           <button
             onClick={() => navigate("/signup")}
             className="text-drumio-purple hover:text-drumio-purple/80 font-semibold"
           >
-            Sign up
+            {t.signupLink}
           </button>
         </p>
       </div>
