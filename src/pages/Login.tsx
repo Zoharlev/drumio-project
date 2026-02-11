@@ -5,6 +5,7 @@ import DrumLogo from "@/components/DrumLogo";
 import LanguageSelector from "@/components/LanguageSelector";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const translations = {
   en: {
@@ -55,6 +56,12 @@ export default function Login() {
     const stored = localStorage.getItem("drumio-language") || "en";
     return stored in translations ? (stored as LangKey) : "en";
   });
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) navigate("/explore", { replace: true });
+    });
+  }, [navigate]);
 
   useEffect(() => {
     const interval = setInterval(() => {
