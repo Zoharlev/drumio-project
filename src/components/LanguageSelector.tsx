@@ -21,6 +21,7 @@ export default function LanguageSelector() {
     setSelected(code);
     localStorage.setItem("drumio-language", code);
     setOpen(false);
+    window.dispatchEvent(new Event("language-changed"));
   };
 
   return (
