@@ -8,6 +8,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useSongs } from "@/hooks/useSongs";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import LanguageSelector from "@/components/LanguageSelector";
 const Explore = () => {
   const [activeCategory, setActiveCategory] = useState("lessons");
   const [searchTerm, setSearchTerm] = useState("");
@@ -104,14 +105,17 @@ const Explore = () => {
           </div>
           <h1 className="text-2xl font-bold text-foreground font-poppins">Explore</h1>
         </div>
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          className="text-muted-foreground hover:text-foreground"
-          onClick={() => setShowSearch(!showSearch)}
-        >
-          <Search className="h-5 w-5" />
-        </Button>
+        <div className="flex items-center gap-1">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="text-muted-foreground hover:text-foreground"
+            onClick={() => setShowSearch(!showSearch)}
+          >
+            <Search className="h-5 w-5" />
+          </Button>
+          <LanguageSelector />
+        </div>
       </div>
 
       {/* Search Input */}
