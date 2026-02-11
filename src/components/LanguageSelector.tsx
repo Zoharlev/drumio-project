@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Globe } from "lucide-react";
+import { isRTL } from "@/utils/translations";
 
 const LANGUAGES = [
   { code: "en", label: "English" },
@@ -37,7 +38,7 @@ export default function LanguageSelector() {
       {open && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
-          <div className="absolute right-0 top-full mt-1 z-50 bg-card border border-secondary rounded-lg shadow-lg py-1 min-w-[140px]">
+          <div className="absolute top-full mt-1 z-50 bg-card border border-secondary rounded-lg shadow-lg py-1 min-w-[140px]" style={{ insetInlineEnd: 0 }}>
             {LANGUAGES.map((lang) => (
               <button
                 key={lang.code}
