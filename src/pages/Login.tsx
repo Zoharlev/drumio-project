@@ -26,7 +26,7 @@ const translations = {
   he: {
     welcome: "!ברוכים הבאים לדרומיו",
     emailLabel: "אימייל",
-    emailPlaceholder: "דוא״ל שלך",
+    emailPlaceholder: "כתובת האימייל שלך",
     passwordLabel: "סיסמה",
     passwordPlaceholder: "סיסמה שלך",
     forgotPassword: "שכחת סיסמה?",
