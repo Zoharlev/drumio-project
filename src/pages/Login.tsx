@@ -48,7 +48,7 @@ export default function Login() {
   const { signIn, signInWithProvider } = useAuth();
   const { toast } = useToast();
   const [showPassword, setShowPassword] = useState(false);
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(() => localStorage.getItem("drumio-email") || "");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [lang, setLang] = useState<LangKey>(() => {
@@ -85,6 +85,7 @@ export default function Login() {
       }
 
       if (data.user) {
+        localStorage.setItem("drumio-email", email);
         toast({
           title: t.successTitle,
           description: t.successDesc,
