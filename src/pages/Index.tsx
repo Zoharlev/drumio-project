@@ -1,7 +1,40 @@
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import LanguageSelector from "@/components/LanguageSelector";
+
+const translations = {
+  en: {
+    heading: "Before we start, let's get to know you better!",
+    cta: "Let's go!",
+  },
+  he: {
+    heading: "!לפני שנתחיל, בואו נכיר אתכם טוב יותר",
+    cta: "!יאללה",
+  },
+};
+
 const Index = () => {
   const navigate = useNavigate();
-  return <div className="min-h-screen bg-drumio-intro-bg flex flex-col items-center justify-center px-6 py-8 relative overflow-hidden">
+  const [lang, setLang] = useState(() => localStorage.getItem("drumio-language") || "en");
+  const t = lang === "he" ? translations.he : translations.en;
+  const isRtl = lang === "he";
+
+  useEffect(() => {
+    const handler = () => setLang(localStorage.getItem("drumio-language") || "en");
+    window.addEventListener("storage", handler);
+    // Also poll for same-tab changes
+    const interval = setInterval(() => {
+      const current = localStorage.getItem("drumio-language") || "en";
+      setLang(prev => prev !== current ? current : prev);
+    }, 300);
+    return () => { window.removeEventListener("storage", handler); clearInterval(interval); };
+  }, []);
+  return <div className="min-h-screen bg-drumio-intro-bg flex flex-col items-center justify-center px-6 py-8 relative overflow-hidden" dir={isRtl ? "rtl" : "ltr"}>
+      {/* Language selector */}
+      <div className="absolute top-4 right-4 z-20">
+        <LanguageSelector />
+      </div>
+
       {/* Logo and main content */}
       <div className="flex flex-col items-center gap-12 max-w-sm w-full relative z-10">
         {/* Logo with glowing effect */}
@@ -19,13 +52,13 @@ const Index = () => {
         {/* Main heading */}
         <div className="text-center">
           <h2 className="text-3xl font-bold text-white leading-tight font-poppins">
-            Before we start, let's get to know you better!
+            {t.heading}
           </h2>
         </div>
 
         {/* CTA Button */}
         <button onClick={() => navigate("/onboarding")} className="w-full py-4 px-12 rounded-xl border-2 border-drumio-purple bg-gradient-to-r from-transparent via-white/10 to-transparent text-drumio-purple text-2xl font-semibold font-poppins hover:bg-white/5 transition-all duration-200">
-          Let's go!
+          {t.cta}
         </button>
       </div>
 
