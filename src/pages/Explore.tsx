@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Search } from "lucide-react";
+import { Search, Menu, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -7,11 +7,14 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useSongs } from "@/hooks/useSongs";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 const Explore = () => {
   const [activeCategory, setActiveCategory] = useState("lessons");
   const [searchTerm, setSearchTerm] = useState("");
   const [showSearch, setShowSearch] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const navigate = useNavigate();
+  const { signOut } = useAuth();
   
   const { data: allSongs = [], isLoading } = useSongs(activeCategory === "lessons" ? undefined : activeCategory);
   
@@ -70,7 +73,37 @@ const Explore = () => {
   return <div className="min-h-screen bg-background px-6 py-8">
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
-        <h1 className="text-2xl font-bold text-foreground font-poppins">Explore</h1>
+        <div className="flex items-center gap-2">
+          <h1 className="text-2xl font-bold text-foreground font-poppins">Explore</h1>
+          <div className="relative">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-muted-foreground hover:text-foreground"
+              onClick={() => setMenuOpen(!menuOpen)}
+            >
+              <Menu className="h-5 w-5" />
+            </Button>
+            {menuOpen && (
+              <>
+                <div className="fixed inset-0 z-40" onClick={() => setMenuOpen(false)} />
+                <div className="absolute left-0 top-full mt-1 z-50 bg-card border border-secondary rounded-lg shadow-lg py-1 min-w-[160px]">
+                  <button
+                    onClick={async () => {
+                      setMenuOpen(false);
+                      await signOut();
+                      navigate("/login", { replace: true });
+                    }}
+                    className="w-full text-left px-4 py-2.5 text-sm font-poppins text-destructive hover:bg-secondary transition-colors flex items-center gap-2"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    Logout
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
         <Button 
           variant="ghost" 
           size="icon" 
