@@ -212,7 +212,7 @@ const Explore = () => {
                             onClick={() => handleStartPractice(song.id)}
                             className="w-fit bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-8 py-3 rounded-full"
                           >
-                            {t("go")}
+                            {progressMap?.get(song.id) && progressMap.get(song.id)!.percentage > 0 ? t("continue") : t("go")}
                           </Button>
                         </div>
                       </CardContent>
