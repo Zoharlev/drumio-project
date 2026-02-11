@@ -9,7 +9,8 @@ type TranslationKeys =
   | "beginner"
   | "intermediate"
   | "advanced"
-  | "professional";
+  | "professional"
+  | "professionals";
 
 const translations: Record<string, Record<TranslationKeys, string>> = {
   en: {
@@ -24,6 +25,7 @@ const translations: Record<string, Record<TranslationKeys, string>> = {
     intermediate: "Intermediate",
     advanced: "Advanced",
     professional: "Professional",
+    professionals: "Professional",
   },
   he: {
     explore: "עיון",
@@ -37,6 +39,7 @@ const translations: Record<string, Record<TranslationKeys, string>> = {
     intermediate: "בינוני",
     advanced: "מתקדם",
     professional: "מקצועי",
+    professionals: "מתקדם",
   },
 };
 
