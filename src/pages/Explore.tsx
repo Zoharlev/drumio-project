@@ -10,6 +10,8 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import LanguageSelector from "@/components/LanguageSelector";
 import { t, isRTL, getLanguage } from "@/utils/translations";
+import { Progress } from "@/components/ui/progress";
+import { useAllSongsProgress } from "@/hooks/useAllSongsProgress";
 
 const Explore = () => {
   const [activeCategory, setActiveCategory] = useState("lessons");
@@ -29,6 +31,8 @@ const Explore = () => {
   const rtl = isRTL();
   
   const { data: allSongs = [], isLoading } = useSongs(activeCategory === "lessons" ? undefined : activeCategory);
+  const songIds = allSongs.map(s => s.id);
+  const { data: progressMap } = useAllSongsProgress(songIds);
   
   const songs = allSongs.filter(song => {
     if (!searchTerm) return true;
@@ -193,6 +197,16 @@ const Explore = () => {
                               ))}
                             </div>
                           </div>
+
+                          {/* Progress Bar */}
+                          {progressMap?.get(song.id) && (progressMap.get(song.id)!.percentage > 0) && (
+                            <div>
+                              <Progress value={progressMap.get(song.id)!.percentage} variant="completed" className="h-2 bg-white/20" />
+                              <div className="flex justify-end mt-1">
+                                <span className="text-white/80 text-xs font-medium">{progressMap.get(song.id)!.percentage}%</span>
+                              </div>
+                            </div>
+                          )}
 
                           <Button
                             onClick={() => handleStartPractice(song.id)}
