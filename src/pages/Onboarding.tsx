@@ -99,7 +99,7 @@ const translations = {
       ],
     },
     step2: {
-      title: "מה הסטאפ שלך?",
+      title: "על מה אתה מתופף?",
       subtitle: "נתאים את השיעורים לציוד שלך",
       options: [
         { id: "acoustic", label: "מערכת תופים אקוסטית", desc: "סט תופים מסורתי מלא" },
