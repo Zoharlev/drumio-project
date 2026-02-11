@@ -11,7 +11,12 @@ type TranslationKeys =
   | "advanced"
   | "professional"
   | "professionals"
-  | "continue";
+  | "continue"
+  | "preview"
+  | "song_not_found"
+  | "sessions"
+  | "no_sessions"
+  | "loading_generic";
 
 const translations: Record<string, Record<TranslationKeys, string>> = {
   en: {
@@ -28,6 +33,11 @@ const translations: Record<string, Record<TranslationKeys, string>> = {
     professional: "Professional",
     professionals: "Professional",
     continue: "Continue!",
+    preview: "Preview",
+    song_not_found: "Song not found.",
+    sessions: "Sessions",
+    no_sessions: "No practice sessions available for this song.",
+    loading_generic: "Loading...",
   },
   he: {
     explore: "עיון",
@@ -43,6 +53,11 @@ const translations: Record<string, Record<TranslationKeys, string>> = {
     professional: "מקצועי",
     professionals: "מתקדם",
     continue: "!המשך",
+    preview: "תצוגה מקדימה",
+    song_not_found: "השיר לא נמצא.",
+    sessions: "תרגולים",
+    no_sessions: "אין תרגולים זמינים לשיר זה.",
+    loading_generic: "...טוען",
   },
 };
 

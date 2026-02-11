@@ -5,12 +5,14 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { useSongPractices } from "@/hooks/useSongPractices";
 import { useUserPracticeProgress } from "@/hooks/useUserPracticeProgress";
+import { t, isRTL } from "@/utils/translations";
 
 const SongDetails = () => {
   const navigate = useNavigate();
   const { songId } = useParams<{ songId: string }>();
   const { data, isLoading } = useSongPractices(songId || "");
   const { data: progressData } = useUserPracticeProgress(songId);
+  const rtl = isRTL();
 
   // Create a map of practice_id -> progress_percentage
   const progressMap = new Map<string, number>();
@@ -29,7 +31,7 @@ const SongDetails = () => {
     return (
       <div className="min-h-screen bg-background px-6 py-8">
         <div className="text-center py-8">
-          <p className="text-muted-foreground">Loading...</p>
+          <p className="text-muted-foreground">{t("loading_generic")}</p>
         </div>
       </div>
     );
@@ -39,7 +41,7 @@ const SongDetails = () => {
     return (
       <div className="min-h-screen bg-background px-6 py-8">
         <div className="text-center py-8">
-          <p className="text-muted-foreground">Song not found.</p>
+          <p className="text-muted-foreground">{t("song_not_found")}</p>
         </div>
       </div>
     );
@@ -56,6 +58,7 @@ const SongDetails = () => {
   return (
     <div 
       className="min-h-screen bg-cover bg-center bg-no-repeat px-6 py-8"
+      dir={rtl ? "rtl" : "ltr"}
       style={{
         backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.85)), url(${data.song.background_image_url || '/lovable-uploads/ced3ac1d-0317-4c8a-9be2-23b8f68dac90.png'})`
       }}
@@ -68,7 +71,7 @@ const SongDetails = () => {
           onClick={() => navigate('/explore')} 
           className="text-white hover:bg-white/10"
         >
-          <ArrowLeft className="h-5 w-5" />
+          <ArrowLeft className={`h-5 w-5 ${rtl ? "rotate-180" : ""}`} />
         </Button>
         <h1 className="text-2xl font-bold text-white font-poppins">
           {data.song.title}
@@ -80,25 +83,25 @@ const SongDetails = () => {
         onClick={handlePreview}
         className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-6 rounded-2xl text-lg mb-6"
       >
-        Preview
+        {t("preview")}
       </Button>
 
       {/* Song Progress Bar */}
       <div className="mb-8">
         <Progress value={songProgress} variant="completed" className="h-3 bg-muted/30" />
-        <div className="flex justify-end mt-2">
+        <div className={`flex ${rtl ? "justify-start" : "justify-end"} mt-2`}>
           <span className="text-white text-sm font-medium">{Math.round(songProgress)} %</span>
         </div>
       </div>
 
       {/* Sessions Section */}
       <div className="mb-6">
-        <h2 className="text-2xl font-bold text-white mb-6 font-poppins">Sessions</h2>
+        <h2 className="text-2xl font-bold text-white mb-6 font-poppins">{t("sessions")}</h2>
         
         <div className="space-y-4">
           {data.practices.length === 0 ? (
             <div className="text-center py-8">
-              <p className="text-white/60">No practice sessions available for this song.</p>
+              <p className="text-white/60">{t("no_sessions")}</p>
             </div>
           ) : (
             data.practices.map((practice) => (
@@ -136,7 +139,7 @@ const SongDetails = () => {
                         handlePracticeClick(practice.id);
                       }}
                     >
-                      <Play className="h-6 w-6" fill="currentColor" />
+                      <Play className={`h-6 w-6 ${rtl ? "rotate-180" : ""}`} fill="currentColor" />
                     </Button>
                   </div>
                 </CardContent>
