@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import DrumLogo from "@/components/DrumLogo";
+import LanguageSelector from "@/components/LanguageSelector";
 
 type OnboardingStep = 1 | 2 | 3 | 4;
 
@@ -76,13 +77,16 @@ export default function Onboarding() {
           </h1>
         </div>
 
-        {/* Skip button */}
-        <button
-          onClick={skip}
-          className="ml-auto text-text-secondary hover:text-foreground transition-colors font-poppins"
-        >
-          Skip
-        </button>
+        {/* Language & Skip */}
+        <div className="ml-auto flex items-center gap-2">
+          <LanguageSelector />
+          <button
+            onClick={skip}
+            className="text-text-secondary hover:text-foreground transition-colors font-poppins"
+          >
+            Skip
+          </button>
+        </div>
       </div>
 
       {/* Progress bar */}
