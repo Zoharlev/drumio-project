@@ -26,7 +26,7 @@ const translations: Record<string, Record<TranslationKeys, string>> = {
     professional: "Professional",
   },
   he: {
-    explore: "גלה",
+    explore: "עיון",
     search_placeholder: "חפש שיעורים לפי שם, רמה או תגיות...",
     loading: "טוען שירים...",
     no_results: "לא נמצאו שירים בקטגוריה זו.",
