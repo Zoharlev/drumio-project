@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Eye, EyeOff, Chrome, Facebook } from "lucide-react";
 import DrumLogo from "@/components/DrumLogo";
+import LanguageSelector from "@/components/LanguageSelector";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 
@@ -72,6 +73,11 @@ export default function Login() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col px-6 py-8 max-w-md mx-auto">
+      {/* Language selector */}
+      <div className="flex justify-end mb-2">
+        <LanguageSelector />
+      </div>
+
       {/* Logo */}
       <div className="flex flex-col items-center gap-4 mb-8">
         <div className="w-48 h-48 flex items-center justify-center bg-cover bg-center bg-no-repeat" style={{backgroundImage: 'url(/lovable-uploads/510fe5e0-9da9-4a4f-b14b-1da58f985a07.png)'}}>
