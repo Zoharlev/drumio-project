@@ -30,7 +30,7 @@ const translations: Record<string, Record<TranslationKeys, string>> = {
     search_placeholder: "חפש שיעורים לפי שם, רמה או תגיות...",
     loading: "טוען שירים...",
     no_results: "לא נמצאו שירים בקטגוריה זו.",
-    go: "!קדימה",
+    go: "!התחל",
     logout: "התנתק",
     no_description: "אין תיאור זמין",
     beginner: "מתחיל",
