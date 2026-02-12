@@ -64,7 +64,10 @@ const Explore = () => {
   };
 
   const getLevelLabel = (level: string) => {
-    const key = level.toLowerCase() === 'advanced' ? 'intermediate' : level.toLowerCase();
+    let key = level.toLowerCase();
+    // Map plural/variations to singular translation keys
+    if (key === 'beginners') key = 'beginner';
+    if (key === 'advanced') key = 'intermediate';
     return t(key as any) || level;
   };
 
