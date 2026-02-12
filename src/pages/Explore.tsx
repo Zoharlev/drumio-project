@@ -30,7 +30,7 @@ const Explore = () => {
 
   const rtl = isRTL();
   
-  const { data: allSongs = [], isLoading } = useSongs(activeCategory === "lessons" ? undefined : activeCategory);
+  const { data: allSongs = [], isLoading } = useSongs(activeCategory === "lessons" ? undefined : activeCategory, lang);
   const songIds = allSongs.map(s => s.id);
   const { data: progressMap } = useAllSongsProgress(songIds);
   
