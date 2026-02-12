@@ -47,7 +47,7 @@ const translations: Record<string, Record<TranslationKeys, string>> = {
     go: "!התחל",
     logout: "התנתק",
     no_description: "אין תיאור זמין",
-    beginner: "מתחיל",
+    beginner: "מתחילים",
     intermediate: "בינוני",
     advanced: "מתקדם",
     professional: "מקצועי",
