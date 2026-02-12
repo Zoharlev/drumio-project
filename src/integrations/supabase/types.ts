@@ -325,6 +325,7 @@ export type Database = {
           created_at: string
           description: string | null
           id: string
+          is_hidden: boolean
           level: string
           notation_file_url: string | null
           notation_svg_url: string | null
@@ -341,6 +342,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          is_hidden?: boolean
           level: string
           notation_file_url?: string | null
           notation_svg_url?: string | null
@@ -357,6 +359,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          is_hidden?: boolean
           level?: string
           notation_file_url?: string | null
           notation_svg_url?: string | null
