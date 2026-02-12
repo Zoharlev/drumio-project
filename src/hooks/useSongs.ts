@@ -39,6 +39,8 @@ export const useSongs = (category?: string) => {
           )
         `);
 
+      query = query.eq("is_hidden", false);
+
       if (category && category !== "lessons") {
         query = query.eq("category", category);
       }
