@@ -26,6 +26,7 @@ import { useIsLandscape } from "@/hooks/useIsLandscape";
 import { RotationPrompt } from "@/components/RotationPrompt";
 import { useSavePracticeProgress } from "@/hooks/useUserPracticeProgress";
 import { cn } from "@/lib/utils";
+import { getLanguage } from "@/utils/translations";
 
 const SongPractice = () => {
   const { songId, practiceId } = useParams();
@@ -173,6 +174,32 @@ const SongPractice = () => {
     },
     enabled: !!practiceId,
   });
+
+  // Fetch translations for song/practice title
+  const lang = getLanguage();
+  const { data: titleTranslations } = useQuery({
+    queryKey: ["title-translations", songId, practiceId, lang],
+    queryFn: async () => {
+      const entityIds = [songId, practiceId].filter(Boolean) as string[];
+      const { data } = await supabase
+        .from("translations")
+        .select("entity_id, entity_type, field_name, translation")
+        .eq("language_code", lang)
+        .eq("field_name", "title")
+        .in("entity_id", entityIds);
+      const map = new Map<string, string>();
+      data?.forEach(t => map.set(t.entity_id, t.translation));
+      return map;
+    },
+    enabled: lang !== "en" && !!(songId || practiceId),
+  });
+
+  const getTranslatedTitle = () => {
+    if (practice) {
+      return titleTranslations?.get(practice.id) || practice.title;
+    }
+    return titleTranslations?.get(song?.id || "") || song?.title || "";
+  };
 
   // Fetch all practices for this song to enable navigation
   const { data: songPractices } = useSongPractices(songId || "");
@@ -527,7 +554,7 @@ const SongPractice = () => {
       {!isLandscape && (
         <div className="sticky top-0 z-10 p-2">
           <TopToolbar
-            title={practice ? practice.title : song.title}
+            title={getTranslatedTitle()}
             currentSection={drumPattern.sections?.[currentStep] || practice?.title || "Section"}
             isPlaying={isPlaying}
             isLandscape={isLandscape}
@@ -551,7 +578,7 @@ const SongPractice = () => {
             !showControls && "-translate-y-[calc(100%+8px)]"
           )}>
             <TopToolbar
-              title={practice ? practice.title : song.title}
+              title={getTranslatedTitle()}
               currentSection={drumPattern.sections?.[currentStep] || practice?.title || "Section"}
               isPlaying={isPlaying}
               isLandscape={isLandscape}
